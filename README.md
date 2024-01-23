@@ -31,7 +31,7 @@ This repository contains the `run.py` script and associated files for conducting
     touch SECRETS
     echo OPENAI_API_KEY=<INSERT_HERE> >> SECRETS
     echo ANTHROPIC_API_KEY=<INSERT_HERE> >> SECRETS
-    echo ACEDEMICNYUPEREZ_ORG=org-<INSERT_HERE> >> SECRETS
+    echo DEFAULT_ORG=org-<INSERT_HERE> >> SECRETS
     echo FARAI_ORG=org-<INSERT_HERE> >> SECRETS
     ```
 

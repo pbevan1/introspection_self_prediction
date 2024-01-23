@@ -29,7 +29,7 @@ class InferenceAPI:
         self,
         anthropic_num_threads: int = 5,
         openai_fraction_rate_limit: float = 0.99,
-        organization: str = "ACEDEMICNYUPEREZ_ORG",
+        organization: str = "DEFAULT_ORG",
         prompt_history_dir: Path = None,
     ):
         if openai_fraction_rate_limit >= 1:
@@ -42,7 +42,7 @@ class InferenceAPI:
 
         secrets = load_secrets("SECRETS")
         if self.organization is None:
-            self.organization = "ACEDEMICNYUPEREZ_ORG"
+            self.organization = "DEFAULT_ORG"
 
         self._openai_completion = OpenAICompletionModel(
             frac_rate_limit=self.openai_fraction_rate_limit,

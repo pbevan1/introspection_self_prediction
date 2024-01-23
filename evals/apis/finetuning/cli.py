@@ -9,19 +9,19 @@ import fire
 from evals.utils import save_jsonl, setup_environment
 
 
-def list_finetunes(limit: int = 100, organization: str = "ACEDEMICNYUPEREZ_ORG") -> None:
+def list_finetunes(limit: int = 100, organization: str = "DEFAULT_ORG") -> None:
     setup_environment(organization=organization)
     finetunes = openai.FineTuningJob.list(limit=limit)
     print(finetunes)
 
 
-def delete_file(file_id: str, organization: str = "ACEDEMICNYUPEREZ_ORG") -> None:
+def delete_file(file_id: str, organization: str = "DEFAULT_ORG") -> None:
     setup_environment(organization=organization)
     openai.File.delete(file_id)
     print(f"Deleted file {file_id}")
 
 
-def delete_all_files(organization: str = "ACEDEMICNYUPEREZ_ORG") -> None:
+def delete_all_files(organization: str = "DEFAULT_ORG") -> None:
     setup_environment(organization=organization)
     files = openai.File.list().data  # type: ignore
     for file in files:
@@ -33,23 +33,23 @@ def delete_all_files(organization: str = "ACEDEMICNYUPEREZ_ORG") -> None:
     print("deleted all files")
 
 
-def list_all_files(organization: str = "ACEDEMICNYUPEREZ_ORG") -> None:
+def list_all_files(organization: str = "DEFAULT_ORG") -> None:
     setup_environment(organization=organization)
     files = openai.File.list().data  # type: ignore
     print(files)
 
 
-def cancel_job(job_id: str, organization: str = "ACEDEMICNYUPEREZ_ORG") -> None:
+def cancel_job(job_id: str, organization: str = "DEFAULT_ORG") -> None:
     setup_environment(organization=organization)
     print(openai.FineTuningJob.cancel(job_id))
 
 
-def retrieve_job(job_id: str, organization: str = "ACEDEMICNYUPEREZ_ORG") -> None:
+def retrieve_job(job_id: str, organization: str = "DEFAULT_ORG") -> None:
     setup_environment(organization=organization)
     print(openai.FineTuningJob.retrieve(job_id))
 
 
-def download_result_file(result_file_id: str, organization: str = "ACEDEMICNYUPEREZ_ORG") -> None:
+def download_result_file(result_file_id: str, organization: str = "DEFAULT_ORG") -> None:
     setup_environment(organization=organization)
     file = openai.File.retrieve(result_file_id)
     downloaded: bytes = openai.File.download(result_file_id)
@@ -60,7 +60,7 @@ def download_result_file(result_file_id: str, organization: str = "ACEDEMICNYUPE
     print(csv.to_markdown())
 
 
-def download_training_file(training_file_id: str, organization: str = "ACEDEMICNYUPEREZ_ORG") -> None:
+def download_training_file(training_file_id: str, organization: str = "DEFAULT_ORG") -> None:
     setup_environment(organization=organization)
     openai.File.retrieve(training_file_id)
     downloaded: bytes = openai.File.download(training_file_id)

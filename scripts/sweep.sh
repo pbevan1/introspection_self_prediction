@@ -9,7 +9,7 @@ sweep_dir=./exp/data_${DATE}_model_sweep
 anthropic_num_threads=50
 openai_fraction_rate_limit=0.5
 limit=25
-organization=ACEDEMICNYUPEREZ_ORG
+organization=DEFAULT_ORG
 standard_args="++anthropic_num_threads=$anthropic_num_threads ++limit=$limit ++openai_fraction_rate_limit=$openai_fraction_rate_limit ++organization=$organization"
 
 for model in gpt-3.5-turbo claude-2.1; do

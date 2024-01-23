@@ -174,7 +174,7 @@ def main(
     notes: Optional[str] = None,
     more_config: str = None,
     ask_to_validate_training: bool = True,
-    organization: str = "ACEDEMICNYUPEREZ_ORG",
+    organization: str = "DEFAULT_ORG",
     logger_level: str = "info",
     use_wandb: bool = True,
 ) -> str:
