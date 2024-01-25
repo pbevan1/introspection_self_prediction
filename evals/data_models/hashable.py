@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 import hashlib
+
+from pydantic import BaseModel
 
 
 def deterministic_hash(something: str) -> str:

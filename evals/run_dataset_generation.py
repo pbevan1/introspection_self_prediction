@@ -1,3 +1,5 @@
+"""This file is used to find initial completions which are hard to predict."""
+
 import asyncio
 import logging
 import traceback
@@ -12,7 +14,7 @@ from evals.apis.inference.api import InferenceAPI
 from evals.apis.inference.cache_manager import CacheManager
 from evals.data_models.inference import LLMParams
 from evals.data_models.messages import ChatMessage, Prompt, PromptTemplate
-from evals.load.mmlu import load_mmlu
+from evals.load.generate_random_strings import generate_random_strings
 from evals.utils import async_function_with_retry, setup_environment
 
 LOGGER = logging.getLogger(__name__)
@@ -45,6 +47,7 @@ class DatasetRunner:
                 LOGGER.info(f"Loaded cache for row {index}")
                 return {
                     "answer": cache.responses[0].completion,
+                    "logprobs": cache.responses[0].logprobs,
                     "complete": True,
                 }
 
@@ -57,35 +60,36 @@ class DatasetRunner:
                 top_p=self.llm_params.top_p,
                 num_candidates_per_completion=self.llm_params.num_candidates_per_completion,
                 insufficient_valids_behaviour=self.llm_params.insufficient_valids_behaviour,
-                is_valid=lambda x: "Answer:" in x,
+                is_valid=lambda x: True,  # len(x) > 0 and len(x) < 10 and " " not in x, # x should be a single word
                 print_prompt_and_response=self.print_prompt_and_response,
+                logprobs=self.llm_params.logprobs,
             )
             # save successful prompt/response to file
             if self.cache_manager is not None:
                 self.cache_manager.save_cache(prompt, self.llm_params, responses)
 
             answer = responses[0].completion
+            logprobs = responses[0].logprobs
             complete = True
             self.inference_api.log_model_timings()
             LOGGER.info(f"Completed row {index}\tRunning cost: ${self.inference_api.running_cost:.3f}")
         except RuntimeError as e:
             complete = False
             answer = traceback.format_exc()
+            logprobs = None
             LOGGER.warning(f"Failed row {index} with error {e}")
             LOGGER.warning(answer)
         return {
             "answer": answer,
+            "logprobs": logprobs,
             "complete": complete,
         }
 
     def process_prompt(self, row: pd.Series) -> Prompt:
-        answer_a = row["correct_answer"] if not self.swap else row["negative_answer"]
-        answer_b = row["negative_answer"] if not self.swap else row["correct_answer"]
-
         messages = []
         for message in self.prompt_template.messages:
             t = Template(message.content)
-            content = t.safe_substitute(question=row["question"], answer_a=answer_a, answer_b=answer_b)
+            content = t.safe_substitute(string=row["string"])
             messages.append(ChatMessage(role=message.role, content=content))
 
         return Prompt(messages=messages)
@@ -96,12 +100,12 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int =
     full_df = pd.read_csv(filename)
     if limit is not None:
         full_df = full_df.head(limit)
-    if "answer" not in full_df.columns:
-        full_df["answer"] = ""
+    if "response" not in full_df.columns:
+        full_df["response"] = ""
     if "complete" not in full_df.columns:
         full_df["complete"] = False
-    if "swap" not in full_df.columns:
-        full_df["swap"] = ""
+    if "logprobs" not in full_df.columns:
+        full_df["logprobs"] = {}
     df = full_df[~(full_df["complete"])]
 
     # run each question concurrently
@@ -115,7 +119,8 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int =
     df.update(
         pd.DataFrame(
             {
-                "answer": [result["answer"] for result in results],
+                "response": [result["answer"] for result in results],
+                "logprobs": [result["logprobs"] for result in results],
                 "complete": [result["complete"] for result in results],
             },
             index=df.index,
@@ -159,10 +164,12 @@ async def async_main(cfg: DictConfig):
     # load dataset and save to file
     exp_dir = Path(cfg.exp_dir)
     exp_dir.mkdir(parents=True, exist_ok=True)
-    filename = exp_dir / f"data{cfg.seed}_swap{cfg.swap}.csv"
+    filename = exp_dir / f"data{cfg.seed}.csv"
     if not filename.exists() or cfg.reset:
         LOGGER.info(f"File {filename} does not exist. Creating...")
-        load_mmlu(filename, topics=["high_school_mathematics"], num_per_topic=25)
+        generate_random_strings(
+            filename, cfg.dataset.topic, cfg.seed, cfg.dataset.n_items, cfg.dataset.num, cfg.dataset.join_on
+        )
 
     # run dataset (with retry)
     complete = await async_function_with_retry(
@@ -176,6 +183,7 @@ async def async_main(cfg: DictConfig):
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
+    print(cfg)
     asyncio.run(async_main(cfg))
 
 

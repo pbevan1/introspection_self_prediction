@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, validator
+
 from evals.data_models.hashable import HashableBaseModel
 
 

@@ -1,6 +1,5 @@
 import tiktoken
 
-
 COMPLETION_MODELS = {
     "davinci-002",
     "babbage-002",

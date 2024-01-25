@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Sequence, Optional, Dict, Self
-from pydantic import BaseModel
+from typing import Dict, Optional, Self, Sequence
+
 import anthropic
+from pydantic import BaseModel
 from termcolor import cprint
 
 from evals.data_models.hashable import HashableBaseModel

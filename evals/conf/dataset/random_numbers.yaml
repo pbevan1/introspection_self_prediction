@@ -1,0 +1,5 @@
+# parameters for generate_random_strings.py
+topic: numbers
+n_items: [7,10]
+num: ${limit}
+join_on: ""

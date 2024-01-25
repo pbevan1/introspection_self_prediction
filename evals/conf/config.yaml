@@ -9,11 +9,12 @@ hydra:
       level: INFO
 
 defaults:
-  - prompt: zero-shot
+  - prompt: base_completion
   - language_model: gpt-3.5-turbo
+  - dataset: random_words
 
 # Common Params
-exp_dir: ???
+exp_dir: exp/default_dir
 swap: false
 seed: 0
 limit: 50
@@ -23,8 +24,11 @@ print_prompt_and_response: false
 cache_dir: ${exp_dir}/cache
 prompt_history_dir: ${exp_dir}/prompt_history
 
+# Model
+temperature: 0.0
+
 # API
-organization: DEFAULT_ORG
+organization: OWAIN_ORG
 anthropic_tag: ANTHROPIC_API_KEY
 openai_tag: OPENAI_API_KEY
 anthropic_num_threads: 20

@@ -6,9 +6,13 @@ import requests
 from openai.openai_object import OpenAIObject as OpenAICompletion
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-from evals.data_models.inference import LLMResponse
 from evals.apis.inference.openai.base import OpenAIModel
-from evals.apis.inference.openai.utils import count_tokens, price_per_token, GPT_CHAT_MODELS
+from evals.apis.inference.openai.utils import (
+    GPT_CHAT_MODELS,
+    count_tokens,
+    price_per_token,
+)
+from evals.data_models.inference import LLMResponse
 from evals.data_models.messages import Prompt
 
 LOGGER = logging.getLogger(__name__)
