@@ -25,7 +25,9 @@ cache_dir: ${exp_dir}/cache
 prompt_history_dir: ${exp_dir}/prompt_history
 
 # Model
-temperature: 0.0
+language_model:
+  temperature: 0.0
+  logprobs: 2
 
 # API
 organization: OWAIN_ORG
