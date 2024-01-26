@@ -9,6 +9,7 @@ COMPLIANCE_CHECKS = {
     "no": lambda x: clean_string(x) in ["no", "nope"],
     "sorry": lambda x: clean_string(x) in ["sorry", "apologies", "apology", "apologize", "apologise"],
     "impossible": lambda x: clean_string(x) in ["impossible"],
+    "unable": lambda x: clean_string(x) in ["unable"],
     "unpredictable": lambda x: clean_string(x) in ["unpredictable"],
     "sequence": lambda x: clean_string(x) == "sequence",
     "random": lambda x: clean_string(x) in ["random", "randomness"],
