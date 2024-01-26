@@ -36,13 +36,13 @@ def extract_most_uncertain_strings_from_base(
 
     df["compliance"] = df["response"].apply(check_compliance)
 
-    print(f"Compliance: {(df['compliance'] is True).mean():.2%}")
+    print(f"Compliance: {(df['compliance'] == True).mean():.2%}")  # noqa: E712
 
     # print("Most common non-compliant reasons:")
     # df[df['compliance'] != True]['compliance'].value_counts().head(10)
 
     # Exclude non-compliant responses
-    df = df[df["compliance"] is True]
+    df = df[df["compliance"] == True]  # noqa: E712
     print(f"Excluded non-compliant responses, leaving {len(df)} rows")
 
     # We want to select strings that are hard to predict from external means. Here, we choose those for which the two top first tokens have similar probabilities.
