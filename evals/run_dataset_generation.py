@@ -26,14 +26,12 @@ class DatasetRunner:
         prompt_template: PromptTemplate,
         llm_params: LLMParams,
         inference_api: InferenceAPI,
-        swap: bool,
         print_prompt_and_response: bool = False,
         cache_manager: CacheManager = None,
     ):
         self.prompt_template = prompt_template
         self.llm_params = llm_params
         self.inference_api = inference_api
-        self.swap = swap
         self.print_prompt_and_response = print_prompt_and_response
         self.cache_manager = cache_manager
 
@@ -142,7 +140,6 @@ async def async_main(cfg: DictConfig):
     LOGGER.info(f"Using experiment directory {cfg.exp_dir}")
     LOGGER.info(f"Using model {cfg.language_model.model}")
     LOGGER.info(f"Using method {cfg.prompt.method}")
-    LOGGER.info(f"Using swap: {cfg.swap}")
 
     # setup api handler
     setup_environment(anthropic_tag=cfg.anthropic_tag, logging_level=cfg.logging)
@@ -158,7 +155,7 @@ async def async_main(cfg: DictConfig):
     llm_params = LLMParams(**OmegaConf.to_container(cfg.language_model, resolve=True))
     cache_manager = CacheManager(Path(cfg.cache_dir)) if cfg.cache_dir is not None else None
     dataset_runner = DatasetRunner(
-        prompt_parts, llm_params, inference_api, cfg.swap, cfg.print_prompt_and_response, cache_manager
+        prompt_parts, llm_params, inference_api, cfg.print_prompt_and_response, cache_manager
     )
 
     # load dataset and save to file
@@ -181,7 +178,7 @@ async def async_main(cfg: DictConfig):
     return complete
 
 
-@hydra.main(version_base=None, config_path="conf", config_name="config")
+@hydra.main(version_base=None, config_path="conf", config_name="config_dataset_generation")
 def main(cfg: DictConfig):
     print(cfg)
     asyncio.run(async_main(cfg))
