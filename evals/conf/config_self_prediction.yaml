@@ -9,14 +9,14 @@ hydra:
       level: INFO
 
 defaults:
-  - prompt: base_completion
+  - prompt: self_prediction_basic
   - language_model: gpt-3.5-turbo
-  - dataset: random_words
 
 # Common Params
-exp_dir: exp/default_dir
-swap: false
+base_dir: exp/default_dir
+exp_dir: ${base_dir}_self_prediction
 seed: 0
+base_seed: 0
 limit: 50
 reset: false
 logging: INFO
@@ -27,7 +27,13 @@ prompt_history_dir: ${exp_dir}/prompt_history
 # Model
 language_model:
   temperature: 0.0
-  logprobs: 2
+  logprobs: 5
+
+# Extracting the most relevant strings from the base completion
+dataset:
+  num: ${limit}
+  how: logprob_delta
+  minimize: true
 
 # API
 organization: OWAIN_ORG
