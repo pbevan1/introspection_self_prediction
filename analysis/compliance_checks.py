@@ -1,7 +1,14 @@
-import string
+import logging
 from typing import Callable, Dict, List, Union
 
 import numpy as np
+
+try:
+    from .string_cleaning import clean_string
+except ImportError:
+    from string_cleaning import clean_string
+
+LOGGER = logging.getLogger(__name__)
 
 COMPLIANCE_CHECKS = {
     "none": lambda x: x is None or np.isnan(x),
@@ -9,8 +16,8 @@ COMPLIANCE_CHECKS = {
     "no": lambda x: clean_string(x) in ["no", "nope"],
     "sorry": lambda x: clean_string(x) in ["sorry", "apologies", "apology", "apologize", "apologise"],
     "impossible": lambda x: clean_string(x) in ["impossible"],
-    "unable": lambda x: clean_string(x) in ["unable"],
-    "unpredictable": lambda x: clean_string(x) in ["unpredictable"],
+    "unable": lambda x: clean_string(x) in ["unable", "i cannot", "i can't", "cannot"],
+    "unpredictable": lambda x: clean_string(x) in ["unpredictable", "indeterminable"],
     "sequence": lambda x: clean_string(x) == "sequence",
     "random": lambda x: clean_string(x) in ["random", "randomness"],
     "item": lambda x: clean_string(x) == "item",
@@ -39,9 +46,12 @@ def check_compliance(
         return failed
 
 
-def strip_punctuation(s):
-    return "".join(c for c in s if c not in string.punctuation)
-
-
-def clean_string(s):
-    return strip_punctuation(s.lower().strip())
+def enforce_compliance_on_df(df):
+    """
+    Enforce compliance checks on a dataframe. Returns a dataframe with only compliant rows.
+    """
+    old_len = len(df)
+    df["compliance"] = df["response"].apply(check_compliance)
+    df = df[df["compliance"] == True]  # noqa: E712
+    LOGGER.info(f"Excluded non-compliant responses, leaving {len(df)} rows down from {old_len}")
+    return df
