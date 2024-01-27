@@ -234,18 +234,6 @@ async def async_main(cfg: DictConfig):
     return complete
 
 
-def create_strings_table(strings_path, new_strings_table_path):
-    """Loads the strings and turns them into dataframe that can be used by the dataset runner."""
-    df = pd.read_csv(strings_path)
-    df["id"] = df.index
-    # id should come first
-    cols = df.columns.tolist()
-    cols = cols[-1:] + cols[:-1]
-    df = df[cols]
-    # save as csv
-    df.to_csv(new_strings_table_path, index=False)
-
-
 @hydra.main(version_base=None, config_path="conf", config_name="config_self_prediction")
 def main(cfg: DictConfig):
     print(cfg)

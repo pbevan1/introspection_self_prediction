@@ -18,7 +18,9 @@ LOGGER.info("Repository directory:", REPO_DIR)
 sys.path.append(REPO_DIR)
 
 
-def generate_few_shot_data(base_data_path, strings_path, n_shot, num=None, seed=0, enforce_compliance=True) -> Path:
+def generate_few_shot_data(
+    base_data_path, strings_path, n_shot, num=None, repeat=1, seed=0, enforce_compliance=True
+) -> Path:
     """
     Generates a .data{seed}.csv file for few-shot evaluation by adding fields for the few-shot strings.
 
@@ -33,6 +35,7 @@ def generate_few_shot_data(base_data_path, strings_path, n_shot, num=None, seed=
         strings_path: Path to the strings file. These are the strings that will be used to query the model.
         n_shot: Number of few-shot strings to add.
         num: Number of strings to generate. If None, use all strings from the base data file.
+        repeat: Number of times to repeat the strings with different few-shot completions.
         seed: Random seed. Can be different from the base seed.
         enforce_compliance: Whether to enforce compliance checks on the base data.
 
@@ -63,6 +66,9 @@ def generate_few_shot_data(base_data_path, strings_path, n_shot, num=None, seed=
     if num is not None:
         strings = strings.sample(num, random_state=seed)
         LOGGER.info(f"Sampled {len(strings)} strings since a specific number ({num}) was requested.")
+
+    # repeat the strings
+    strings = strings.reindex(strings.index.repeat(repeat)).reset_index(drop=True)
 
     # add in few-shot columns
     out_df = strings.copy()

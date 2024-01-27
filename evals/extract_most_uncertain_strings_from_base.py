@@ -70,6 +70,6 @@ def extract_most_uncertain_strings_from_base(
     # save the output strings
     if output_file_path is None:
         output_file_path = Path(input_file_path).parent / "out_strings.csv"
-    out_df["string"].to_csv(output_file_path, index=False)
+    out_df[["id", "string"]].to_csv(output_file_path, index=False)
     LOGGER.info(f"Saved {len(out_df)} strings to {output_file_path}")
     return output_file_path
