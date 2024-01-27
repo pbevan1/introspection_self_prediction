@@ -13,10 +13,11 @@ from omegaconf import DictConfig, OmegaConf
 from evals.apis.inference.api import InferenceAPI
 from evals.apis.inference.cache_manager import CacheManager
 from evals.data_models.inference import LLMParams
-from evals.data_models.messages import ChatMessage, Prompt, PromptTemplate
+from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
 from evals.extract_most_uncertain_strings_from_base import (
     extract_most_uncertain_strings_from_base,
 )
+from evals.generate_few_shot import generate_few_shot_data
 from evals.utils import async_function_with_retry, setup_environment
 
 LOGGER = logging.getLogger(__name__)
@@ -86,8 +87,39 @@ class DatasetRunner:
         }
 
     def process_prompt(self, row: pd.Series) -> Prompt:
+        # extract the few-shot strings and responses
+        # # this isn't safe, but then again, who would expect an AI model to not be safe?
+        few_shot_strings = eval(row["few-shot_string"])
+        few_shot_strings = [str(s) for s in few_shot_strings]
+        few_shot_responses = eval(row["few-shot_response"])
+        few_shot_responses = [str(s) for s in few_shot_responses]
+
         messages = []
-        for message in self.prompt_template.messages:
+        system_messages = [m for m in self.prompt_template.messages if m.role == "system"]
+        user_messages = [m for m in self.prompt_template.messages if m.role == "user"]
+
+        # add system messages
+        for message in system_messages:
+            t = Template(message.content)
+            content = t.safe_substitute(string=row["string"])
+            messages.append(ChatMessage(role=message.role, content=content))
+
+        # add in few shot messages into the context
+        assert len(few_shot_strings) == len(
+            few_shot_responses
+        ), f"Expected the same number of few-shot strings and responses, but got {len(row['few-shot_string'])} strings and {len(row['few-shot_response'])} responses."
+        for few_shot_string, few_shot_response in zip(few_shot_strings, few_shot_responses):
+            for message in user_messages:
+                # add in the few-shot string for each user message (usually just one)
+                t = Template(message.content)
+                content = t.safe_substitute(string=few_shot_string)
+                messages.append(ChatMessage(role=message.role, content=content))
+                # add in the few-shot response for each user message (usually just one)
+                m = ChatMessage(role=MessageRole.assistant, content=few_shot_response)
+                messages.append(m)
+
+        # add the actual query message
+        for message in user_messages:
             t = Template(message.content)
             content = t.safe_substitute(string=row["string"])
             messages.append(ChatMessage(role=message.role, content=content))
@@ -166,30 +198,31 @@ async def async_main(cfg: DictConfig):
     filename = exp_dir / f"data{cfg.base_seed}.csv"
     if not filename.exists() or cfg.reset:
         LOGGER.info(f"File {filename} does not exist. Creating...")
-        # we pull the strings from the base dir
-        # do we have out_strings.csv?
-        base_strings_path = Path(cfg.base_dir) / "out_strings.csv"
-        if base_strings_path.exists():
-            LOGGER.info(
-                f"Using strings from {base_strings_path}. Potentially ignoring extracting method as specified in config."
-            )
-            create_strings_table(base_strings_path, filename)
-            LOGGER.info(f"Created strings table at {filename}")
+        strings_path = exp_dir / f"strings{cfg.seed}.csv"
+        if strings_path.exists():
+            LOGGER.info(f"Using strings from {strings_path}")
         else:
+            LOGGER.info(f"File {strings_path} does not exist. Trying to generate strings...")
             base_data_path = Path(cfg.base_dir) / f"data{cfg.base_seed}.csv"
-            LOGGER.info(
-                f"File {base_strings_path} does not exist. Trying to use {base_data_path} to generate strings..."
+            LOGGER.info(f"Using data from {base_data_path}")
+            gen_strings_path = extract_most_uncertain_strings_from_base(
+                base_data_path,
+                cfg.dataset.num,
+                how=cfg.dataset.how,
+                minimize=cfg.dataset.minimize,
+                output_file_path=strings_path,
             )
-            if base_data_path.exists():
-                LOGGER.info(f"Using data from {base_data_path}")
-                extract_most_uncertain_strings_from_base(
-                    base_data_path, cfg.dataset.num, how=cfg.dataset.how, minimize=cfg.dataset.minimize
-                )
-                create_strings_table(base_strings_path, filename)
-                LOGGER.info(f"Created strings table at {filename}")
-            else:
-                LOGGER.error(f"File {base_data_path} does not exist. Cannot generate strings.")
-                raise ValueError(f"File {base_data_path} does not exist. Cannot generate strings.")
+            assert gen_strings_path == strings_path, f"Expected {gen_strings_path} to be {strings_path}"
+            LOGGER.info(f"Generated strings at {strings_path}")
+        # generate the data{seed}.csv file
+        base_data_path = Path(cfg.base_dir) / f"data{cfg.base_seed}.csv"
+        new_filename = generate_few_shot_data(
+            base_data_path=base_data_path, strings_path=strings_path, n_shot=cfg.dataset.n_shot, seed=cfg.seed
+        )
+        assert new_filename == filename, f"Expected {new_filename} to be {filename}"
+        LOGGER.info(f"Generated data{cfg.base_seed}.csv at {filename}")
+    else:
+        LOGGER.info(f"File {filename} exists. Skipping generation.")
 
     # run dataset (with retry)
     complete = await async_function_with_retry(

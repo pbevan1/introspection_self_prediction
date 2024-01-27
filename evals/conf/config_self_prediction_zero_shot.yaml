@@ -14,7 +14,7 @@ defaults:
 
 # Common Params
 base_dir: exp/default_dir
-exp_dir: ${base_dir}_${dataset.n_shot}_shot
+exp_dir: ${base_dir}_self_prediction_zero_shot
 seed: 0
 base_seed: 0
 limit: 50
@@ -34,7 +34,7 @@ dataset:
   num: ${limit}
   how: logprob_delta
   minimize: true
-  n_shot: 5 # set to 0 for zero-shot
+  n_shot: 0
 
 # API
 organization: OWAIN_ORG
