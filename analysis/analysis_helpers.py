@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 
 try:
@@ -74,9 +75,9 @@ def load_and_prep_dfs(df_paths: List[Path], names: Optional[List[str]] = None) -
     # if word separation doesnt apply, they still might repeat the last character
     def last_char_repeated(row):  # TODO fix
         try:
-            last_char = row["string"][-1]
-            return last_char.lower() == row["response"].lower()
-        except AttributeError:
+            last_char = str(row["string"])[-1]
+            return last_char.lower() == str(row["response"])[0].lower()
+        except IndexError:  # response is empty
             return False
         except TypeError:  # if the string is nan
             return False
@@ -152,3 +153,44 @@ def merge_base_and_self_pred_dfs(b_df: pd.DataFrame, s_df: pd.DataFrame) -> pd.D
     )
     print(f"Merged base and self prediction dataframes, leaving {len(df)} rows")
     return df
+
+
+CONFIG_VALUES_OF_INTEREST = [
+    "language_model",
+    ["prompt", "method"],
+    "base_dir",
+    "limit",
+    ["dataset", "topic"],
+    ["dataset", "n_shot"],
+]
+
+
+def create_df_from_configs(configs: List[Dict]) -> pd.DataFrame:
+    """Create a dataframe from a list of configs."""
+    df = pd.DataFrame({"config": configs})
+    assert len(set(configs)) == len(df), "Duplicate configs found"
+    # set config as index
+    df.index = df.config
+    # seed the dataframe with the config values
+    for value in CONFIG_VALUES_OF_INTEREST:
+        pretty_value = value if isinstance(value, str) else value[0] + "_" + value[1]
+        try:
+            if isinstance(value, list):
+                df[pretty_value] = df["config"].apply(lambda x: x[value[0]][value[1]])
+            else:
+                df[pretty_value] = df["config"].apply(lambda x: x[value])
+        except KeyError:
+            df[pretty_value] = None
+    return df
+
+
+def fill_df_with_function(dfs, function, name, results):
+    """Fill the results dataframe with the results of the function. TO be used with the results df."""
+    # make col for name
+    if name not in results.columns:
+        results[name] = np.nan
+        results[name] = results[name].astype("object")
+    # compute and fill in results
+    for config, df in dfs.items():
+        result = function(df)
+        results.at[config, name] = result
