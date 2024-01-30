@@ -11,7 +11,7 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 
 COMPLIANCE_CHECKS = {
-    "none": lambda x: x is None or np.isnan(x),
+    "NaN": lambda x: x is None or x == "nan" or np.isnan(x),
     "not_single_word": lambda x: len(x.split()) > 1,
     "no": lambda x: clean_string(x) in ["no", "nope"],
     "sorry": lambda x: clean_string(x) in ["sorry", "apologies", "apology", "apologize", "apologise"],
