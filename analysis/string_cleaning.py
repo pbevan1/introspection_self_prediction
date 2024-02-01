@@ -94,6 +94,18 @@ def strip_common_prefixes(s: str) -> str:
     return s
 
 
+def extract_first_of_multiple_responses(response: str, join_on: str) -> str:
+    """
+    Sometimes, the continuation model will return multiple responses. This function extracts the first response.
+    """
+    try:
+        responses = response.split(join_on)
+        responses = [r for r in responses if r.strip() != ""]
+        return responses[0]
+    except AttributeError:
+        return response
+
+
 def match_log_probs_to_trimmed_response(response, logprobs):
     """
     When we are stripping words from the beginning of the string, we also need to discard the corresponding logprobs.
