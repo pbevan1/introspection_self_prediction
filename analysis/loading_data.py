@@ -28,12 +28,6 @@ def get_hydra_config(exp_folder: Union[Path, str]) -> Union[DictConfig, ListConf
     hydra_folder = log_time_folder[0] / ".hydra"
     # use hydra to parse the yaml config
     config = OmegaConf.load(hydra_folder / "config.yaml")
-    # apply the overrides
-    overrides = OmegaConf.load(hydra_folder / "overrides.yaml")
-    # convert overrides to DictConfig
-    overrides_dict = {override.split("=")[0]: override.split("=")[1] for override in overrides}
-    overrides = OmegaConf.create(overrides_dict)
-    config = OmegaConf.merge(config, overrides)
     return config
 
 
@@ -107,10 +101,3 @@ def load_dfs_with_filter(
     dfs = load_and_prep_dfs(data_paths, names=configs, exclude_noncompliant=exclude_noncompliant)
     LOGGER.info(f"Loaded {len(dfs)} dataframes")
     return dfs
-
-
-if __name__ == "__main__":
-    exp_folder = Path("/Users/felixbinder/Cloud/AI Alignment/Astra/Introspection/introspection_self_prediction/exp")
-    conditions = {"language_model": "gpt-3.5-turbo", "limit": [500, 1000]}
-    dfs = load_dfs_with_filter(exp_folder, conditions)
-    print(dfs.keys())

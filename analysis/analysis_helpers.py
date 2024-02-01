@@ -8,11 +8,16 @@ try:
     from analysis.compliance_checks import check_compliance
     from analysis.string_cleaning import (
         apply_all_cleaning,
+        extract_first_of_multiple_responses,
         match_log_probs_to_trimmed_response,
     )
 except ImportError:
     from compliance_checks import check_compliance
-    from string_cleaning import apply_all_cleaning, match_log_probs_to_trimmed_response
+    from string_cleaning import (
+        apply_all_cleaning,
+        extract_first_of_multiple_responses,
+        match_log_probs_to_trimmed_response,
+    )
 
 
 def get_exp_folders(exp_dir: Path, exp_name_pattern: str) -> List[Path]:
@@ -42,6 +47,9 @@ def load_and_prep_dfs(
     if names is None:
         names = [str(path.parent.stem) for path in df_paths]
 
+    # get pretty name for printing
+    pretty_names = {name: get_pretty_name(name) for name in names}
+
     # load the data
     dfs = {}
     for path, name in zip(df_paths, names):
@@ -54,7 +62,7 @@ def load_and_prep_dfs(
         if "response" not in dfs[name].columns:
             to_remove.append(name)
     for name in to_remove:
-        print(f"[{name}] No response column found. Removing dataframe.")
+        print(f"[{pretty_names[name]}] No response column found. Removing dataframe.")
         dfs.pop(name)
 
     # clean the input strings (note that this might lead to the response and the tokens diverging)
@@ -63,6 +71,14 @@ def load_and_prep_dfs(
         dfs[name]["raw_response"] = dfs[name]["response"]
         dfs[name]["response"] = dfs[name]["response"].astype(str)
         dfs[name]["response"] = dfs[name]["response"].apply(apply_all_cleaning)
+        # if the model has a continuation with multiple responses, we only want the first one
+        try:
+            join_on = dfs[name]["dataset"]["join_on"]
+            dfs[name]["response"] = dfs[name]["response"].apply(
+                lambda x: extract_first_of_multiple_responses(x, join_on)
+            )
+        except KeyError:
+            print(f"[{pretty_names[name]}] No join_on found, skipping extraction of first response")
 
     # trim teh logprobs to ensure that they match the string
     for name in dfs.keys():
@@ -76,7 +92,7 @@ def load_and_prep_dfs(
             dfs[name]["few-shot_string"] = dfs[name]["few-shot_string"].apply(eval)
             dfs[name]["few-shot_response"] = dfs[name]["few-shot_response"].apply(eval)
         except KeyError:
-            print(f"[{name}] No few-shot columns found")
+            print(f"[{pretty_names[name]}] No few-shot columns found")
 
     # Run compliance checks. See `evals/compliance_checks.py` for more details.
     # The models like to repeat the last word. We flag it, but don't exclude it
@@ -90,7 +106,9 @@ def load_and_prep_dfs(
 
     for name in dfs.keys():
         dfs[name]["last_word_repeated"] = dfs[name].apply(last_word_repeated, axis=1)
-        print(f"[{name}] {dfs[name]['last_word_repeated'].mean():.2%} of the responses repeat the last word")
+        print(
+            f"[{pretty_names[name]}] {dfs[name]['last_word_repeated'].mean():.2%} of the responses repeat the last word"
+        )
 
     # if word separation doesnt apply, they still might repeat the last character
     def last_char_repeated(row):  # TODO fix
@@ -104,7 +122,9 @@ def load_and_prep_dfs(
 
     for name in dfs.keys():
         dfs[name]["last_char_repeated"] = dfs[name].apply(last_char_repeated, axis=1)
-        print(f"[{name}] {dfs[name]['last_char_repeated'].mean():.2%} of the responses repeat the last character")
+        print(
+            f"[{pretty_names[name]}] {dfs[name]['last_char_repeated'].mean():.2%} of the responses repeat the last character"
+        )
 
     # Even if they don't repeat the last word, they like to repeat another word
     def nonlast_word_repeated(row):
@@ -118,22 +138,22 @@ def load_and_prep_dfs(
     for name in dfs.keys():
         dfs[name]["nonlast_word_repeated"] = dfs[name].apply(nonlast_word_repeated, axis=1)
         print(
-            f"[{name}] {dfs[name]['nonlast_word_repeated'].mean():.2%} of the responses repeat a word other than the last word"
+            f"[{pretty_names[name]}] {dfs[name]['nonlast_word_repeated'].mean():.2%} of the responses repeat a word other than the last word"
         )
 
     for name in dfs.keys():
         dfs[name]["compliance"] = dfs[name]["response"].apply(check_compliance)
-        print(f"[{name}] Compliance: {(dfs[name]['compliance'] == True).mean():.2%}")  # noqa: E712
+        print(f"[{pretty_names[name]}] Compliance: {(dfs[name]['compliance'] == True).mean():.2%}")  # noqa: E712
 
     for name in dfs.keys():
-        print(f"[{name}] Most common non-compliant reasons:")
+        print(f"[{pretty_names[name]}] Most common non-compliant reasons:")
         print(dfs[name][dfs[name]["compliance"] != True]["compliance"].value_counts().head(10))  # noqa: E712
 
     # Exclude non-compliant responses
     if exclude_noncompliant:
         for name in dfs.keys():
             dfs[name].query("compliance == True", inplace=True)
-            print(f"[{name}] Excluded non-compliant responses, leaving {len(dfs[name])} rows")
+            print(f"[{pretty_names[name]}] Excluded non-compliant responses, leaving {len(dfs[name])} rows")
 
     # add in first logprobs
     def extract_first_logprob(logprobs):
@@ -193,11 +213,12 @@ def merge_base_and_self_pred_dfs(b_df: pd.DataFrame, s_df: pd.DataFrame) -> pd.D
 
 
 CONFIG_VALUES_OF_INTEREST = [
-    "language_model",
+    ["language_model", "model"],
     ["prompt", "method"],
     "base_dir",
+    "exp_dir",
     "limit",
-    "dataset",
+    # "dataset",
     ["dataset", "topic"],
     ["dataset", "n_shot"],
 ]
@@ -241,3 +262,18 @@ def fill_df_with_function(dfs, function, name, results):
     for config, df in dfs.items():
         result = function(df)
         results.at[config, name] = result
+
+
+def get_pretty_name(config):
+    """Get a pretty name for a config."""
+    values = []
+    for attribute in CONFIG_VALUES_OF_INTEREST:
+        try:
+            if isinstance(attribute, list):
+                values.append(config[attribute[0]][attribute[1]])
+            else:
+                values.append(config[attribute])
+        except KeyError:
+            values.append(None)
+    values = [str(val) for val in values]
+    return "|".join(values)
