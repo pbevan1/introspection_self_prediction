@@ -30,7 +30,9 @@ def get_exp_folders(exp_dir: Path, exp_name_pattern: str) -> List[Path]:
     return exp_folders
 
 
-def load_and_prep_dfs(df_paths: List[Path], names: Optional[List[str]] = None) -> Dict[str, pd.DataFrame]:
+def load_and_prep_dfs(
+    df_paths: List[Path], names: Optional[List[str]] = None, exclude_noncompliant: bool = True
+) -> Dict[str, pd.DataFrame]:
     # TODO all of this should be small functions...
     """Loads and cleans a number of dataframes. Returns a dictionary of dataframes with the names as keys."""
 
@@ -42,6 +44,15 @@ def load_and_prep_dfs(df_paths: List[Path], names: Optional[List[str]] = None) -
     for path, name in zip(df_paths, names):
         dfs[name] = pd.read_csv(path)
         print(f"Loaded {len(dfs[name])} rows from {path}")
+
+    # if response is not in the dataframe, remove the dataframe—it's still running
+    to_remove = []
+    for name in dfs.keys():
+        if "response" not in dfs[name].columns:
+            to_remove.append(name)
+    for name in to_remove:
+        print(f"[{name}] No response column found. Removing dataframe.")
+        dfs.pop(name)
 
     # clean the input strings (note that this might lead to the response and the tokens diverging)
     for name in dfs.keys():
@@ -110,19 +121,30 @@ def load_and_prep_dfs(df_paths: List[Path], names: Optional[List[str]] = None) -
         print(dfs[name][dfs[name]["compliance"] != True]["compliance"].value_counts().head(10))  # noqa: E712
 
     # Exclude non-compliant responses
-    for name in dfs.keys():
-        dfs[name].query("compliance == True", inplace=True)
-        print(f"[{name}] Excluded non-compliant responses, leaving {len(dfs[name])} rows")
+    if exclude_noncompliant:
+        for name in dfs.keys():
+            dfs[name].query("compliance == True", inplace=True)
+            print(f"[{name}] Excluded non-compliant responses, leaving {len(dfs[name])} rows")
 
     # add in first logprobs
+    def extract_first_logprob(logprobs):
+        logprobs = eval(logprobs)
+        try:
+            return logprobs[0]
+        except IndexError:
+            return None
+
     for name in dfs.keys():
-        dfs[name]["first_logprobs"] = dfs[name]["logprobs"].apply(lambda x: eval(x)[0])
+        dfs[name]["first_logprobs"] = dfs[name]["logprobs"].apply(extract_first_logprob)
 
     # extract first token
     def extract_top_token(logprobs):
         logprobs = eval(logprobs)
-        top_token = list(logprobs[0].keys())[0]
-        return top_token
+        try:
+            top_token = list(logprobs[0].keys())[0]
+            return top_token
+        except IndexError:
+            return None
 
     for name in dfs.keys():
         dfs[name]["first_token"] = dfs[name]["logprobs"].apply(extract_top_token)
@@ -160,6 +182,7 @@ CONFIG_VALUES_OF_INTEREST = [
     ["prompt", "method"],
     "base_dir",
     "limit",
+    "dataset",
     ["dataset", "topic"],
     ["dataset", "n_shot"],
 ]
@@ -172,15 +195,24 @@ def create_df_from_configs(configs: List[Dict]) -> pd.DataFrame:
     # set config as index
     df.index = df.config
     # seed the dataframe with the config values
-    for value in CONFIG_VALUES_OF_INTEREST:
-        pretty_value = value if isinstance(value, str) else value[0] + "_" + value[1]
+
+    def extract_value(config, value):
         try:
             if isinstance(value, list):
-                df[pretty_value] = df["config"].apply(lambda x: x[value[0]][value[1]])
+                return config[value[0]][value[1]]
             else:
-                df[pretty_value] = df["config"].apply(lambda x: x[value])
+                return config[value]
         except KeyError:
-            df[pretty_value] = None
+            return None
+        except TypeError:
+            return None
+
+    for value in CONFIG_VALUES_OF_INTEREST:
+        pretty_value = value if isinstance(value, str) else value[0] + "_" + value[1]
+        df[pretty_value] = df["config"].apply(lambda x: extract_value(x, value))
+
+    # drop the columns that are all None
+    df = df.dropna(axis=1, how="all")
     return df
 
 

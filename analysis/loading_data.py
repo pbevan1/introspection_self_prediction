@@ -90,7 +90,9 @@ def get_folders_matching_config_key(exp_folder: Path, conditions: Dict) -> List[
     return matching_folders
 
 
-def load_dfs_with_filter(exp_folder: Path, conditions: Dict) -> Dict[str, pd.DataFrame]:
+def load_dfs_with_filter(
+    exp_folder: Path, conditions: Dict, exclude_noncompliant: bool = True
+) -> Dict[str, pd.DataFrame]:
     """Loads and preps all dataframes from the experiment folder that match the conditions.
 
     Args:
@@ -102,7 +104,7 @@ def load_dfs_with_filter(exp_folder: Path, conditions: Dict) -> Dict[str, pd.Dat
     data_paths = [get_data_path(folder) for folder in matching_folders]
     LOGGER.info(f"Found {len(data_paths)} data entries")
     configs = [get_hydra_config(folder) for folder in matching_folders]
-    dfs = load_and_prep_dfs(data_paths, names=configs)
+    dfs = load_and_prep_dfs(data_paths, names=configs, exclude_noncompliant=exclude_noncompliant)
     LOGGER.info(f"Loaded {len(dfs)} dataframes")
     return dfs
 
