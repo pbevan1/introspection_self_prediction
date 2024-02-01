@@ -93,7 +93,7 @@ def generate_random_strings(
         string_length = [string_length, string_length]
     for i in range(num):
         k = random.randint(string_length[0], string_length[1])
-        string = join_on.join(random.choices(RANDOM_SETS[set], k=k))
+        string = join_on.join(random.choices(RANDOM_SETS[set], k=k)) + join_on
         data.append({"id": i, "string": string})
 
     df = pd.DataFrame(data)
