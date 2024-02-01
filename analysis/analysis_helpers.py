@@ -277,3 +277,13 @@ def get_pretty_name(config):
             values.append(None)
     values = [str(val) for val in values]
     return "|".join(values)
+
+
+def get_maybe_nested_from_dict(d, keys):
+    """Helper function to get a value from a nested dictionary."""
+    if isinstance(keys, str):
+        keys = [keys]
+    if len(keys) == 1:
+        return d[keys[0]]
+    else:
+        return get_maybe_nested_from_dict(d[keys[0]], keys[1:])
