@@ -92,3 +92,27 @@ def strip_common_prefixes(s: str) -> str:
         if s.startswith(prefix):
             return s[len(prefix) :]
     return s
+
+
+def match_log_probs_to_trimmed_response(response, logprobs):
+    """
+    When we are stripping words from the beginning of the string, we also need to discard the corresponding logprobs.
+
+    Parameters:
+    string (str): The input string.
+    logprobs (str): The log probabilities of the words in the string.
+
+    Returns:
+    logprobs (str): The log probabilities of the words in the string.
+    """
+    if isinstance(logprobs, str):
+        logprobs = eval(logprobs)
+    index = 0
+    while index < len(logprobs):
+        logprob = logprobs[index]
+        # get most likely token
+        token = max(logprob, key=logprob.get)
+        if response.lower().startswith(token.lower()):
+            return str(logprobs[index:])
+        index += 1
+    return None

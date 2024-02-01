@@ -6,10 +6,13 @@ import pandas as pd
 
 try:
     from analysis.compliance_checks import check_compliance
-    from analysis.string_cleaning import apply_all_cleaning
+    from analysis.string_cleaning import (
+        apply_all_cleaning,
+        match_log_probs_to_trimmed_response,
+    )
 except ImportError:
     from compliance_checks import check_compliance
-    from string_cleaning import apply_all_cleaning
+    from string_cleaning import apply_all_cleaning, match_log_probs_to_trimmed_response
 
 
 def get_exp_folders(exp_dir: Path, exp_name_pattern: str) -> List[Path]:
@@ -60,6 +63,12 @@ def load_and_prep_dfs(
         dfs[name]["raw_response"] = dfs[name]["response"]
         dfs[name]["response"] = dfs[name]["response"].astype(str)
         dfs[name]["response"] = dfs[name]["response"].apply(apply_all_cleaning)
+
+    # trim teh logprobs to ensure that they match the string
+    for name in dfs.keys():
+        dfs[name]["logprobs"] = dfs[name].apply(
+            lambda x: match_log_probs_to_trimmed_response(x["response"], x["logprobs"]), axis=1
+        )
 
     # ensure that the few-shot_string and responses are lists
     for name in dfs.keys():
@@ -128,10 +137,13 @@ def load_and_prep_dfs(
 
     # add in first logprobs
     def extract_first_logprob(logprobs):
-        logprobs = eval(logprobs)
+        if isinstance(logprobs, str):
+            logprobs = eval(logprobs)
         try:
             return logprobs[0]
         except IndexError:
+            return None
+        except TypeError:  # if logprobs is None
             return None
 
     for name in dfs.keys():
@@ -139,11 +151,14 @@ def load_and_prep_dfs(
 
     # extract first token
     def extract_top_token(logprobs):
-        logprobs = eval(logprobs)
+        if isinstance(logprobs, str):
+            logprobs = eval(logprobs)
         try:
             top_token = list(logprobs[0].keys())[0]
             return top_token
         except IndexError:
+            return None
+        except TypeError:  # if logprobs is None
             return None
 
     for name in dfs.keys():
