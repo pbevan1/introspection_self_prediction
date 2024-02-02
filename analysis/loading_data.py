@@ -224,16 +224,21 @@ def get_hydra_config(exp_folder: Union[Path, str]) -> Union[DictConfig, ListConf
     if isinstance(exp_folder, str):
         exp_folder = Path(exp_folder)
     # do we have logs in the folders?
-    if not (exp_folder / "logs").exists():
+    logs_folder = exp_folder / "logs"
+    if not logs_folder.exists():
         raise ValueError(f"No logs found in {exp_folder}")
-    # find most recent entry in logs
-    logs = list(exp_folder.glob("logs/*"))
+    # find most recent entry in logs, ignoring .DS_Store
+    logs = [f for f in logs_folder.glob("*") if f.name != ".DS_Store"]
+    if not logs:
+        raise ValueError(f"No valid log directories found in {logs_folder}")
     logs.sort(key=lambda x: x.stat().st_ctime, reverse=True)
     log_day_folder = logs[0]
-    # find most recent subfolder
-    log_time_folder = list(log_day_folder.glob("*"))
-    log_time_folder.sort(key=lambda x: x.stat().st_ctime, reverse=True)
-    hydra_folder = log_time_folder[0] / ".hydra"
+    # find most recent subfolder, ignoring .DS_Store
+    log_time_folders = [f for f in log_day_folder.glob("*") if f.name != ".DS_Store"]
+    if not log_time_folders:
+        raise ValueError(f"No valid log time directories found in {log_day_folder}")
+    log_time_folders.sort(key=lambda x: x.stat().st_ctime, reverse=True)
+    hydra_folder = log_time_folders[0] / ".hydra"
     # use hydra to parse the yaml config
     config = OmegaConf.load(hydra_folder / "config.yaml")
     return config
@@ -248,7 +253,8 @@ def get_data_path(exp_folder: Union[Path, str]) -> Path:
     data_files = list(exp_folder.glob("data*.csv"))
     data_files.sort(key=lambda x: x.stat().st_ctime, reverse=True)
     if len(data_files) == 0:
-        raise ValueError(f"No data*.csv files found in {exp_folder}")
+        print(f"No data*.csv files found in {exp_folder}")
+        return None
     if len(data_files) > 1:
         LOGGER.warning(f"Found more than one data*.csv file in {exp_folder}, using the newest one")
     return data_files[0]
@@ -266,9 +272,6 @@ def get_folders_matching_config_key(exp_folder: Path, conditions: Dict) -> List[
     for key, value in conditions.items():
         if not isinstance(value, list):
             conditions[key] = [value]
-    # ensure that it's all strings
-    for key, value in conditions.items():
-        conditions[key] = [str(val) for val in value]
     # find all subfolders
     subfolders = list(exp_folder.glob("**"))
     # get configs for each subfolder
@@ -284,7 +287,7 @@ def get_folders_matching_config_key(exp_folder: Path, conditions: Dict) -> List[
     for subfolder, config in config_dict.items():
         matched = True
         for key, value in conditions.items():
-            if config[key] not in value:
+            if get_maybe_nested_from_dict(config, key) not in value:
                 matched = False
                 break
         if matched:
@@ -303,9 +306,9 @@ def load_dfs_with_filter(
             For example, `conditions={"language_model": "gpt-3.5-turbo", "limit": [500,1000]}` will return all experiment folders that have a config for a gpt-3.5-turbo model and a limit of 500 or 1000.
     """
     matching_folders = get_folders_matching_config_key(exp_folder, conditions)
-    data_paths = [get_data_path(folder) for folder in matching_folders]
+    data_paths = [get_data_path(folder) for folder in matching_folders if get_data_path(folder) is not None]
     LOGGER.info(f"Found {len(data_paths)} data entries")
     configs = [get_hydra_config(folder) for folder in matching_folders]
-    dfs = load_and_prep_dfs(data_paths, names=configs, exclude_noncompliant=exclude_noncompliant)
+    dfs = load_and_prep_dfs(data_paths, configs=configs, exclude_noncompliant=exclude_noncompliant)
     LOGGER.info(f"Loaded {len(dfs)} dataframes")
     return dfs

@@ -11,7 +11,11 @@ def merge_base_and_self_pred_dfs(b_df: pd.DataFrame, s_df: pd.DataFrame) -> pd.D
     Merge the base and self prediction dataframes.
     """
     # make sure that the strings in s_df are all in b_df
-    assert set(s_df["string"].unique()).issubset(set(b_df["string"].unique())), "Not all strings in s_df are in b_df"
+    # assert set(s_df["string"].unique()).issubset(set(b_df["string"].unique())), "Not all strings in s_df are in b_df"
+    if not set(s_df["string"].unique()).issubset(set(b_df["string"].unique())):
+        print(
+            f"Not all strings in s_df are in b_df: {len(set(s_df['string'].unique()).difference(set(b_df['string'].unique())))} are missing!"
+        )
 
     # we need to subset the data to only include the strings that are in both dfs
     old_b_len = len(b_df)
@@ -40,6 +44,7 @@ CONFIG_VALUES_OF_INTEREST = [
     # "dataset",
     ["dataset", "topic"],
     ["dataset", "n_shot"],
+    ["dataset", "n_shot_seeding"],
 ]
 
 
@@ -50,21 +55,9 @@ def create_df_from_configs(configs: List[Dict]) -> pd.DataFrame:
     # set config as index
     df.index = df.config
     # seed the dataframe with the config values
-
-    def extract_value(config, value):
-        try:
-            if isinstance(value, list):
-                return config[value[0]][value[1]]
-            else:
-                return config[value]
-        except KeyError:
-            return None
-        except TypeError:
-            return None
-
     for value in CONFIG_VALUES_OF_INTEREST:
         pretty_value = value if isinstance(value, str) else value[0] + "_" + value[1]
-        df[pretty_value] = df["config"].apply(lambda x: extract_value(x, value))
+        df[pretty_value] = df["config"].apply(lambda x: get_maybe_nested_from_dict(x, value))
 
     # drop the columns that are all None
     df = df.dropna(axis=1, how="all")

@@ -101,3 +101,16 @@ def function_with_retry(function, *args, **kwargs):
 )
 async def async_function_with_retry(function, *args, **kwargs):
     return await function(*args, **kwargs)
+
+
+def get_maybe_nested_from_dict(d, keys):
+    """Helper function to get a value from a nested dictionary."""
+    try:
+        if isinstance(keys, str):
+            keys = [keys]
+        if len(keys) == 1:
+            return d[keys[0]]
+        else:
+            return get_maybe_nested_from_dict(d[keys[0]], keys[1:])
+    except KeyError:
+        return None
