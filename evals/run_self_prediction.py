@@ -217,7 +217,11 @@ async def async_main(cfg: DictConfig):
         # generate the data{seed}.csv file
         base_data_path = Path(cfg.base_dir) / f"data{cfg.base_seed}.csv"
         new_filename = generate_few_shot_data(
-            base_data_path=base_data_path, strings_path=strings_path, n_shot=cfg.dataset.n_shot, seed=cfg.seed
+            base_data_path=base_data_path,
+            strings_path=strings_path,
+            n_shot=cfg.dataset.n_shot,
+            seed=cfg.seed,
+            how=cfg.dataset.n_shot_seeding,
         )
         assert new_filename == filename, f"Expected {new_filename} to be {filename}"
         LOGGER.info(f"Generated data{cfg.base_seed}.csv at {filename}")

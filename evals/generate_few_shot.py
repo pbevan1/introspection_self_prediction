@@ -8,6 +8,7 @@ from typing import List, Tuple
 import pandas as pd
 
 from analysis.compliance_checks import enforce_compliance_on_df
+from analysis.loading_data import load_and_prep_dfs
 
 LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ sys.path.append(REPO_DIR)
 
 
 def generate_few_shot_data(
-    base_data_path, strings_path, n_shot, num=None, repeat=1, seed=0, enforce_compliance=True
+    base_data_path, strings_path, n_shot, how: str, num=None, repeat=1, seed=0, enforce_compliance=True
 ) -> Path:
     """
     Generates a .data{seed}.csv file for few-shot evaluation by adding fields for the few-shot strings.
@@ -34,6 +35,11 @@ def generate_few_shot_data(
         base_data_path: Path to the base data file. These are the base completions that will be used to generate the few-shot strings.
         strings_path: Path to the strings file. These are the strings that will be used to query the model.
         n_shot: Number of few-shot strings to add.
+        how: How to generate the few-shot strings.
+            Options:
+                - true: Takes inputs from basedir and generates accurate few-shot completions
+                - scrambled: Takes inputs from a random row of basedir and generates wrong few-shot completions
+                - other_model: like true, but uses data from another model. BASEDIR MUST BE SET TO THE MODEL YOU WANT TO USE.
         num: Number of strings to generate. If None, use all strings from the base data file.
         repeat: Number of times to repeat the strings with different few-shot completions.
         seed: Random seed. Can be different from the base seed.
@@ -42,12 +48,18 @@ def generate_few_shot_data(
     Returns:
         Path to the generated .data{seed}.csv file.
     """
+    if how is True:
+        how = "true"
+    if how not in ["true", "scrambled", "other_model"]:
+        raise ValueError(f"Invalid how argument: {how}")
+
     LOGGER.info(f"Generating few-shot strings for {base_data_path} with {n_shot} few-shot strings")
     random.seed(seed)
     LOGGER.info(f"Using random seed {seed}")
 
     # load the data
-    base_df = pd.read_csv(base_data_path)
+    # base_df = pd.read_csv(base_data_path)
+    base_df = list(load_and_prep_dfs([base_data_path]).values())[0]
     LOGGER.info(f"Loaded {len(base_df)} rows from {base_data_path}")
 
     # enforce compliance checks
@@ -61,7 +73,9 @@ def generate_few_shot_data(
     # are the strigns the same?
     shared_strings = set(base_df["string"].unique()).intersection(set(strings["string"].unique()))
     if len(shared_strings) > 0:
-        LOGGER.warning(f"Found {len(shared_strings)} shared strings between the base data and the strings file.")
+        LOGGER.warning(
+            f"Found {len(shared_strings)} shared strings between the base data and the strings file. Call with a different seed."
+        )
 
     if num is not None:
         strings = strings.sample(num, random_state=seed)
@@ -78,7 +92,7 @@ def generate_few_shot_data(
     # add in few-shot strings
     for i, row in out_df.iterrows():
         string = row["string"]
-        few_shot_strings, few_shot_responses = get_few_shot_completions(string, base_df, n_shot)
+        few_shot_strings, few_shot_responses = get_few_shot_completions(string, base_df, n_shot, how)
         out_df.at[i, "few-shot_string"] = few_shot_strings
         out_df.at[i, "few-shot_response"] = few_shot_responses
 
@@ -89,7 +103,7 @@ def generate_few_shot_data(
     return output_file_path
 
 
-def get_few_shot_completions(string, base_df, n) -> Tuple[List[str], List[str]]:
+def get_few_shot_completions(string, base_df, n, how) -> Tuple[List[str], List[str]]:
     """
     Get the few-shot completions for a string.
 
@@ -97,6 +111,11 @@ def get_few_shot_completions(string, base_df, n) -> Tuple[List[str], List[str]]:
         string: The string to get the few-shot completions for.
         base_df: The base dataframe to use.
         n: The number of completions to get.
+        how: How to generate the few-shot completions.
+            Options:
+                - true: Takes inputs from basedir and generates accurate few-shot completions
+                - scrambled: Takes inputs from a random row of basedir and generates wrong few-shot completions
+                - other_model: like true, but uses data from another model. BASEDIR MUST BE SET TO THE MODEL YOU WANT TO USE.
 
     Returns:
         A tuple of lists of strings, the first being the few-shot strings and the second being the few-shot responses.
@@ -104,14 +123,26 @@ def get_few_shot_completions(string, base_df, n) -> Tuple[List[str], List[str]]:
     strings = []
     responses = []
     # get the base completions
-    while n != 0:
-        row = base_df.sample(1)
-        base_string = row["string"].iloc[0]
-        base_response = row["response"].iloc[0]
-        if base_string != string:
-            strings.append(base_string)
-            responses.append(base_response)
-            n -= 1
-        else:
-            LOGGER.warning(f"Found the same string {string} in the base data. Choosing another...")
+    if how in ["true", "other_model"]:  # we pull the proper row
+        while n != 0:
+            row = base_df.sample(1)
+            base_string = row["string"].iloc[0]
+            base_response = row["response"].iloc[0]
+            if base_string != string:
+                strings.append(base_string)
+                responses.append(base_response)
+                n -= 1
+            else:
+                LOGGER.warning(f"Found the same string {string} in the base data. Choosing another...")
+    elif how == "scrambled":  # we pair up two random rows
+        while n != 0:
+            rows = base_df.sample(2, replace=False)
+            row_A = rows.iloc[0]
+            row_B = rows.iloc[1]
+            if row_A["string"] != row_B["string"]:
+                strings.append(row_A["string"])
+                responses.append(row_B["response"])
+                n -= 1
+    else:
+        raise ValueError(f"Invalid how argument: {how}")
     return strings, responses
