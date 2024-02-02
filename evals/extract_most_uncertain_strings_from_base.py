@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pandas as pd
+from analysis.loading_data import load_and_prep_dfs
 
 LOGGER = logging.getLogger(__name__)
 
@@ -12,8 +12,6 @@ REPO_DIR = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).deco
 
 LOGGER.info("Repository directory:", REPO_DIR)
 sys.path.append(REPO_DIR)
-
-from analysis.compliance_checks import check_compliance  # noqa: E402
 
 
 def extract_most_uncertain_strings_from_base(
@@ -34,21 +32,8 @@ def extract_most_uncertain_strings_from_base(
         raise ValueError(f"how {how} not supported")
 
     # load the data
-    df = pd.read_csv(input_file_path)
+    df = list(load_and_prep_dfs([input_file_path]).values())[0]
     LOGGER.info(f"Loaded {len(df)} rows from {input_file_path}")
-
-    # Run compliance checks. See `evals/run_dataset_generation.py` for more details.
-
-    df["compliance"] = df["response"].apply(check_compliance)
-
-    LOGGER.info(f"Compliance: {(df['compliance'] == True).mean():.2%}")  # noqa: E712
-
-    # LOGGER.info("Most common non-compliant reasons:")
-    # df[df['compliance'] != True]['compliance'].value_counts().head(10)
-
-    # Exclude non-compliant responses
-    df = df[df["compliance"] == True]  # noqa: E712
-    LOGGER.info(f"Excluded non-compliant responses, leaving {len(df)} rows")
 
     # We want to select strings that are hard to predict from external means. Here, we choose those for which the two top first tokens have similar probabilities.
 
