@@ -18,6 +18,7 @@ COMPLIANCE_CHECKS = {
     "impossible": lambda x: clean_string(x) in ["impossible"],
     "unable": lambda x: clean_string(x) in ["unable", "i cannot", "i can't", "cannot"],
     "unpredictable": lambda x: clean_string(x) in ["unpredictable", "indeterminable"],
+    "unknown": lambda x: clean_string(x) in ["unknown", "i don't know", "i do not know"],
     "sequence": lambda x: clean_string(x) == "sequence",
     "random": lambda x: clean_string(x) in ["random", "randomness"],
     "item": lambda x: clean_string(x) == "item",
