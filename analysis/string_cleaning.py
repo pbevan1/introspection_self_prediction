@@ -82,14 +82,9 @@ def strip_common_prefixes(s: str) -> str:
     Returns:
     str: The string with common prefixes removed.
     """
-    prefixes: List[str] = [
-        "Answer:",
-        "Answer :",
-        "Response:",
-        "Response :",
-    ]
+    prefixes: List[str] = ["Answer:", "Answer :", "Response:", "Response :", "Assistant:", "Assistant :", "Assistant"]
     for prefix in prefixes:
-        if s.startswith(prefix):
+        if s.lower().startswith(prefix.lower()):
             return s[len(prefix) :]
     return s
 
@@ -99,7 +94,10 @@ def extract_first_of_multiple_responses(response: str, join_on: str) -> str:
     Sometimes, the continuation model will return multiple responses. This function extracts the first response.
     """
     try:
-        responses = response.split(join_on)
+        if join_on == "":
+            responses = [[c] for c in response]
+        else:
+            responses = response.split(join_on)
         responses = [r for r in responses if r.strip() != ""]
         return responses[0]
     except AttributeError:
