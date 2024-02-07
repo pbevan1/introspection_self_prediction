@@ -78,7 +78,7 @@ def generate_few_shot_data(
         )
 
     if num is not None:
-        strings = strings.sample(num, random_state=seed)
+        strings = strings.sample(num, random_state=seed, replace=False)
         LOGGER.info(f"Sampled {len(strings)} strings since a specific number ({num}) was requested.")
 
     # repeat the strings
