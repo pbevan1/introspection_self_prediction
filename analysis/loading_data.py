@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -312,3 +313,20 @@ def load_dfs_with_filter(
     dfs = load_and_prep_dfs(data_paths, configs=configs, exclude_noncompliant=exclude_noncompliant)
     LOGGER.info(f"Loaded {len(dfs)} dataframes")
     return dfs
+
+
+def load_single_df(df_path: Path) -> pd.DataFrame:
+    """Loads and prepares a single dataframe"""
+    dfs = load_and_prep_dfs([df_path])
+    return list(dfs.values())[0]
+
+
+def load_base_df_from_config(config: DictConfig, root_folder: Path = Path(os.getcwd()).parent) -> pd.DataFrame:
+    """Loads the base dataframe for a config"""
+    # check the config
+    assert "base_dir" in config, "No base_dir found in config—are you passing a self prediction config?"
+    base_dir = config["base_dir"]
+    base_path = root_folder / base_dir
+    # load the base dataframe
+    base_df = load_single_df(get_data_path(base_path))
+    return base_df

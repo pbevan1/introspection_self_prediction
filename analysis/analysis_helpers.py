@@ -1,7 +1,8 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
+import tqdm
 
 from evals.utils import get_maybe_nested_from_dict
 
@@ -45,6 +46,7 @@ CONFIG_VALUES_OF_INTEREST = [
     ["dataset", "topic"],
     ["dataset", "n_shot"],
     ["dataset", "n_shot_seeding"],
+    "prediction_target",
 ]
 
 
@@ -64,15 +66,29 @@ def create_df_from_configs(configs: List[Dict]) -> pd.DataFrame:
     return df
 
 
-def fill_df_with_function(dfs, function, name, results):
-    """Fill the results dataframe with the results of the function. TO be used with the results df."""
+def fill_df_with_function(dfs, function, name, results, pass_config=False):
+    """Fill the results dataframe with the results of the function. To be used with the results df.
+
+    Args:
+        dfs: A dictionary with the dataframes to use as input for the function.
+        function: The function to use to compute the results.
+        name: The name of the column to fill in the results dataframe.
+        results: The dataframe to fill in.
+        pass_config: Whether to pass the config to the function or not as the second argument.
+
+    Returns:
+        None. The results dataframe is modified in place.
+    """
     # make col for name
     if name not in results.columns:
         results[name] = np.nan
         results[name] = results[name].astype("object")
     # compute and fill in results
-    for config, df in dfs.items():
-        result = function(df)
+    for config, df in tqdm.tqdm(dfs.items(), desc=name):
+        if pass_config:
+            result = function(df, config)
+        else:
+            result = function(df)
         results.at[config, name] = result
 
 
@@ -89,3 +105,32 @@ def get_pretty_name(config):
             values.append(None)
     values = [str(val) for val in values]
     return "|".join(values)
+
+
+def filter_configs_by_conditions(
+    configs: Dict[Tuple[str], Tuple[str]], conditions: List[Dict[Tuple[str], Tuple[str]]]
+) -> List[Dict[Tuple[str], Tuple[str]]]:
+    """Filter configs by conditions.
+
+    Args:
+        configs: The list of configs to filter.
+        conditions: The conditions to filter by. Each condition is a dictionary with a single or tuple key-value pair, and a list of allowed values as the value.
+            ```
+            {
+                ("language_model","model"): ["gpt-4-1106-preview"],
+                ("dataset","n_shot"): [100, None]
+            }
+            ```
+
+    Returns:
+        The filtered list of configs.
+    """
+    to_be_removed = set()
+    for key, allowed_values in conditions.items():
+        if not isinstance(allowed_values, list):
+            allowed_values = [allowed_values]
+        for config in list(configs):
+            config_value = get_maybe_nested_from_dict(config, key)
+            if config_value not in allowed_values:
+                to_be_removed.add(config)
+    return set(configs).difference(to_be_removed)
