@@ -102,6 +102,8 @@ def extract_first_of_multiple_responses(response: str, join_on: str) -> str:
         return responses[0]
     except AttributeError:
         return response
+    except IndexError:  # response is empty
+        return response
 
 
 def match_log_probs_to_trimmed_response(response, logprobs):
@@ -115,6 +117,9 @@ def match_log_probs_to_trimmed_response(response, logprobs):
     Returns:
     logprobs (str): The log probabilities of the words in the string.
     """
+    if logprobs is None or isinstance(logprobs, float):  # ie is it nan?
+        # we don't have logprobs
+        return logprobs
     if isinstance(logprobs, str):
         logprobs = eval(logprobs)
     index = 0
