@@ -9,7 +9,7 @@ hydra:
       level: INFO
 
 defaults:
-  - prompt: self_prediction_with_complete_base_prompt
+  - prompt: self_prediction_with_base_completion
   - language_model: gpt-3.5-turbo
 
 # Common Params
