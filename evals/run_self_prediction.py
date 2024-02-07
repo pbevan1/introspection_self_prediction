@@ -14,9 +14,6 @@ from evals.apis.inference.api import InferenceAPI
 from evals.apis.inference.cache_manager import CacheManager
 from evals.data_models.inference import LLMParams
 from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
-from evals.extract_most_uncertain_strings_from_base import (
-    extract_most_uncertain_strings_from_base,
-)
 from evals.generate_few_shot import generate_few_shot_data
 from evals.utils import async_function_with_retry, setup_environment
 
@@ -197,32 +194,9 @@ async def async_main(cfg: DictConfig):
     exp_dir.mkdir(parents=True, exist_ok=True)
     filename = exp_dir / f"data{cfg.base_seed}.csv"
     if not filename.exists() or cfg.reset:
+        # have to make the data_{seed}.csv file
         LOGGER.info(f"File {filename} does not exist. Creating...")
-        strings_path = exp_dir / f"strings{cfg.seed}.csv"
-        if strings_path.exists():
-            LOGGER.info(f"Using strings from {strings_path}")
-        else:
-            LOGGER.info(f"File {strings_path} does not exist. Trying to generate strings...")
-            base_data_path = Path(cfg.base_dir) / f"data{cfg.base_seed}.csv"
-            LOGGER.info(f"Using data from {base_data_path}")
-            gen_strings_path = extract_most_uncertain_strings_from_base(
-                base_data_path,
-                cfg.dataset.num,
-                how=cfg.dataset.how,
-                minimize=cfg.dataset.minimize,
-                output_file_path=strings_path,
-            )
-            assert gen_strings_path == strings_path, f"Expected {gen_strings_path} to be {strings_path}"
-            LOGGER.info(f"Generated strings at {strings_path}")
-        # generate the data{seed}.csv file
-        base_data_path = Path(cfg.base_dir) / f"data{cfg.base_seed}.csv"
-        new_filename = generate_few_shot_data(
-            base_data_path=base_data_path,
-            strings_path=strings_path,
-            n_shot=cfg.dataset.n_shot,
-            seed=cfg.seed,
-            how=cfg.dataset.n_shot_seeding,
-        )
+        new_filename = setup_data_file(cfg, exp_dir, filename)
         assert new_filename == filename, f"Expected {new_filename} to be {filename}"
         LOGGER.info(f"Generated data{cfg.base_seed}.csv at {filename}")
     else:
@@ -236,6 +210,24 @@ async def async_main(cfg: DictConfig):
         limit=cfg.limit,
     )
     return complete
+
+
+def setup_data_file(cfg, exp_dir, filename):
+    # we have to create the data{seed}.csv file
+    strings_path = Path(cfg.strings_path)
+    assert (
+        strings_path.exists()
+    ), f"Strings file {strings_path} does not exist. Use evals/extract_[...].py to generate strings file"
+    base_data_path = Path(cfg.base_dir) / f"data{cfg.base_seed}.csv"
+    new_filename = generate_few_shot_data(
+        base_data_path=base_data_path,
+        strings_path=strings_path,
+        n_shot=cfg.dataset.n_shot,
+        output_path=filename,
+        seed=cfg.seed,
+        how=cfg.dataset.n_shot_seeding,
+    )
+    return new_filename
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config_self_prediction")

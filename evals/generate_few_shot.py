@@ -3,12 +3,9 @@ import random
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import pandas as pd
-
-from analysis.compliance_checks import enforce_compliance_on_df
-from analysis.loading_data import load_and_prep_dfs
 
 LOGGER = logging.getLogger(__name__)
 
@@ -18,9 +15,20 @@ REPO_DIR = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).deco
 LOGGER.info("Repository directory:", REPO_DIR)
 sys.path.append(REPO_DIR)
 
+from analysis.compliance_checks import enforce_compliance_on_df  # noqa: E402
+from analysis.loading_data import load_and_prep_dfs  # noqa: E402
+
 
 def generate_few_shot_data(
-    base_data_path, strings_path, n_shot, how: str, num=None, repeat=1, seed=0, enforce_compliance=True
+    base_data_path,
+    strings_path,
+    n_shot,
+    how: str,
+    output_path: Optional[Path] = None,
+    num=None,
+    repeat=1,
+    seed=0,
+    enforce_compliance=True,
 ) -> Path:
     """
     Generates a .data{seed}.csv file for few-shot evaluation by adding fields for the few-shot strings.
@@ -74,7 +82,7 @@ def generate_few_shot_data(
     shared_strings = set(base_df["string"].unique()).intersection(set(strings["string"].unique()))
     if len(shared_strings) > 0:
         LOGGER.warning(
-            f"Found {len(shared_strings)} shared strings between the base data and the strings file. Call with a different seed."
+            f"Found {len(shared_strings)} shared strings between the base data {len(base_df)} and the strings file ({len(strings)})."
         )
 
     if num is not None:
@@ -97,7 +105,11 @@ def generate_few_shot_data(
         out_df.at[i, "few-shot_response"] = few_shot_responses
 
     # save the output strings
-    output_file_path = Path(strings_path).parent / f"data{seed}.csv"
+    if output_path is None:
+        output_file_path = Path(strings_path).parent / f"data{seed}.csv"
+    else:
+        output_file_path = output_path
+        assert output_file_path.suffix == ".csv", "Output file must be a .csv file"
     out_df.to_csv(output_file_path, index=False)
     LOGGER.info(f"Saved {len(out_df)} strings with few-shot completions to {output_file_path}")
     return output_file_path

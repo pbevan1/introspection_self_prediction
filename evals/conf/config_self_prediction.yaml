@@ -9,15 +9,16 @@ hydra:
       level: INFO
 
 defaults:
-  - prompt: self_prediction_basic
+  - prompt: self_prediction_with_complete_base_prompt
   - language_model: gpt-3.5-turbo
 
 # Common Params
-base_dir: exp/default_dir
+strings_path: ${base_dir}/chosen_strings.csv # path to the strings file with the preselect strings for the experiment.
 exp_dir: ${base_dir}_${language_model.model}_base_${dataset.n_shot}_shot_${dataset.n_shot_seeding}_seed
-seed: 0
-base_seed: 0
-limit: 50
+base_dir: ???  # path to the directory containing the base completions
+seed: 0 # seed for the random number generator
+base_seed: 0 # seed for the random number generator for the base completion
+limit: 50 # how many?
 reset: false
 logging: INFO
 print_prompt_and_response: false
@@ -32,8 +33,6 @@ language_model:
 # Extracting the most relevant strings from the base completion
 dataset:
   num: ${limit}
-  how: logprob_delta
-  minimize: true
   n_shot: 5 # set to 0 for zero-shot
   n_shot_seeding: true # true (takes inputs from basedir), scrambled (takes inputs from a random row of basedir), other_model (flag to use a different model BUT BASEDIR MUST BE SET TO THE MODEL YOU WANT TO USE)
 

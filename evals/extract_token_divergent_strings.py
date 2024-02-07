@@ -3,8 +3,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-from analysis.loading_data import load_and_prep_dfs
-
 LOGGER = logging.getLogger(__name__)
 
 # Run the git command to get the repository root directory
@@ -12,6 +10,8 @@ REPO_DIR = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).deco
 
 LOGGER.info("Repository directory:", REPO_DIR)
 sys.path.append(REPO_DIR)
+
+from analysis.loading_data import get_data_path, load_and_prep_dfs  # noqa: E402
 
 
 def extract_most_uncertain_strings_from_base(
@@ -55,6 +55,55 @@ def extract_most_uncertain_strings_from_base(
     # save the output strings
     if output_file_path is None:
         output_file_path = Path(input_file_path).parent / "out_strings.csv"
+    # ensure output dir exists
+    output_file_path.parent.mkdir(parents=True, exist_ok=True)
+
     out_df[["id", "string"]].to_csv(output_file_path, index=False)
     LOGGER.info(f"Saved {len(out_df)} strings to {output_file_path}")
     return output_file_path
+
+
+if __name__ == "__main__":
+    """
+    Usage example:
+    `python evals/extract_token_divergent_strings.py exp/num_35 --n 100 --output exp/random_numbers_basic/token_divergent_strings_35_4`
+    """
+
+    import argparse
+
+    logging.basicConfig(level=logging.INFO)
+
+    parser = argparse.ArgumentParser(
+        description="Extract the most uncertain strings from the base level completions using the top two tokens."
+    )
+    parser.add_argument("input", type=str, help="Path to the .csv with the base level completions.")
+    parser.add_argument("--n", type=int, help="Number of strings to extract.")
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Path to save the output file. If None, will save to the same directory as the input file.",
+    )
+    parser.add_argument(
+        "--how",
+        type=str,
+        default="logprob_delta",
+        help="How to select the strings. Can be 'logprob_delta' or 'logprob_delta_rel'.",
+    )
+    parser.add_argument(
+        "--minimize",
+        action="store_true",
+        help="Whether to minimize the value of `how` or not.",
+    )
+    args = parser.parse_args()
+
+    input_path = Path(args.input).resolve()
+    input_path = get_data_path(input_path)
+    LOGGER.info(f"Extracting from {input_path}")
+
+    output = args.output
+    if output is not None and not output.endswith(".csv"):
+        output = Path(output).with_suffix(".csv")
+
+    out_path = extract_most_uncertain_strings_from_base(input_path, args.n, args.output, args.how, args.minimize)
+    print(f"Saved {out_path}.")
