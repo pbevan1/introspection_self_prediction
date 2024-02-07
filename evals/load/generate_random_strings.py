@@ -76,6 +76,9 @@ RANDOM_SETS = {
         "shark",
     ],
     "english_words": words.words(),
+    "number_doublets": [f"{n:02d}" for n in range(100)],
+    "number_triplets": [f"{n:03d}" for n in range(1000)],
+    "number_quadruplets": [f"{n:04d}" for n in range(10000)],
 }
 
 
@@ -85,7 +88,7 @@ def generate_random_strings(
     seed: int = 42,
     string_length: Union[int, list[int]] = [6, 10],
     num: int = 1000,
-    join_on: str = "",
+    join_on: str = " ",
 ):
     random.seed(seed)
     data = []
