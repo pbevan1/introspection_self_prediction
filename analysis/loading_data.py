@@ -173,7 +173,7 @@ def load_and_prep_dfs(
         )
 
     for name in dfs.keys():
-        dfs[name]["compliance"] = dfs[name]["response"].apply(check_compliance)
+        dfs[name]["compliance"] = dfs[name]["raw_response"].apply(check_compliance)
         print(f"[{pretty_names[name]}]:\n  Compliance: {(dfs[name]['compliance'] == True).mean():.2%}")  # noqa: E712
 
     # for name in dfs.keys():
