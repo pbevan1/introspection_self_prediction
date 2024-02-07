@@ -31,6 +31,8 @@ class AnthropicChatModel(InferenceAPIModel):
         max_attempts: int,
         **kwargs,
     ) -> list[LLMResponse]:
+        # HACK Anthropic doesn't give us logprobs, so we take them out of kwargs if they're there
+        kwargs.pop("logprobs", None)
         start = time.time()
         assert len(model_ids) == 1, "Anthropic implementation only supports one model at a time."
         model_id = model_ids[0]
@@ -65,6 +67,7 @@ class AnthropicChatModel(InferenceAPIModel):
             duration=duration,
             api_duration=api_duration,
             cost=0,
+            logprobs=None,  # HACK Anthropic doesn't give us logprobs
         )
         responses = [response]
 
