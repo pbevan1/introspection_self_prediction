@@ -67,7 +67,7 @@ class AnthropicChatModel(InferenceAPIModel):
             duration=duration,
             api_duration=api_duration,
             cost=0,
-            logprobs=None,  # HACK Anthropic doesn't give us logprobs
+            logprobs=[],  # HACK Anthropic doesn't give us logprobs
         )
         responses = [response]
 
