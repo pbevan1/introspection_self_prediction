@@ -62,7 +62,7 @@ def load_and_prep_dfs(
     # load the data
     dfs = {}
     for path, name in zip(df_paths, configs):
-        dfs[name] = pd.read_csv(path)
+        dfs[name] = pd.read_csv(path, dtype={"complete": bool, "string": "str", "response": "str", "logprobs": "str"})
         print(f"Loaded {len(dfs[name])} rows from {path}")
 
     # exclude rows with complete=False
@@ -98,6 +98,12 @@ def load_and_prep_dfs(
         # if the model has a continuation with multiple responses, we only want the first one
         try:
             join_on = name["dataset"]["join_on"]
+        except KeyError:
+            join_on = " "
+            print(
+                f"[{pretty_names[name]}]:\n  No join_on found, trying to extract first response anyway using '{join_on}' as join_on."
+            )
+        finally:
             old_responses = dfs[name]["response"]
             dfs[name]["response"] = dfs[name]["response"].apply(
                 lambda x: extract_first_of_multiple_responses(x, join_on)
@@ -106,10 +112,6 @@ def load_and_prep_dfs(
                 print(
                     f"[{pretty_names[name]}]:\n  Extracted first response on {np.sum(old_responses != dfs[name]['response'])} rows"
                 )
-        except KeyError:
-            print(f"[{pretty_names[name]}]:\n  No join_on found, skipping extraction of first response")
-        except TypeError:
-            print(f"[{pretty_names[name]}]:\n  Name is not config, skipping extraction of first response")
 
     # trim teh logprobs to ensure that they match the string
     for name in dfs.keys():
@@ -328,5 +330,8 @@ def load_base_df_from_config(config: DictConfig, root_folder: Path = Path(os.get
     base_dir = config["base_dir"]
     base_path = root_folder / base_dir
     # load the base dataframe
-    base_df = load_single_df(get_data_path(base_path))
+    data_path = get_data_path(base_path)
+    if data_path is None:
+        raise ValueError(f"No data*.csv files found in {base_path}")
+    base_df = load_single_df(data_path)
     return base_df
