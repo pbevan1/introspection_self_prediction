@@ -34,6 +34,7 @@ COMPLIANCE_CHECKS = {
     "nope": lambda x: clean_string(x) == "nope",
     "next": lambda x: clean_string(x) == "next",
     "asterisk": lambda x: clean_string(x) == "*",  # Claude likes to do this for some reason
+    "question_mark": lambda x: x in ["?", " ?", "???"],
     "empty": lambda x: x in ["", " ", "  ", "   "],
 }
 
