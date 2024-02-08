@@ -1,5 +1,5 @@
 # parameters for generate_random_strings.py
 topic: english_words
-n_items: [7,10]
+n_items: [5,5]
 num: ${limit}
 join_on: " "
