@@ -32,5 +32,5 @@ language_model:
 organization: OWAIN_ORG
 anthropic_tag: ANTHROPIC_API_KEY
 openai_tag: OPENAI_API_KEY
-anthropic_num_threads: 1
+anthropic_num_threads: 2
 openai_fraction_rate_limit: 0.9
