@@ -28,7 +28,7 @@ def merge_base_and_self_pred_dfs(b_df: pd.DataFrame, s_df: pd.DataFrame) -> pd.D
     )
     # join the two dataframes on the string column
     df = pd.merge(b_df, s_df, on="string", suffixes=("_base", "_self"))
-    for col in ["compliance_base", "compliance_self", "complete_base", "complete_self", "id_base", "id_self"]:
+    for col in ["complete_base", "complete_self", "id_base", "id_self"]:
         try:
             df.drop(
                 columns=[col],
