@@ -24,7 +24,8 @@ COMPLIANCE_CHECKS = {
     "impossible": lambda x: clean_string(x) in ["impossible"],
     "unable": lambda x: clean_string(x) in ["unable", "i cannot", "i can't", "cannot"],
     "na": lambda x: clean_string(x) in ["na", "n/a"],
-    "unpredictable": lambda x: clean_string(x) in ["unpredictable", "indeterminable", "indeterminate"],
+    "unpredictable": lambda x: clean_string(x)
+    in ["unpredictable", "indeterminable", "indeterminate", "unpredictability"],
     "insufficient": lambda x: clean_string(x) in ["insufficient"],
     "unknown": lambda x: clean_string(x) in ["unknown", "i don't know", "i do not know"],
     "sequence": lambda x: clean_string(x) == "sequence",
@@ -36,6 +37,7 @@ COMPLIANCE_CHECKS = {
     "asterisk": lambda x: clean_string(x) == "*",  # Claude likes to do this for some reason
     "question_mark": lambda x: x in ["?", " ?", "???"],
     "empty": lambda x: x in ["", " ", "  ", "   "],
+    "system": lambda x: clean_string(x) in ["system", "system:"],
 }
 
 
