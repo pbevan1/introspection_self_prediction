@@ -323,7 +323,8 @@ def load_dfs_with_filter(
             For example, `conditions={"language_model": "gpt-3.5-turbo", "limit": [500,1000]}` will return all experiment folders that have a config for a gpt-3.5-turbo model and a limit of 500 or 1000.
     """
     matching_folders = get_folders_matching_config_key(exp_folder, conditions)
-    data_paths = [get_data_path(folder) for folder in matching_folders if get_data_path(folder) is not None]
+    matching_folders = [folder for folder in matching_folders if get_data_path(folder) is not None]
+    data_paths = [get_data_path(folder) for folder in matching_folders]
     LOGGER.info(f"Found {len(data_paths)} data entries")
     configs = [get_hydra_config(folder) for folder in matching_folders]
     dfs = load_and_prep_dfs(data_paths, configs=configs, exclude_noncompliant=exclude_noncompliant)
