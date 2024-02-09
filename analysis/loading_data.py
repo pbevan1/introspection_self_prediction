@@ -174,6 +174,20 @@ def load_and_prep_dfs(
             f"[{pretty_names[name]}]:\n  {dfs[name]['nonlast_word_repeated'].mean():.2%} of the responses repeat a word other than the last word"
         )
 
+    def any_word_repeated(row):
+        try:
+            words = row["string"].split()
+            words = [w.lower() for w in words]
+            return row["response"].lower() in words
+        except AttributeError:
+            return False
+
+    for name in dfs.keys():
+        dfs[name]["any_word_repeated"] = dfs[name].apply(any_word_repeated, axis=1)
+        print(
+            f"[{pretty_names[name]}]:\n  {dfs[name]['any_word_repeated'].mean():.2%} of the responses repeat any word"
+        )
+
     for name in dfs.keys():
         dfs[name]["compliance"] = dfs[name]["raw_response"].apply(check_compliance)
         print(f"[{pretty_names[name]}]:\n  Compliance: {(dfs[name]['compliance'] == True).mean():.2%}")  # noqa: E712
