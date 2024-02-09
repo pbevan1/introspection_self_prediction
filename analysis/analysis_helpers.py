@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 import tqdm
+from IPython.display import HTML, display
 
 from evals.utils import get_maybe_nested_from_dict
 
@@ -110,6 +111,29 @@ def get_pretty_name(config):
             values.append(None)
     values = [str(val) for val in values]
     return "|".join(values)
+
+
+def pretty_print_config(config):
+    """Pretty print a config."""
+    values = {}
+    for attribute in CONFIG_VALUES_OF_INTEREST:
+        try:
+            if isinstance(attribute, list):
+                values[str(attribute)] = config[attribute[0]][attribute[1]]
+            else:
+                values[str(attribute)] = config[attribute]
+        except KeyError:
+            values[str(attribute)] = None
+    # produce html for jupyter notebook
+    html = "<b>Model:</b><table>"
+    for key, value in values.items():
+        html += f"<tr><td>{key}</td><td><b>{value}</b></td></tr>"
+    html += "</table>"
+    # display in jupyter notebook
+    try:
+        display(HTML(html))
+    except NameError:
+        print(html)
 
 
 def filter_configs_by_conditions(
