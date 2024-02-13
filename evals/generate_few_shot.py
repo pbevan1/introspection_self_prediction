@@ -58,7 +58,7 @@ def generate_few_shot_data(
     """
     if how is True:
         how = "true"
-    if how not in ["true", "scrambled", "other_model"]:
+    if how not in ["true", "scrambled", "other_model", "other_task"]:
         raise ValueError(f"Invalid how argument: {how}")
 
     LOGGER.info(f"Generating few-shot strings for {base_data_path} with {n_shot} few-shot strings")
@@ -135,7 +135,7 @@ def get_few_shot_completions(string, base_df, n, how) -> Tuple[List[str], List[s
     strings = []
     responses = []
     # get the base completions
-    if how in ["true", "other_model"]:  # we pull the proper row
+    if how in ["true", "other_model", "other_task"]:  # we pull the proper row
         while n != 0:
             row = base_df.sample(1)
             base_string = row["string"].iloc[0]

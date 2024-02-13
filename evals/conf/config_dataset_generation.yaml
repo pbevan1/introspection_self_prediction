@@ -14,7 +14,8 @@ defaults:
   - dataset: random_words
 
 # Common Params
-exp_dir: exp/default_dir
+study_dir: exp/default_dir
+exp_dir: ${study_dir}/${language_model.model}_${prompt.method}_prompt_${dataset.topic}_dataset_base
 seed: 0
 limit: 50
 reset: false

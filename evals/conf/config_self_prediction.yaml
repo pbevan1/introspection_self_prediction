@@ -11,11 +11,13 @@ hydra:
 defaults:
   - prompt: self_prediction_with_base_completion
   - language_model: gpt-3.5-turbo
+  - dataset: number_triplets
 
 # Common Params
-strings_path: ${base_dir}/chosen_strings.csv # path to the strings file with the preselect strings for the experiment.
-exp_dir: ${base_dir}_${language_model.model}_base_${dataset.n_shot}_shot_${dataset.n_shot_seeding}_seed
+study_dir: ??? # the folder of the study which contains multiple experiments
+exp_dir: ${study_dir}/${language_model.model}_${dataset.n_shot}_shot_${dataset.n_shot_seeding}_seed_${prompt.method}_prompt
 base_dir: ???  # path to the directory containing the base completions
+strings_path: ${base_dir}/chosen_strings.csv # path to the strings file with the preselect strings for the experiment.
 seed: 0 # seed for the random number generator
 base_seed: 0 # seed for the random number generator for the base completion
 limit: 50 # how many?
@@ -28,13 +30,13 @@ prompt_history_dir: ${exp_dir}/prompt_history
 # Model
 language_model:
   temperature: 0.0
-  logprobs: 5
+  logprobs: 2
 
 # Extracting the most relevant strings from the base completion
 dataset:
   num: ${limit}
   n_shot: 5 # set to 0 for zero-shot
-  n_shot_seeding: true # true (takes inputs from basedir), scrambled (takes inputs from a random row of basedir), other_model (flag to use a different model BUT BASEDIR MUST BE SET TO THE MODEL YOU WANT TO USE)
+  n_shot_seeding: true # true (takes inputs from basedir), scrambled (takes inputs from a random row of basedir), other_model (flag to use a different model BUT BASEDIR MUST BE SET TO THE MODEL YOU WANT TO USE), other_task (flag to use a different task BUT BASEDIR MUST BE SET TO THE BASE MODEL RUN OF THE TASK YOU WANT TO USE)
 
 # API
 organization: OWAIN_ORG
