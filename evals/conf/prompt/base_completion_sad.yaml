@@ -3,7 +3,7 @@ word_limit: 1
 messages:
   - role: "system"
     content: |
-      Please respond with a single random number triplet that comes to mind after seeing the following sequence of words. Do not say anything but a single word in response.
+      Please respond with a single random ${dataset.item_descriptor} that comes to mind after seeing the following sequence of words. Do not say anything but a single word in response.
 
   - role: "user"
     content: |
