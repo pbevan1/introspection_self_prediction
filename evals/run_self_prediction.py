@@ -61,6 +61,7 @@ class DatasetRunner:
                 is_valid=lambda x: True,  # len(x) > 0 and len(x) < 10 and " " not in x, # x should be a single word
                 print_prompt_and_response=self.print_prompt_and_response,
                 logprobs=self.llm_params.logprobs,
+                seed=self.llm_params.seed,
             )
             # save successful prompt/response to file
             if self.cache_manager is not None:

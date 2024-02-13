@@ -131,6 +131,7 @@ class InferenceAPI:
         num_candidates_per_completion: int = 1,
         is_valid: Callable[[str], bool] = lambda _: True,
         insufficient_valids_behaviour: Literal["error", "continue", "pad_invalids"] = "error",
+        seed: int = 0,
         **kwargs,
     ) -> list[LLMResponse]:
         """
@@ -157,6 +158,7 @@ class InferenceAPI:
                 - error: raise an error
                 - continue: return the valid responses, even if they are fewer than n
                 - pad_invalids: pad the list with invalid responses up to n
+            seed: The seed to use for the random number generator. Note that Anthropic presently does not support setting a random seed.
         """
 
         assert "max_tokens_to_sample" not in kwargs, "max_tokens_to_sample should be passed in as max_tokens."
@@ -210,6 +212,7 @@ class InferenceAPI:
                 print_prompt_and_response,
                 max_attempts_per_api_call,
                 n=num_candidates,
+                seed=seed,
                 **kwargs,
             )
 
