@@ -38,6 +38,10 @@ COMPLIANCE_CHECKS = {
     "question_mark": lambda x: x in ["?", " ?", "???"],
     "empty": lambda x: x in ["", " ", "  ", "   "],
     "system": lambda x: clean_string(x) in ["system", "system:"],
+    "unanswerable": lambda x: clean_string(x) in ["unanswerable"],
+    "unavailable": lambda x: clean_string(x) in ["unavailable"],
+    "unidentifiable": lambda x: clean_string(x) in ["unidentifiable"],
+    "unrelated": lambda x: clean_string(x) in ["unrelated"],
 }
 
 
