@@ -219,7 +219,7 @@ def setup_data_file(cfg, exp_dir, filename):
     assert (
         strings_path.exists()
     ), f"Strings file {strings_path} does not exist. Use evals/extract_[...].py to generate strings file"
-    base_data_path = Path(cfg.base_dir) / f"data{cfg.base_seed}.csv"
+    base_data_path = Path(cfg.seeding_base_dir) / f"data{cfg.base_seed}.csv"
     new_filename = generate_few_shot_data(
         base_data_path=base_data_path,
         strings_path=strings_path,
