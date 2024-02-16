@@ -1,9 +1,10 @@
+import importlib
 import logging
 import random
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
 
@@ -25,10 +26,12 @@ def generate_few_shot_data(
     n_shot,
     how: str,
     output_path: Optional[Path] = None,
-    num=None,
-    repeat=1,
-    seed=0,
-    enforce_compliance=True,
+    num: int | None = None,
+    repeat: int = 1,
+    seed: int = 0,
+    enforce_compliance: bool = True,
+    string_modifier: Callable[[str], str | None] | None = None,
+    response_property: Callable[[pd.Series], str | None] | None = None,
 ) -> Path:
     """
     Generates a .data{seed}.csv file for few-shot evaluation by adding fields for the few-shot strings.
@@ -52,10 +55,25 @@ def generate_few_shot_data(
         repeat: Number of times to repeat the strings with different few-shot completions.
         seed: Random seed. Can be different from the base seed.
         enforce_compliance: Whether to enforce compliance checks on the base data.
+        string_modifier: A function to modify the strings before generating the few-shot completions, taken from evals/string_modifier.py.
+        response_property: A function to extract a property of the response of the language model, taken from evals/response_property.py.
 
     Returns:
         Path to the generated .data{seed}.csv file.
     """
+
+    # load in the string_modifier and response_property functions
+    if string_modifier == "None":
+        string_modifier = None
+    if response_property == "None":
+        response_property = None
+    if string_modifier is not None:
+        string_modifier = import_function_from_string("evals.string_modifier", string_modifier)
+        LOGGER.info(f"Loaded string modifier function {string_modifier.__name__} from evals.string_modifier")
+    if response_property is not None:
+        response_property = import_function_from_string("evals.response_property", response_property)
+        LOGGER.info(f"Loaded output property function {response_property.__name__} from evals.response_property")
+
     if how is True:
         how = "true"
     if how not in ["true", "scrambled", "other_model", "other_task"]:
@@ -97,6 +115,15 @@ def generate_few_shot_data(
     out_df["few-shot_string"] = None
     out_df["few-shot_response"] = None
 
+    # apply string modifier if necessary
+    if string_modifier is not None:
+        out_df["string"] = out_df["string"].apply(string_modifier)
+        base_df["string"] = base_df["string"].apply(string_modifier)
+
+    # apply output property if necessary
+    if response_property is not None:
+        base_df["response"] = base_df.apply(response_property, axis=1)
+
     # add in few-shot strings
     for i, row in out_df.iterrows():
         string = row["string"]
@@ -115,7 +142,12 @@ def generate_few_shot_data(
     return output_file_path
 
 
-def get_few_shot_completions(string, base_df, n, how) -> Tuple[List[str], List[str]]:
+def get_few_shot_completions(
+    string: str,
+    base_df: pd.DataFrame,
+    n: int,
+    how: str,
+) -> Tuple[List[str], List[str]]:
     """
     Get the few-shot completions for a string.
 
@@ -158,3 +190,9 @@ def get_few_shot_completions(string, base_df, n, how) -> Tuple[List[str], List[s
     else:
         raise ValueError(f"Invalid how argument: {how}")
     return strings, responses
+
+
+def import_function_from_string(module_name, function_name):
+    module = importlib.import_module(module_name)
+    function = getattr(module, function_name)
+    return function

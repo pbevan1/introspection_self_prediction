@@ -227,6 +227,8 @@ def setup_data_file(cfg, exp_dir, filename):
         output_path=filename,
         seed=cfg.seed,
         how=cfg.dataset.n_shot_seeding,
+        string_modifier=cfg.dataset.string_modifier,
+        response_property=cfg.dataset.response_property,
     )
     return new_filename
 
