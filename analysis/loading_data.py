@@ -139,9 +139,9 @@ def load_and_prep_dfs(
 
     for name in dfs.keys():
         dfs[name]["last_word_repeated"] = dfs[name].apply(last_word_repeated, axis=1)
-        print(
-            f"[{pretty_names[name]}]:\n  {dfs[name]['last_word_repeated'].mean():.2%} of the responses repeat the last word"
-        )
+        # print(
+        #     f"[{pretty_names[name]}]:\n  {dfs[name]['last_word_repeated'].mean():.2%} of the responses repeat the last word"
+        # )
 
     # if word separation doesnt apply, they still might repeat the last character
     def last_char_repeated(row):  # TODO fix
@@ -155,9 +155,9 @@ def load_and_prep_dfs(
 
     for name in dfs.keys():
         dfs[name]["last_char_repeated"] = dfs[name].apply(last_char_repeated, axis=1)
-        print(
-            f"[{pretty_names[name]}]:\n  {dfs[name]['last_char_repeated'].mean():.2%} of the responses repeat the last character"
-        )
+        # print(
+        #     f"[{pretty_names[name]}]:\n  {dfs[name]['last_char_repeated'].mean():.2%} of the responses repeat the last character"
+        # )
 
     # Even if they don't repeat the last word, they like to repeat another word
     def nonlast_word_repeated(row):
@@ -170,9 +170,9 @@ def load_and_prep_dfs(
 
     for name in dfs.keys():
         dfs[name]["nonlast_word_repeated"] = dfs[name].apply(nonlast_word_repeated, axis=1)
-        print(
-            f"[{pretty_names[name]}]:\n  {dfs[name]['nonlast_word_repeated'].mean():.2%} of the responses repeat a word other than the last word"
-        )
+        # print(
+        #     f"[{pretty_names[name]}]:\n  {dfs[name]['nonlast_word_repeated'].mean():.2%} of the responses repeat a word other than the last word"
+        # )
 
     def any_word_repeated(row):
         try:
@@ -184,9 +184,9 @@ def load_and_prep_dfs(
 
     for name in dfs.keys():
         dfs[name]["any_word_repeated"] = dfs[name].apply(any_word_repeated, axis=1)
-        print(
-            f"[{pretty_names[name]}]:\n  {dfs[name]['any_word_repeated'].mean():.2%} of the responses repeat any word"
-        )
+        # print(
+        #     f"[{pretty_names[name]}]:\n  {dfs[name]['any_word_repeated'].mean():.2%} of the responses repeat any word"
+        # )
 
     for name in dfs.keys():
         dfs[name]["compliance"] = dfs[name]["raw_response"].apply(check_compliance)
@@ -335,6 +335,8 @@ def load_dfs_with_filter(
 def load_single_df(df_path: Path) -> pd.DataFrame:
     """Loads and prepares a single dataframe"""
     dfs = load_and_prep_dfs([df_path])
+    if len(dfs) != 1:
+        LOGGER.warning(f"Expected 1 dataframe, found {len(dfs)}")
     return list(dfs.values())[0]
 
 
