@@ -1,4 +1,3 @@
-import importlib
 import logging
 import random
 import subprocess
@@ -7,6 +6,8 @@ from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
+
+from evals.utils import load_string_and_reponse_functions
 
 LOGGER = logging.getLogger(__name__)
 
@@ -63,16 +64,7 @@ def generate_few_shot_data(
     """
 
     # load in the string_modifier and response_property functions
-    if string_modifier == "None":
-        string_modifier = None
-    if response_property == "None":
-        response_property = None
-    if string_modifier is not None:
-        string_modifier = import_function_from_string("evals.string_modifier", string_modifier)
-        LOGGER.info(f"Loaded string modifier function {string_modifier.__name__} from evals.string_modifier")
-    if response_property is not None:
-        response_property = import_function_from_string("evals.response_property", response_property)
-        LOGGER.info(f"Loaded output property function {response_property.__name__} from evals.response_property")
+    string_modifier, response_property = load_string_and_reponse_functions(string_modifier, response_property)
 
     if how is True:
         how = "true"
@@ -116,6 +108,7 @@ def generate_few_shot_data(
     out_df["few-shot_response"] = None
 
     # apply string modifier if necessary
+    out_df["unmodified_string"] = out_df["string"]
     if string_modifier is not None:
         out_df["string"] = out_df["string"].apply(string_modifier)
         base_df["string"] = base_df["string"].apply(string_modifier)
@@ -190,9 +183,3 @@ def get_few_shot_completions(
     else:
         raise ValueError(f"Invalid how argument: {how}")
     return strings, responses
-
-
-def import_function_from_string(module_name, function_name):
-    module = importlib.import_module(module_name)
-    function = getattr(module, function_name)
-    return function

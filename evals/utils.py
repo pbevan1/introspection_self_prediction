@@ -1,3 +1,4 @@
+import importlib
 import json
 import logging
 import os
@@ -114,3 +115,23 @@ def get_maybe_nested_from_dict(d, keys):
             return get_maybe_nested_from_dict(d[keys[0]], keys[1:])
     except KeyError:
         return None
+
+
+def load_string_and_reponse_functions(string_modifier, response_property):
+    if string_modifier == "None":
+        string_modifier = None
+    if response_property == "None":
+        response_property = None
+    if string_modifier is not None:
+        string_modifier = import_function_from_string("evals.string_modifier", string_modifier)
+        LOGGER.info(f"Loaded string modifier function {string_modifier.__name__} from evals.string_modifier")
+    if response_property is not None:
+        response_property = import_function_from_string("evals.response_property", response_property)
+        LOGGER.info(f"Loaded output property function {response_property.__name__} from evals.response_property")
+    return string_modifier, response_property
+
+
+def import_function_from_string(module_name, function_name):
+    module = importlib.import_module(module_name)
+    function = getattr(module, function_name)
+    return function

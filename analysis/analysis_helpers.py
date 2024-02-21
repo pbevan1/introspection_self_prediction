@@ -5,15 +5,19 @@ import pandas as pd
 import tqdm
 from IPython.display import HTML, display
 
-from evals.utils import get_maybe_nested_from_dict
+from evals.utils import get_maybe_nested_from_dict, load_string_and_reponse_functions
 
 
-def merge_base_and_self_pred_dfs(b_df: pd.DataFrame, s_df: pd.DataFrame) -> pd.DataFrame:
+def merge_base_and_self_pred_dfs(
+    b_df: pd.DataFrame, s_df: pd.DataFrame, string_modifier: str | None = None, response_property: str | None = None
+) -> pd.DataFrame:
     """
-    Merge the base and self prediction dataframes.
+    Merge the base and self prediction dataframes. Applies the string_modifier and response_property functions if they are not None to the base dataframe.
     """
     # make sure that the strings in s_df are all in b_df
     # assert set(s_df["string"].unique()).issubset(set(b_df["string"].unique())), "Not all strings in s_df are in b_df"
+    string_modifier, response_property = load_string_and_reponse_functions(string_modifier, response_property)
+
     if not set(s_df["string"].unique()).issubset(set(b_df["string"].unique())):
         print(
             f"Not all strings in s_df are in b_df: {len(set(s_df['string'].unique()).difference(set(b_df['string'].unique())))} are missing!"
@@ -21,12 +25,27 @@ def merge_base_and_self_pred_dfs(b_df: pd.DataFrame, s_df: pd.DataFrame) -> pd.D
 
     # we need to subset the data to only include the strings that are in both dfs
     old_b_len = len(b_df)
-    strings_set = set(b_df["string"].unique()).intersection(set(s_df["string"].unique()))
-    b_df = b_df[b_df["string"].isin(strings_set)]
-    s_df = s_df[s_df["string"].isin(strings_set)]
+    # if unmodified_string is in the dataframe, use that to subset
+    if "unmodified_string" in s_df.columns:
+        strings_set = set(b_df["string"].unique()).intersection(set(s_df["unmodified_string"].unique()))
+        b_df = b_df[b_df["string"].isin(strings_set)]
+        s_df = s_df[s_df["unmodified_string"].isin(strings_set)]
+    else:
+        strings_set = set(b_df["string"].unique()).intersection(set(s_df["string"].unique()))
+        b_df = b_df[b_df["string"].isin(strings_set)]
+        s_df = s_df[s_df["string"].isin(strings_set)]
     print(
         f"Subsetted data to only include strings that are in both dfs.\nBefore: [Base] {old_b_len}, After: {len(b_df)}"
     )
+    # apply string modifier and response property
+    b_df["unmodified_response"] = b_df["response"]
+    if response_property is not None:
+        b_df["response"] = b_df.apply(response_property, axis=1)
+    if string_modifier is not None:
+        b_df["modified_string"] = b_df["string"].apply(string_modifier)
+        b_df["unmodified_string"] = b_df["string"]
+        b_df["string"] = b_df["modified_string"]
+
     # join the two dataframes on the string column
     df = pd.merge(b_df, s_df, on="string", suffixes=("_base", "_self"))
     for col in ["complete_base", "complete_self", "id_base", "id_self"]:

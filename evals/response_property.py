@@ -42,12 +42,12 @@ def fifth_most_likely_initial_token(row: pd.Series) -> str | None:
     return nth_most_likely_initial_token(row, 4)
 
 
-def numeric_property(row: pd.Series, prop_func: Callable[..., bool] = lambda x: x % 2 == 0) -> bool | None:
+def numeric_property(row: pd.Series, prop_func: Callable[..., bool] = lambda x: x % 2 == 0) -> str | None:
     """Extract a numeric property of the response.
 
     Args:
     - row: a row of the response dataframe
-    - prop_func: a function that takes a string and returns a boolean
+    - prop_func: a function that takes a string and returns either "true" or "false"
 
     Returns:
     - True if the property is true, False otherwise
@@ -61,22 +61,22 @@ def numeric_property(row: pd.Series, prop_func: Callable[..., bool] = lambda x: 
         return None
     # get property
     prop = prop_func(response)
-    return prop
+    return str(prop).lower()
 
 
-def is_even(row: pd.Series) -> bool | None:
+def is_even(row: pd.Series) -> str | None:
     return numeric_property(row, lambda x: x % 2 == 0)
 
 
-def is_odd(row: pd.Series) -> bool | None:
+def is_odd(row: pd.Series) -> str | None:
     return numeric_property(row, lambda x: x % 2 != 0)
 
 
-def is_greater_than_50(row: pd.Series) -> bool | None:
+def is_greater_than_50(row: pd.Series) -> str | None:
     return numeric_property(row, lambda x: x > 50)
 
 
-def is_greater_than_500(row: pd.Series) -> bool | None:
+def is_greater_than_500(row: pd.Series) -> str | None:
     return numeric_property(row, lambda x: x > 500)
 
 
