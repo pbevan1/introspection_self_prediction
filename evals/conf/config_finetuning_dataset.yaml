@@ -1,0 +1,27 @@
+hydra:
+  run:
+    dir: ${exp_dir}/logs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${exp_dir}/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+  job_logging:
+    root:
+      level: INFO
+
+# when using, these values will be overwritten by the config files in the folder the data is created in
+
+study_dir: exp/finetuning/debug_finetuning_run #??? # the folder of the study which contains multiple experiments
+
+name: ??
+base_dir: ??
+
+exp_dir: ${study_dir}
+
+limit: 1250 # how many? Includes both training and validation. Overwrite with dataset.num in the config file in the finetuning folder
+
+dataset: # these will be overwritten if the field is in the dataset config file
+  validation_fraction: 0.2 # fraction of the dataset to use for validation
+  response_property: None # When seeding the strings, extract the property from the string and score against it. Use `None` or any function from evals/response_property.py. Remember to change the prompt!
+  string_modifier: None # Require that the string has to be reconstructed. None or any function from evals/string_modification.py. Remember to change the prompt!
+
+seed: 0 # seed for the random number generator

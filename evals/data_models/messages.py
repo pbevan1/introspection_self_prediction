@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 from typing import Dict, Optional, Self, Sequence
 
@@ -74,6 +75,14 @@ class Prompt(HashableBaseModel):
         if self.is_none_in_messages():
             raise ValueError(f"OpenAI chat prompts cannot have a None role. Got {self.messages}")
         return [msg.model_dump() for msg in self.messages]
+
+    def openai_finetuning_format(self) -> str:
+        msgs = [msg.model_dump() for msg in self.messages]
+        # fix the message roles
+        for i, msg in enumerate(msgs):
+            msgs[i]["role"] = msg["role"].value
+        line = {"messages": msgs}
+        return json.dumps(line)
 
     def anthropic_format(self) -> str:
         if self.is_none_in_messages():

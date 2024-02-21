@@ -64,6 +64,24 @@ This repository contains the `run.py` script and associated files for conducting
 
 ### Running Finetuning
 
+#### Creating a JSONL File
+The JSONL files are created using the `evals.apis.finetuning.create_dataset.py` file.
+Pass a path to a folder containing config files for the dataset you want to create. The config files should be in the following format:
+```yaml
+name: number_triplets
+base_dir: exp/number_triplets_azalea/base_gpt-3.5-turbo-0125_base-completion-azalea-system_prompt_number_triplets_dataset
+
+defaults:
+  - dataset: number_triplets
+  - prompt: base_completion_azalea_system # using which prompt?
+
+dataset:
+  num: 100 # how many strings to generate? None for all in the base_dir
+  response_property: None # When seeding the strings, extract the property from the string and score against it. Use `None` or any function from evals/response_property.py. Remember to change the prompt!
+  string_modifier: None # Require that the string has to be reconstructed. None or any function from evals/string_modification.py. Remember to change the prompt!
+```
+The dataset will be saved out into the folder.
+
 - **Basic Run:**
     Prepare a jsonl file according to the openai format and run the following command:
     ```bash
