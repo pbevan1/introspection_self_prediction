@@ -149,6 +149,8 @@ def pretty_print_config(config):
     # produce html for jupyter notebook
     html = "<b>Model:</b><table>"
     for key, value in values.items():
+        if value is None:
+            continue
         html += f"<tr><td>{key}</td><td><b>{value}</b></td></tr>"
     html += "</table>"
     # display in jupyter notebook

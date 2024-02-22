@@ -21,3 +21,5 @@ SECRETS
 prompt_history
 .hydra
 exp
+build
+*.code-workspace
