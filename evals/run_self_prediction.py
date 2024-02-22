@@ -215,10 +215,14 @@ async def async_main(cfg: DictConfig):
 
 def setup_data_file(cfg, exp_dir, filename):
     # we have to create the data{seed}.csv file
-    strings_path = Path(cfg.strings_path)
-    assert (
-        strings_path.exists()
-    ), f"Strings file {strings_path} does not exist. Use evals/extract_[...].py to generate strings file"
+    if cfg.strings_path != "none":
+        strings_path = Path(cfg.strings_path)
+        assert (
+            strings_path.exists()
+        ), f"Strings file {strings_path} does not exist. Use evals/extract_[...].py to generate strings file"
+    else:
+        strings_path = None
+        LOGGER.info("No strings file provided. Using the base data as the strings file.")
     base_data_path = Path(cfg.seeding_base_dir) / f"data{cfg.base_seed}.csv"
     new_filename = generate_few_shot_data(
         base_data_path=base_data_path,

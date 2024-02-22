@@ -45,7 +45,7 @@ def generate_few_shot_data(
 
     Args:
         base_data_path: Path to the base data file. These are the base completions that will be used to generate the few-shot strings.
-        strings_path: Path to the strings file. These are the strings that will be used to query the model.
+        strings_path: Path to the strings file. These are the strings that will be used to query the model. If none, use the base data file to select strings.
         n_shot: Number of few-shot strings to add.
         how: How to generate the few-shot strings.
             Options:
@@ -85,8 +85,12 @@ def generate_few_shot_data(
         base_df = enforce_compliance_on_df(base_df)
 
     # load the strings
-    strings = pd.read_csv(strings_path)
-    LOGGER.info(f"Loaded {len(strings)} rows from {strings_path}")
+    if strings_path is not None:
+        strings = pd.read_csv(strings_path)
+        LOGGER.info(f"Loaded {len(strings)} rows from {strings_path}")
+    else:
+        strings = base_df[["string"]].copy()
+        LOGGER.info("No strings provided, using the base data as the strings file")
 
     # are the strigns the same?
     shared_strings = set(base_df["string"].unique()).intersection(set(strings["string"].unique()))
