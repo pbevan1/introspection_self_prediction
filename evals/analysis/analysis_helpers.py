@@ -37,6 +37,9 @@ def merge_base_and_self_pred_dfs(
     print(
         f"Subsetted data to only include strings that are in both dfs.\nBefore: [Base] {old_b_len}, After: {len(b_df)}"
     )
+    # ensure that b_df and s_df aren't slices
+    b_df = b_df.copy()
+    s_df = s_df.copy()
     # apply string modifier and response property
     b_df["unmodified_response"] = b_df["response"]
     if response_property is not None:
