@@ -42,20 +42,6 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
     if not filename.endswith(".jsonl"):
         filename += ".jsonl"
 
-    train_filename = "train_" + filename
-    val_filename = "val_" + filename
-
-    # do we have the file?
-    if (path / train_filename).exists():
-        LOGGER.info(f"File {filename} already exists. Overwriting.")
-        (path / train_filename).unlink()
-    if (path / val_filename).exists():
-        LOGGER.info(f"File {filename} already exists. Overwriting.")
-        (path / val_filename).unlink()
-
-    train_filepath = path / train_filename
-    val_filepath = path / val_filename
-
     # lets ensure that the config file isn't changed when we do things with hydra.
     main_cfg = copy.deepcopy(main_cfg)
 
@@ -65,6 +51,9 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
 
     assert len(config_files) > 0, f"No config files found in {path}"
 
+    train_filepaths = []
+    val_filepaths = []
+
     for config_file in config_files:
         cfg = load_hydra_config(config_file)
         # Allow new fields to be added to the configuration
@@ -72,9 +61,39 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
         # extend main_cfg with the config file
         cfg = OmegaConf.merge(main_cfg, cfg)
         LOGGER.info(f"Processing config {config_file}")
+
+        # set up filenames
+        train_filename = cfg.name + "_train_" + filename
+        val_filename = cfg.name + "_val_" + filename
+
+        # do we have the file?
+        if (path / train_filename).exists():
+            LOGGER.info(f"File {filename} already exists. Overwriting.")
+            (path / train_filename).unlink()
+        if (path / val_filename).exists():
+            LOGGER.info(f"File {filename} already exists. Overwriting.")
+            (path / val_filename).unlink()
+
+        train_filepath = path / train_filename
+        val_filepath = path / val_filename
+
         generate_single_config_dataset(cfg, train_filepath, val_filepath)
 
-    LOGGER.info(f"Generated {len(config_files)} datasets and saved to {train_filepath} & {val_filepath}")
+        train_filepaths.append(train_filepath)
+        val_filepaths.append(val_filepath)
+
+    # merge the files into a single one
+    with open(path / ("train_" + filename), "w") as outfile:
+        for train_filepath in train_filepaths:
+            with open(train_filepath, "r") as infile:
+                outfile.write(infile.read())
+
+    with open(path / ("val_" + filename), "w") as outfile:
+        for val_filepath in val_filepaths:
+            with open(val_filepath, "r") as infile:
+                outfile.write(infile.read())
+
+    LOGGER.info(f"Generated {len(train_filepaths)} datasets and saved to {train_filepath} & {val_filepath}")
     return train_filepath, val_filepath
 
 
@@ -140,6 +159,10 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
             prompt = process_prompt(row, prompt_template)
             f.write(prompt.openai_finetuning_format())
             f.write("\n")
+
+    # save out the dfs so we can recover the split
+    train_df.to_csv(train_filepath.with_suffix(".df.csv"), index=False)
+    val_df.to_csv(val_filepath.with_suffix(".df.csv"), index=False)
 
     LOGGER.info(
         f"Saved {len(train_df)} training rows to {train_filepath} & {len(val_df)} validation rows to {val_filepath}"
