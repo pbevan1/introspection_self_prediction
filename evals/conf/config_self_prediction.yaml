@@ -15,10 +15,10 @@ defaults:
 
 # Common Params
 study_dir: ??? # the folder of the study which contains multiple experiments
-exp_dir: ${study_dir}/self_${language_model.model}_${dataset.n_shot}_shot_${dataset.n_shot_seeding}_seed_${prompt.method}_prompt
+exp_dir: ${sanitize:${study_dir}/self_${language_model.model}_${dataset.topic}_dataset_${dataset.n_shot}_shot_${dataset.n_shot_seeding}_seed_${prompt.method}_prompt}
 base_dir: ???  # path to the directory containing the base completions
 seeding_base_dir: ${base_dir} # path to the directory containing the base completions for the seeding. When setting this to a different directory, also change dataset.n_shot_seeding to 'other_task'
-strings_path: ${base_dir}/chosen_strings.csv # path to the strings file with the preselect strings for the experiment.
+strings_path: none # path to the strings file with the preselected strings for the experiment. If set to none, the strings will be extracted from the base_dir
 seed: 0 # seed for the random number generator
 base_seed: 0 # seed for the random number generator for the base completion
 limit: 50 # how many?

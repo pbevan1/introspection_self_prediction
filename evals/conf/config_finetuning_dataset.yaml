@@ -15,7 +15,7 @@ study_dir: exp/finetuning/debug_finetuning_run #??? # the folder of the study wh
 name: ??
 base_dir: ??
 
-exp_dir: ${study_dir}
+exp_dir: ${sanitize:${study_dir}}
 
 limit: 1250 # how many? Includes both training and validation. Overwrite with dataset.num in the config file in the finetuning folder
 

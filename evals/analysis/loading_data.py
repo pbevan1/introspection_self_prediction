@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
+import evals.utils  # this is necessary to ensure that the Hydra sanitizer is registered  # noqa: F401
+
 try:
     from evals.analysis.analysis_helpers import get_pretty_name
     from evals.analysis.compliance_checks import check_compliance
