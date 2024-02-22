@@ -14,7 +14,7 @@ from hydra import compose, initialize
 from hydra.core.global_hydra import GlobalHydra
 from omegaconf import DictConfig, OmegaConf
 
-from analysis.loading_data import get_data_path, load_single_df
+from evals.analysis.loading_data import get_data_path, load_single_df
 from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
 from evals.utils import load_string_and_reponse_functions
 

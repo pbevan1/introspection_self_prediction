@@ -14,7 +14,7 @@ REPO_DIR = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).deco
 LOGGER.info("Repository directory:", REPO_DIR)
 sys.path.append(REPO_DIR)
 
-from analysis.loading_data import get_data_path, load_and_prep_dfs  # noqa: E402
+from evals.analysis.loading_data import get_data_path, load_and_prep_dfs  # noqa: E402
 
 
 def extract_most_uncertain_strings_from_base(

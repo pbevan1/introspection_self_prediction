@@ -8,9 +8,9 @@ import pandas as pd
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
 try:
-    from analysis.analysis_helpers import get_pretty_name
-    from analysis.compliance_checks import check_compliance
-    from analysis.string_cleaning import (
+    from evals.analysis.analysis_helpers import get_pretty_name
+    from evals.analysis.compliance_checks import check_compliance
+    from evals.analysis.string_cleaning import (
         apply_all_cleaning,
         extract_first_of_multiple_responses,
         match_log_probs_to_trimmed_response,
@@ -18,7 +18,7 @@ try:
 except ImportError:
     from analysis_helpers import get_pretty_name
     from compliance_checks import check_compliance
-    from string_cleaning import (
+    from evals.analysis.string_cleaning import (
         apply_all_cleaning,
         extract_first_of_multiple_responses,
         match_log_probs_to_trimmed_response,

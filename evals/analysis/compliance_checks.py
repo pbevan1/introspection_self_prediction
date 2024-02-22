@@ -6,7 +6,7 @@ import numpy as np
 try:
     from .string_cleaning import clean_string
 except ImportError:
-    from string_cleaning import clean_string
+    from evals.analysis.string_cleaning import clean_string
 
 LOGGER = logging.getLogger(__name__)
 

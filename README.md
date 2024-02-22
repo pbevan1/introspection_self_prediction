@@ -14,25 +14,31 @@ This repository contains the `run.py` script and associated files for conducting
 ### Installation
 
 1. **Create and Activate a Virtual Environment:**
-    ```bash
-    virtualenv --python python3.11 .venv
-    source .venv/bin/activate
-    ```
-2. Install Required Packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
-3. Install Pre-Commit Hooks:
-    ```bash
-    make hooks
-    ```
-4. Create a SECRETS file
-    ```bash
-    touch SECRETS
-    echo OPENAI_API_KEY=<INSERT_HERE> >> SECRETS
-    echo ANTHROPIC_API_KEY=<INSERT_HERE> >> SECRETS
-    echo DEFAULT_ORG=org-<INSERT_HERE> >> SECRETS
-    ```
+  ```bash
+  virtualenv --python python3.11 .venv
+  source .venv/bin/activate
+  ```
+2. Install the package:
+  ```bash
+  pip install -e .
+  ```
+  The package can then be imported as `evals` in your Python code.
+  Make sure that you're using the right version of pip and python. You can check this by running `which pip` and `which python` and making sure they point to the right locations.
+3. Install Required Packages:
+  ```bash
+  pip install -r requirements.txt
+  ```
+4. Install Pre-Commit Hooks:
+  ```bash
+  make hooks
+  ```
+5. Create a SECRETS file
+  ```bash
+  touch SECRETS
+  echo OPENAI_API_KEY=<INSERT_HERE> >> SECRETS
+  echo ANTHROPIC_API_KEY=<INSERT_HERE> >> SECRETS
+  echo DEFAULT_ORG=org-<INSERT_HERE> >> SECRETS
+  ```
 
 ## Usage
 ### Running Inference
