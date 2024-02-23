@@ -66,6 +66,7 @@ def merge_base_and_self_pred_dfs(
 
 CONFIG_VALUES_OF_INTEREST = [
     ["language_model", "model"],
+    "note",
     ["prompt", "method"],
     "base_dir",
     "exp_dir",
@@ -74,6 +75,8 @@ CONFIG_VALUES_OF_INTEREST = [
     ["dataset", "topic"],
     ["dataset", "n_shot"],
     ["dataset", "n_shot_seeding"],
+    ["dataset", "string_modifier"],
+    ["dataset", "response_property"],
     "prediction_target",
 ]
 
@@ -131,8 +134,22 @@ def get_pretty_name(config):
                 values.append(config[attribute])
         except KeyError:
             values.append(None)
-    values = [str(val) for val in values]
+    values = [str(val) for val in values if val is not None]
     return "|".join(values)
+
+
+def get_pretty_name_w_labels(config, attributes=CONFIG_VALUES_OF_INTEREST):
+    """Get a pretty name for a config."""
+    values = {}
+    for attribute in attributes:
+        if isinstance(attribute, str):
+            attribute = [attribute]
+        values[".".join(attribute)] = get_maybe_nested_from_dict(config, attribute)
+    out = "—" * 40 + "\n"
+    for key, value in values.items():
+        out += f"{key}:\t{value}\n"
+    # remove last newline
+    return out[:-1] + "\n" + "—" * 40
 
 
 def pretty_print_config(config):
