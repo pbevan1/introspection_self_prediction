@@ -4,14 +4,13 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
-import fire
 import openai
 from openai.error import APIConnectionError, RateLimitError
 from pydantic import BaseModel
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 from evals.apis.finetuning.syncer import WandbSyncer
-from evals.utils import load_jsonl, setup_environment
+from evals.utils import load_jsonl
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +87,7 @@ def queue_finetune(
     hyperparameters: FineTuneHyperParams,
     suffix: str = None,
     val_file_id: str = None,
+    organization: Optional[str] = None,
 ) -> FinetuneJob:
     # Keep retrying until we can queue the finetune job
     finetune_job_resp = openai.FineTuningJob.create(
@@ -96,6 +96,7 @@ def queue_finetune(
         hyperparameters=hyperparameters.dict(),
         suffix=suffix,
         validation_file=val_file_id,
+        organization=organization,
     )
 
     print(f"Started finetune job. {finetune_job_resp}")
@@ -124,6 +125,7 @@ def run_finetune(
     syncer: Optional[WandbSyncer] = None,
     ask_to_validate_training: bool = True,
     val_data_path: Optional[Path] = None,
+    organisation: Optional[str] = None,
 ) -> str:
     """
     Pass syncer=None to disable wandb logging
@@ -150,6 +152,7 @@ def run_finetune(
         hyperparameters=params.hyperparameters,
         suffix=params.suffix,
         val_file_id=val_file_id,
+        organization=organisation,
     )
     print(f"Started finetune job. {finetune_job_resp}")
 
@@ -163,44 +166,3 @@ def run_finetune(
         syncer.update_training_results(results_id=result.result_files[0])
         syncer.end()
     return model_id
-
-
-def main(
-    data_path: Path,
-    model: str = "gpt-3.5-turbo",
-    n_epochs: int = 1,
-    project_name: str = "seri-ous",
-    val_data_path: Optional[Path] = None,
-    notes: Optional[str] = None,
-    more_config: str = None,
-    ask_to_validate_training: bool = True,
-    organization: str = "DEFAULT_ORG",
-    logger_level: str = "info",
-    use_wandb: bool = True,
-) -> str:
-    assert " " not in notes, "Notes cannot have spaces, use underscores instead"
-    setup_environment(organization=organization, logger_level=logger_level)
-    params = FineTuneParams(
-        model=model,
-        hyperparameters=FineTuneHyperParams(n_epochs=n_epochs),
-        suffix=notes,
-    )
-    if use_wandb:
-        syncer = WandbSyncer.create(project_name=project_name, notes=notes)
-        if more_config:
-            more_config = {k: v for k, v in [x.split("=") for x in more_config.split(",")]}
-            syncer.update_parameters_with_dict(params=more_config)
-    else:
-        syncer = None
-
-    return run_finetune(
-        params=params,
-        data_path=data_path,
-        syncer=syncer,
-        ask_to_validate_training=ask_to_validate_training,
-        val_data_path=val_data_path,
-    )
-
-
-if __name__ == "__main__":
-    fire.Fire(main)

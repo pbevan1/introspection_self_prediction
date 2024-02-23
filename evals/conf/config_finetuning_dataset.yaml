@@ -10,14 +10,14 @@ hydra:
 
 # when using, these values will be overwritten by the config files in the folder the data is created in
 
-study_dir: exp/finetuning/debug_finetuning_run #??? # the folder of the study which contains multiple experiments
+study_dir: exp/finetuning/${study_name} #??? # the folder of the study which contains multiple experiments
 
-name: ??
+study_name: ??
 base_dir: ??
 
 exp_dir: ${sanitize:${study_dir}}
 
-limit: 1250 # how many? Includes both training and validation. Overwrite with dataset.num in the config file in the finetuning folder
+limit: 10000 # how many? Includes both training and validation. Overwrite with dataset.num in the config file in the finetuning folder
 
 dataset: # these will be overwritten if the field is in the dataset config file
   validation_fraction: 0.2 # fraction of the dataset to use for validation
