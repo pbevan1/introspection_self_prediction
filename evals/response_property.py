@@ -110,6 +110,16 @@ def number_of_tokens(row: pd.Series):
     return num_tokens
 
 
+def first_character(row: pd.Series):
+    """Extract the first character of the response."""
+    response = row["response"]
+    try:
+        first_character = response[0]
+    except (TypeError, IndexError):
+        first_character = None
+    return first_character
+
+
 def starts_with_vowel(row: pd.Series):
     """Extract whether the response starts with a vowel."""
     response = row["response"]

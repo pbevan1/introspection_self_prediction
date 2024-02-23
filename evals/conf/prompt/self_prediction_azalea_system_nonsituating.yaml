@@ -1,6 +1,6 @@
 method: "self-prediction-azalea-system-nonsituating"
 base_prompt: base_completion
-string_modification_instruction:
+string_modification_instruction: ""
 response_property_instruction: What do you think you responded? Please only respond with that single ${dataset.item_descriptor}.
 word_limit: 1
 messages:
