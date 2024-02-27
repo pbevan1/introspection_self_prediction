@@ -123,6 +123,50 @@ def fill_df_with_function(dfs, function, name, results, pass_config=False):
         results.at[config, name] = result
 
 
+def fill_df_with_function_bootstrap(dfs, function, name, results, pass_config=False, n_bootstraps=100):
+    """Fill the results dataframe with the results of the function. To be used with the results df.
+
+    Args:
+        dfs: A dictionary with the dataframes to use as input for the function.
+        function: The function to use to compute the
+        results: The dataframe to fill in.
+        pass_config: Whether to pass the config to the function or not as the second argument.
+        n_bootstraps: The number of bootstraps to use.
+
+    Returns:
+        None. The results dataframe is modified in place.
+    """
+    # make col for name
+    if name not in results.columns:
+        results[name] = np.nan
+        results[name] = results[name].astype("object")
+    if name + "_ci" not in results.columns:
+        results[name + "_ci"] = np.nan
+        results[name + "_ci"] = results[name + "_ci"].astype("object")
+    for config, df in tqdm.tqdm(dfs.items(), desc=name):
+        if pass_config:
+            result = function(df, config)
+            ci = bootstrap_ci(df, function, n_bootstraps, config)
+        else:
+            result = function(df)
+            ci = bootstrap_ci(df, function, n_bootstraps)
+        results.at[config, name] = result
+        results.at[config, name + "_ci"] = ci
+
+
+def bootstrap_ci(df, function, n_bootstraps=100, config=None):
+    """Compute the 95% bootstrap confidence interval for a function."""
+    results = []
+    for _ in range(n_bootstraps):
+        if config is not None:
+            sample = df.sample(n=len(df), replace=True)
+            results.append(function(sample, config))
+        else:
+            sample = df.sample(n=len(df), replace=True)
+            results.append(function(sample))
+    return np.percentile(results, [2.5, 97.5])
+
+
 def get_pretty_name(config):
     """Get a pretty name for a config."""
     values = []
