@@ -342,6 +342,14 @@ def load_single_df(df_path: Path) -> pd.DataFrame:
     return list(dfs.values())[0]
 
 
+def load_single_df_from_exp_path(exp_path: Path) -> pd.DataFrame:
+    """Loads and prepares a single dataframe from an experiment path"""
+    data_path = get_data_path(exp_path)
+    if data_path is None:
+        raise ValueError(f"No data*.csv files found in {exp_path}")
+    return load_single_df(data_path)
+
+
 def load_base_df_from_config(config: DictConfig, root_folder: Path = Path(os.getcwd()).parent) -> pd.DataFrame:
     """Loads the base dataframe for a config"""
     # check the config
