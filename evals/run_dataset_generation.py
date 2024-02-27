@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import shutil
 import traceback
 from pathlib import Path
 from string import Template
@@ -162,12 +163,18 @@ async def async_main(cfg: DictConfig):
     # load dataset and save to file
     exp_dir = Path(cfg.exp_dir)
     exp_dir.mkdir(parents=True, exist_ok=True)
-    filename = exp_dir / f"data{cfg.seed}.csv"
-    if not filename.exists() or cfg.reset:
-        LOGGER.info(f"File {filename} does not exist. Creating...")
-        generate_random_strings(
-            filename, cfg.dataset.topic, cfg.seed, cfg.dataset.n_items, cfg.dataset.num, cfg.dataset.join_on
-        )
+    if cfg.strings_path is not None and cfg.strings_path != "none":
+        LOGGER.info(f"Using strings from {cfg.strings_path}. Not generating any new ones.")
+        # copy the file to the experiment directory
+        shutil.copy(cfg.strings_path, exp_dir / f"data{cfg.seed}.csv")
+        filename = exp_dir / f"data{cfg.seed}.csv"
+    else:
+        filename = exp_dir / f"data{cfg.seed}.csv"
+        if not filename.exists() or cfg.reset:
+            LOGGER.info(f"File {filename} does not exist. Creating...")
+            generate_random_strings(
+                filename, cfg.dataset.topic, cfg.seed, cfg.dataset.n_items, cfg.dataset.num, cfg.dataset.join_on
+            )
 
     # run dataset (with retry)
     complete = await async_function_with_retry(
