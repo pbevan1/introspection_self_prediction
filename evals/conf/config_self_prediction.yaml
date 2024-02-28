@@ -22,7 +22,7 @@ strings_path: none # path to the strings file with the preselected strings for t
 note: "" # natural language description of the note of this run. Can be anything.
 seed: 0 # seed for the random number generator
 base_seed: 0 # seed for the random number generator for the base completion
-limit: 50 # how many?
+limit: 500 # how many?
 reset: false
 logging: INFO
 print_prompt_and_response: false

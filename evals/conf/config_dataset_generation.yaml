@@ -16,6 +16,7 @@ defaults:
 # Common Params
 study_dir: exp/default_dir
 exp_dir: ${sanitize:${study_dir}/base_${language_model.model}_${prompt.method}_prompt_${dataset.topic}_dataset}
+strings_path: none # if this is set, do not generate data, but use this instead
 seed: 0
 limit: 50
 reset: false
