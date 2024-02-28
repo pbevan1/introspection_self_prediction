@@ -3,11 +3,13 @@
 import copy
 import logging
 import os
+import random
 import shutil
 from pathlib import Path
 from string import Template
 
 import hydra
+import numpy as np
 import pandas as pd
 import tqdm
 from hydra import compose, initialize
@@ -146,6 +148,15 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     train_df = df.iloc[: int(len(df) * (1 - cfg.dataset.validation_fraction))]
     val_df = df.iloc[int(len(df) * (1 - cfg.dataset.validation_fraction)) :]
 
+    # do we have to scramble the input?
+    try:
+        if cfg.scramble:
+            LOGGER.info("Scrambling the input.")
+            train_df = scramble_strings(train_df, cfg.seed)
+            val_df = scramble_strings(val_df, cfg.seed)
+    except AttributeError:
+        LOGGER.info("No scramble attribute found in config. Not scrambling.")
+
     # generate the messages
     prompt_template = PromptTemplate(**OmegaConf.to_container(cfg.prompt, resolve=True))
     with open(train_filepath, "a") as f:
@@ -215,6 +226,33 @@ def load_hydra_config(config_path):
     # remove the temporary file
     os.remove(temp_file_path)
     return cfg
+
+
+def scramble_strings(df: pd.DataFrame, seed: int) -> pd.DataFrame:
+    """Scramble the strings in a dataframe while preserving the relative order among specified columns.
+
+    Args:
+        df (pd.DataFrame): The dataframe to scramble.
+        seed (int): The random seed to use.
+
+    Returns:
+        pd.DataFrame: The scrambled dataframe with preserved relative order among specified columns.
+    """
+    LOGGER.info(f"Scrambling the strings with seed {seed}")
+
+    # Identify the columns to be scrambled
+    columns_to_scramble = [col for col in ["string", "unmodified_string", "modified_string"] if col in df.columns]
+
+    # Generate a shuffled sequence of indices based on the DataFrame's length
+    random.seed(seed)
+    shuffled_indices = np.arange(len(df))
+    random.shuffle(shuffled_indices)
+
+    # Apply the shuffled sequence to reorder the specified columns
+    for col in columns_to_scramble:
+        df[col] = df[col].iloc[shuffled_indices].values
+
+    return df
 
 
 @hydra.main(version_base=None, config_path=CONFIG_PATH, config_name="config_finetuning_dataset")
