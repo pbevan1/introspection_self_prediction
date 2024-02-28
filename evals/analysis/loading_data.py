@@ -334,20 +334,20 @@ def load_dfs_with_filter(
     return dfs
 
 
-def load_single_df(df_path: Path) -> pd.DataFrame:
+def load_single_df(df_path: Path, exclude_noncompliant: bool = True) -> pd.DataFrame:
     """Loads and prepares a single dataframe"""
-    dfs = load_and_prep_dfs([df_path])
+    dfs = load_and_prep_dfs([df_path], exclude_noncompliant=exclude_noncompliant)
     if len(dfs) != 1:
         LOGGER.warning(f"Expected 1 dataframe, found {len(dfs)}")
     return list(dfs.values())[0]
 
 
-def load_single_df_from_exp_path(exp_path: Path) -> pd.DataFrame:
+def load_single_df_from_exp_path(exp_path: Path, exclude_noncompliant: bool = True) -> pd.DataFrame:
     """Loads and prepares a single dataframe from an experiment path"""
     data_path = get_data_path(exp_path)
     if data_path is None:
         raise ValueError(f"No data*.csv files found in {exp_path}")
-    return load_single_df(data_path)
+    return load_single_df(data_path, exclude_noncompliant=exclude_noncompliant)
 
 
 def load_base_df_from_config(config: DictConfig, root_folder: Path = Path(os.getcwd()).parent) -> pd.DataFrame:
