@@ -19,6 +19,9 @@ exp_dir: ${sanitize:${study_dir}}
 
 limit: 10000 # how many? Includes both training and validation. Overwrite with dataset.num in the config file in the finetuning folder
 
+train_strings_path: none # overwrite to use fix the strings to use in training
+val_strings_path: none # overwrite to use fix the strings to use in validation
+
 dataset: # these will be overwritten if the field is in the dataset config file
   validation_fraction: 0.2 # fraction of the dataset to use for validation
   response_property: None # When seeding the strings, extract the property from the string and score against it. Use `None` or any function from evals/response_property.py. Remember to change the prompt!

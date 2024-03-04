@@ -114,19 +114,23 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     datapath = get_data_path(cfg.base_dir)
     df = load_single_df(datapath)
 
-    # subsample if needed
+    # do we have a strings path?
+    # for train
     try:
-        limit = cfg.dataset.num
-        if limit is not None:
-            if limit < len(df):
-                LOGGER.info(f"Subsampling to {limit} rows.")
-                df = df.sample(limit, random_state=cfg.seed, replace=False)
-            else:
-                LOGGER.info(
-                    f"Limit is {limit}, which is higher than the number of rows in the dataframe. Not subsampling."
-                )
+        if cfg.train_strings_path is not None and cfg.train_strings_path != "none":
+            train_strings = pd.read_csv(cfg.train_strings_path)["string"].values
+            LOGGER.info(f"(Strings) Loaded {len(train_strings)} strings from {cfg.train_strings_path}")
     except AttributeError:
-        LOGGER.info("No limit found in config. Not subsampling.")
+        LOGGER.info("No train_strings_path found in config. Not using any strings.")
+        train_strings = None
+    # for val
+    try:
+        if cfg.val_strings_path is not None and cfg.val_strings_path != "none":
+            val_strings = pd.read_csv(cfg.val_strings_path)["string"].values
+            LOGGER.info(f"(Strings) Loaded {len(val_strings)} strings from {cfg.val_strings_path}")
+    except AttributeError:
+        LOGGER.info("No val_strings_path found in config. Not using any strings.")
+        val_strings = None
 
     # do we have the unmodified string?
     if "unmodified_string" in df.columns:
@@ -145,17 +149,55 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         LOGGER.info(f"Applied response property {response_property.__name__} to response column.")
 
     # split into train and validation
-    train_df = df.iloc[: int(len(df) * (1 - cfg.dataset.validation_fraction))]
-    val_df = df.iloc[int(len(df) * (1 - cfg.dataset.validation_fraction)) :]
+    if train_strings is not None:
+        train_df = df[df["string"].isin(train_strings)]
+        val_df = df[~df["string"].isin(train_strings)]
+    else:
+        if val_strings is not None:
+            val_df = df[df["string"].isin(val_strings)]
+            train_df = df[~df["string"].isin(val_strings)]
+        else:
+            train_df = df.sample(frac=cfg.dataset.train_fraction, random_state=cfg.seed)
+            val_df = df.drop(train_df.index)
+
+    LOGGER.info(f"Split into {len(train_df)} training rows and {len(val_df)} validation rows before subsampling.")
+
+    # subsample if needed
+    try:
+        limit = cfg.dataset.num
+        train_limit = limit - int(cfg.dataset.validation_fraction * limit)
+        val_limit = limit - train_limit
+        LOGGER.info(f"Subsampling to {train_limit} training rows and {val_limit} validation rows.")
+        if limit is not None:
+            if train_limit < len(train_df):
+                LOGGER.info(f"Subsampling to {train_limit} rows.")
+                df = df.sample(train_limit, random_state=cfg.seed, replace=False)
+            else:
+                LOGGER.info(
+                    f"Training limit is {train_limit}, which is higher than the number of rows in the dataframe. Not subsampling."
+                )
+            if val_limit < len(val_df):
+                LOGGER.info(f"Subsampling to {val_limit} rows.")
+                df = df.sample(val_limit, random_state=cfg.seed, replace=False)
+            else:
+                LOGGER.info(
+                    f"Validation limit is {val_limit}, which is higher than the number of rows in the dataframe. Not subsampling."
+                )
+    except AttributeError:
+        LOGGER.info("No limit found in config. Not subsampling.")
 
     # do we have to scramble the input?
     try:
         if cfg.scramble:
-            LOGGER.info("Scrambling the input.")
+            LOGGER.info("Scrambling the input 🎲.")
             train_df = scramble_strings(train_df, cfg.seed)
             val_df = scramble_strings(val_df, cfg.seed)
     except AttributeError:
         LOGGER.info("No scramble attribute found in config. Not scrambling.")
+
+    # is there overlap between the train and validation set?
+    if len(set(train_df["string"]).intersection(set(val_df["string"]))) > 0:
+        LOGGER.warning("There is overlap between the train and validation set.")
 
     # generate the messages
     prompt_template = PromptTemplate(**OmegaConf.to_container(cfg.prompt, resolve=True))
