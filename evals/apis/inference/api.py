@@ -79,7 +79,7 @@ class InferenceAPI:
             return self._openai_gpt4base  # NYU ARG is only org with access to this model
         elif model_id in COMPLETION_MODELS:
             return self._openai_completion
-        elif model_id in GPT_CHAT_MODELS or "ft:gpt-3.5-turbo" in model_id:
+        elif model_id in GPT_CHAT_MODELS or "ft:gpt-3.5-turbo" in model_id or "ft:gpt-4" in model_id:
             return self._openai_chat
         elif model_id in ANTHROPIC_MODELS:
             return self._anthropic_chat

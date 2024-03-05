@@ -5,8 +5,9 @@ from typing import Any, Mapping, Optional
 import numpy as np
 import openai
 import pandas as pd
-import wandb
 from wandb.sdk.wandb_run import Run
+
+import wandb
 
 
 class WandbSyncer:
