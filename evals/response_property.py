@@ -87,7 +87,7 @@ def number_of_letters(row: pd.Series):
         num_letters = len(response)
     except TypeError:
         num_letters = None
-    return num_letters
+    return str(num_letters)
 
 
 def number_of_words(row: pd.Series):
@@ -97,7 +97,7 @@ def number_of_words(row: pd.Series):
         num_words = len(response.split())
     except AttributeError:
         num_words = None
-    return num_words
+    return str(num_words)
 
 
 def number_of_tokens(row: pd.Series):
@@ -107,7 +107,7 @@ def number_of_tokens(row: pd.Series):
         tokens = eval(tokens)
     assert isinstance(tokens, list), f"tokens should be a list, but is {type(tokens)}"
     num_tokens = len(tokens)
-    return num_tokens
+    return str(num_tokens)
 
 
 def first_character(row: pd.Series):
@@ -127,7 +127,7 @@ def starts_with_vowel(row: pd.Series):
         starts_with_vowel = response[0].lower() in "aeiou"
     except (TypeError, IndexError):
         starts_with_vowel = None
-    return starts_with_vowel
+    return str(starts_with_vowel).lower()
 
 
 def ends_with_vowel(row: pd.Series):
@@ -137,7 +137,7 @@ def ends_with_vowel(row: pd.Series):
         ends_with_vowel = response[-1].lower() in "aeiou"
     except (TypeError, IndexError):
         ends_with_vowel = None
-    return ends_with_vowel
+    return str(ends_with_vowel).lower()
 
 
 def confidence_first_token(row: pd.Series):
@@ -147,7 +147,7 @@ def confidence_first_token(row: pd.Series):
         first_logprobs = eval(first_logprobs)
     assert isinstance(first_logprobs, dict), f"first_logprobs should be a dict, but is {type(first_logprobs)}"
     confidence = list(first_logprobs.values())[0]
-    return confidence
+    return str(confidence)
 
 
 def ratio_first_second_token_confidence(row: pd.Series):
@@ -161,4 +161,4 @@ def ratio_first_second_token_confidence(row: pd.Series):
         ratio = confidences[0] / confidences[1]
     except IndexError:
         ratio = None
-    return ratio
+    return str(ratio)
