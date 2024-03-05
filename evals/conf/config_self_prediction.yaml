@@ -14,7 +14,8 @@ defaults:
   - dataset: number_triplets
 
 # Common Params
-study_dir: ??? # the folder of the study which contains multiple experiments
+study_name: ??
+study_dir: exp/${sanitize:${study_name}} # the folder of the study which contains multiple experiments
 exp_dir: ${sanitize:${study_dir}/self_${language_model.model}_${dataset.topic}_dataset_${dataset.n_shot}_shot_${dataset.n_shot_seeding}_seed_${prompt.method}_prompt_${note}_note}
 base_dir: ???  # path to the directory containing the base completions
 seeding_base_dir: ${base_dir} # path to the directory containing the base completions for the seeding. When setting this to a different directory, also change dataset.n_shot_seeding to 'other_task'
