@@ -10,6 +10,7 @@ import hydra
 import pandas as pd
 from omegaconf import DictConfig, OmegaConf
 
+from evals.analysis.loading_data import find_matching_base_dir
 from evals.apis.inference.api import InferenceAPI
 from evals.apis.inference.cache_manager import CacheManager
 from evals.data_models.inference import LLMParams
@@ -223,7 +224,12 @@ def setup_data_file(cfg, exp_dir, filename):
     else:
         strings_path = None
         LOGGER.info("No strings file provided. Using the base data as the strings file.")
-    base_data_path = Path(cfg.seeding_base_dir) / f"data{cfg.base_seed}.csv"
+    if cfg.base_dir is None or cfg.base_dir == "none":
+        LOGGER.info(f"No base data directory provided. Trying to find one in {cfg.study_dir}")
+        base_data_path = find_matching_base_dir(cfg)
+    else:
+        base_data_path = Path(cfg.seeding_base_dir)
+    base_data_path = base_data_path / f"data{cfg.base_seed}.csv"
     new_filename = generate_few_shot_data(
         base_data_path=base_data_path,
         strings_path=strings_path,
@@ -231,8 +237,8 @@ def setup_data_file(cfg, exp_dir, filename):
         output_path=filename,
         seed=cfg.seed,
         how=cfg.dataset.n_shot_seeding,
-        string_modifier=cfg.dataset.string_modifier,
-        response_property=cfg.dataset.response_property,
+        string_modifier=cfg.string_modifier.string_modifier,
+        response_property=cfg.response_property.response_property,
     )
     return new_filename
 

@@ -1,0 +1,3 @@
+name: is_even
+instruction: Is the answer that you gave even or odd? Respond only with "true" for even and "false" for odd.
+response_property: is_even

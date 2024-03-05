@@ -9,15 +9,17 @@ hydra:
       level: INFO
 
 defaults:
-  - prompt: self_prediction_with_base_completion
+  - prompt: self_prediction_bergenia_nontechnical
   - language_model: gpt-3.5-turbo
-  - dataset: number_triplets
+  - dataset: random_words
+  - response_property: prediction
+  - string_modifier: unmodified
 
 # Common Params
 study_name: ??
 study_dir: exp/${sanitize:${study_name}} # the folder of the study which contains multiple experiments
 exp_dir: ${sanitize:${study_dir}/self_${language_model.model}_${dataset.topic}_dataset_${dataset.n_shot}_shot_${dataset.n_shot_seeding}_seed_${prompt.method}_prompt_${note}_note}
-base_dir: ???  # path to the directory containing the base completions
+base_dir: none  # path to the directory containing the base completions
 seeding_base_dir: ${base_dir} # path to the directory containing the base completions for the seeding. When setting this to a different directory, also change dataset.n_shot_seeding to 'other_task'
 strings_path: none # path to the strings file with the preselected strings for the experiment. If set to none, the strings will be extracted from the base_dir
 note: "" # natural language description of the note of this run. Can be anything.

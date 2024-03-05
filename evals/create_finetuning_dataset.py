@@ -139,7 +139,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
 
     # do we have string modifier?
     string_modifier, response_property = load_string_and_reponse_functions(
-        cfg.dataset.string_modifier, cfg.dataset.response_property
+        cfg.string_modifier.string_modifier, cfg.response_property.response_property
     )
     if string_modifier is not None:
         df["string"] = df["string"].apply(string_modifier)

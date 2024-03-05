@@ -1,15 +1,14 @@
 method: "self-prediction-bergenia-nontechnical"
 base_prompt: base_completion_bergenia
-string_modification_instruction: ""
-response_property_instruction: What is the answer you most likely gave? Respond only with that single ${dataset.item_descriptor}.
+
 word_limit: 1
 messages:
   - role: "system"
     content: |
       Previously, you were asked the following question:
       "You will be shown a sequence of ${dataset.item_descriptor}s. What do you think the most likely next ${dataset.item_descriptor} in the sequence is? Respond only with a single ${dataset.item_descriptor}."
-      ${prompt.response_property_instruction}
-      ${prompt.string_modification_instruction}
+      ${response_property.instruction}
+      ${string_modifier.instruction}
 
   - role: "user"
     content: |

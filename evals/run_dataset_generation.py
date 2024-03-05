@@ -177,9 +177,10 @@ async def async_main(cfg: DictConfig):
                 cfg.dataset.topic,
                 cfg.seed,
                 cfg.dataset.n_items,
+                cfg.dataset.num,
                 cfg.dataset.join_on,
                 **{
-                    k: v for k, v in cfg.dataset.items() if k not in ["num"]
+                    k: v for k, v in cfg.dataset.items() if k not in ["num", "join_on", "n_items"]
                 },  # pass the config sans values we passed above
             )
 

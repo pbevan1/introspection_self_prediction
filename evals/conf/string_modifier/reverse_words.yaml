@@ -1,0 +1,3 @@
+name: reverse_words
+instruction: The sequence shown here has been reversed, so that the first item is shown last and so on. Respond as if you were asked about the sequence in the original order.
+string_modifier: reverse_words

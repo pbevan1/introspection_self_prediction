@@ -362,3 +362,22 @@ def load_base_df_from_config(config: DictConfig, root_folder: Path = Path(os.get
         raise ValueError(f"No data*.csv files found in {base_path}")
     base_df = load_single_df(data_path)
     return base_df
+
+
+def find_matching_base_dir(config: DictConfig):
+    """Finds the base dir for a config"""
+    # check the config
+    study_dir = Path(config["study_dir"])
+    # search exp_dir for a base dir that matches on dataset and language_model.model
+    base_dir = None
+    for base in study_dir.glob("base*"):
+        base_config = get_hydra_config(base)
+        if (
+            base_config["dataset"]["topic"] == config["dataset"]["topic"]
+            and base_config["language_model"]["model"] == config["language_model"]["model"]
+        ):
+            base_dir = base
+            break
+    if base_dir is None:
+        raise ValueError(f"No base dir found for {config}")
+    return base_dir

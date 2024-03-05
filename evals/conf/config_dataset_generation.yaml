@@ -9,7 +9,7 @@ hydra:
       level: INFO
 
 defaults:
-  - prompt: base_completion
+  - prompt: base_completion_bergenia
   - language_model: gpt-3.5-turbo
   - dataset: random_words
 
