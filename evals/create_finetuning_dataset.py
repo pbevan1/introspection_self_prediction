@@ -164,21 +164,21 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
 
     # subsample if needed
     try:
-        limit = cfg.dataset.num
+        limit = cfg.limit
         train_limit = limit - int(cfg.dataset.validation_fraction * limit)
         val_limit = limit - train_limit
         LOGGER.info(f"Subsampling to {train_limit} training rows and {val_limit} validation rows.")
         if limit is not None:
             if train_limit < len(train_df):
                 LOGGER.info(f"Subsampling to {train_limit} rows.")
-                df = df.sample(train_limit, random_state=cfg.seed, replace=False)
+                train_df = train_df.sample(train_limit, random_state=cfg.seed, replace=False)
             else:
                 LOGGER.info(
                     f"Training limit is {train_limit}, which is higher than the number of rows in the dataframe. Not subsampling."
                 )
             if val_limit < len(val_df):
                 LOGGER.info(f"Subsampling to {val_limit} rows.")
-                df = df.sample(val_limit, random_state=cfg.seed, replace=False)
+                val_df = val_df.sample(val_limit, random_state=cfg.seed, replace=False)
             else:
                 LOGGER.info(
                     f"Validation limit is {val_limit}, which is higher than the number of rows in the dataframe. Not subsampling."
