@@ -86,7 +86,7 @@ def generate_few_shot_data(
 
     # load the strings
     if strings_path is not None:
-        strings = pd.read_csv(strings_path)
+        strings = pd.read_csv(strings_path)[["string"]]
         LOGGER.info(f"Loaded {len(strings)} rows from strings_path: {strings_path}")
     else:
         strings = base_df[["string"]].copy()
