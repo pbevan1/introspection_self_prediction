@@ -15,6 +15,7 @@ import tqdm
 from hydra import compose, initialize
 from hydra.core.global_hydra import GlobalHydra
 from omegaconf import DictConfig, OmegaConf
+from pydantic_core._pydantic_core import ValidationError
 
 from evals.analysis.loading_data import get_data_path, load_single_df
 from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
@@ -120,6 +121,8 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         if cfg.train_strings_path is not None and cfg.train_strings_path != "none":
             train_strings = pd.read_csv(cfg.train_strings_path)["string"].values
             LOGGER.info(f"(Strings) Loaded {len(train_strings)} strings from {cfg.train_strings_path}")
+        else:
+            train_strings = None
     except AttributeError:
         LOGGER.info("No train_strings_path found in config. Not using any strings.")
         train_strings = None
@@ -128,6 +131,8 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         if cfg.val_strings_path is not None and cfg.val_strings_path != "none":
             val_strings = pd.read_csv(cfg.val_strings_path)["string"].values
             LOGGER.info(f"(Strings) Loaded {len(val_strings)} strings from {cfg.val_strings_path}")
+        else:
+            val_strings = None
     except AttributeError:
         LOGGER.info("No val_strings_path found in config. Not using any strings.")
         val_strings = None
@@ -152,13 +157,12 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     if train_strings is not None:
         train_df = df[df["string"].isin(train_strings)]
         val_df = df[~df["string"].isin(train_strings)]
+    elif val_strings is not None:
+        val_df = df[df["string"].isin(val_strings)]
+        train_df = df[~df["string"].isin(val_strings)]
     else:
-        if val_strings is not None:
-            val_df = df[df["string"].isin(val_strings)]
-            train_df = df[~df["string"].isin(val_strings)]
-        else:
-            train_df = df.sample(frac=cfg.dataset.train_fraction, random_state=cfg.seed)
-            val_df = df.drop(train_df.index)
+        train_df = df.sample(frac=1 - cfg.dataset.validation_fraction, random_state=cfg.seed)
+        val_df = df.drop(train_df.index)
 
     LOGGER.info(f"Split into {len(train_df)} training rows and {len(val_df)} validation rows before subsampling.")
 
@@ -199,13 +203,24 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     if len(set(train_df["string"]).intersection(set(val_df["string"]))) > 0:
         LOGGER.warning("There is overlap between the train and validation set.")
 
+    # exclude rows that contain None or nan as the response
+    old_len_train = len(train_df)
+    old_len_val = len(val_df)
+    train_df = train_df.dropna(subset=["response"])
+    val_df = val_df.dropna(subset=["response"])
+    LOGGER.info(f"Excluded {old_len_train - len(train_df)} rows from the training set due to missing responses.")
+    LOGGER.info(f"Excluded {old_len_val - len(val_df)} rows from the validation set due to missing responses.")
+
     # generate the messages
     prompt_template = PromptTemplate(**OmegaConf.to_container(cfg.prompt, resolve=True))
     with open(train_filepath, "a") as f:
         for i, row in tqdm.tqdm(train_df.iterrows(), total=len(train_df), desc="Generating train messages"):
-            prompt = process_prompt(row, prompt_template)
-            f.write(prompt.openai_finetuning_format())  # this might not work—use different format if it complains
-            f.write("\n")
+            try:
+                prompt = process_prompt(row, prompt_template)
+                f.write(prompt.openai_finetuning_format())  # this might not work—use different format if it complains
+                f.write("\n")
+            except ValidationError as e:
+                LOGGER.warning(f"Failed row {i} with error {e}")
 
     with open(val_filepath, "a") as f:
         for i, row in tqdm.tqdm(val_df.iterrows(), total=len(val_df), desc="Generating validation messages"):
