@@ -18,7 +18,7 @@ defaults:
 # Common Params
 study_name: ??
 study_dir: exp/${sanitize:${study_name}} # the folder of the study which contains multiple experiments
-exp_dir: ${sanitize:${study_dir}/self_${language_model.model}_${dataset.topic}_dataset_${dataset.n_shot}_shot_${dataset.n_shot_seeding}_seed_${prompt.method}_prompt_${note}_note}
+exp_dir: ${sanitize:${study_dir}/self_${language_model.model}_${dataset.topic}_dataset_${dataset.n_shot}_shot_${dataset.n_shot_seeding}_seed_${prompt.method}_prompt_${response_property.name}_resp_${string_modifier.name}_strm_${note}_note}
 base_dir: none  # path to the directory containing the base completions
 seeding_base_dir: ${base_dir} # path to the directory containing the base completions for the seeding. When setting this to a different directory, also change dataset.n_shot_seeding to 'other_task'
 strings_path: none # path to the strings file with the preselected strings for the experiment. If set to none, the strings will be extracted from the base_dir
@@ -40,7 +40,7 @@ language_model:
 # Extracting the most relevant strings from the base completion
 dataset:
   num: ${limit}
-  n_shot: 5 # set to 0 for zero-shot
+  n_shot: 0 # set to 0 for zero-shot
   n_shot_seeding: true # true (takes inputs from basedir), scrambled (takes inputs from a random row of basedir), other_model (flag to use a different model BUT BASEDIR MUST BE SET TO THE MODEL YOU WANT TO USE), other_task (flag to use a different task BUT BASEDIR MUST BE SET TO THE BASE MODEL RUN OF THE TASK YOU WANT TO USE)
   response_property: None # When seeding the strings, extract the property from the string and score against it. Use `None` or any function from evals/response_property.py. Remember to change the prompt!
   string_modifier: None # Require that the string has to be reconstructed. None or any function from evals/string_modification.py. Remember to change the prompt!

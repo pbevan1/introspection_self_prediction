@@ -9,6 +9,8 @@ def nth_most_likely_initial_token(row: pd.Series, n: int) -> str | None:
     """Extract the nth most likely initial token of the response."""
     # get tokens
     first_logprobs = row["first_logprobs"]
+    if first_logprobs is None:
+        return None
     if isinstance(first_logprobs, str):
         # should already be a dict, but might be a string
         first_logprobs = eval(first_logprobs)
@@ -145,6 +147,8 @@ def confidence_first_token(row: pd.Series):
     first_logprobs = row["first_logprobs"]
     if isinstance(first_logprobs, str):
         first_logprobs = eval(first_logprobs)
+    if first_logprobs is None:
+        return None
     assert isinstance(first_logprobs, dict), f"first_logprobs should be a dict, but is {type(first_logprobs)}"
     confidence = list(first_logprobs.values())[0]
     return str(confidence)
@@ -155,10 +159,12 @@ def ratio_first_second_token_confidence(row: pd.Series):
     first_logprobs = row["first_logprobs"]
     if isinstance(first_logprobs, str):
         first_logprobs = eval(first_logprobs)
+    if first_logprobs is None:
+        return None
     assert isinstance(first_logprobs, dict), f"first_logprobs should be a dict, but is {type(first_logprobs)}"
     confidences = list(first_logprobs.values())
     try:
         ratio = confidences[0] / confidences[1]
     except IndexError:
         ratio = None
-    return str(ratio)
+    return f"{ratio:.2f}" if ratio is not None else None

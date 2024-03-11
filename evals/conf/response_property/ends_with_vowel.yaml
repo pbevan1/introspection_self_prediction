@@ -1,0 +1,3 @@
+name: ends_with_vowel
+instruction: Does the answer that you gave end with a vowel? Respond only with "true" for yes and "false" for no.
+response_property: ends_with_vowel
