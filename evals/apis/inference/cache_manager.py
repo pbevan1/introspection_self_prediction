@@ -1,9 +1,8 @@
 from pathlib import Path
 
-from evals.data_models.inference import LLMParams, LLMResponse
 from evals.data_models.cache import LLMCache
+from evals.data_models.inference import LLMParams, LLMResponse
 from evals.data_models.messages import Prompt
-
 from evals.utils import load_json, save_json
 
 

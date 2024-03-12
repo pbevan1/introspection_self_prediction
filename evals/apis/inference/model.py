@@ -4,7 +4,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Protocol
 
-
 from evals.data_models.inference import LLMResponse
 
 LOGGER = logging.getLogger(__name__)
@@ -25,7 +24,7 @@ class InferenceAPIModel(Protocol):
     def create_prompt_history_file(prompt: dict, model: str, prompt_history_dir: Path):
         if prompt_history_dir is None:
             return None
-        filename = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}.txt"
+        filename = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-4]}_{hash(str(prompt))}.txt"
         prompt_file = prompt_history_dir / model / filename
         prompt_file.parent.mkdir(parents=True, exist_ok=True)
         with open(prompt_file, "w") as f:

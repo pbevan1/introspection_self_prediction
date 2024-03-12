@@ -1,3 +1,5 @@
+"""This file is used to find initial completions which are hard to predict."""
+
 import asyncio
 import logging
 import traceback
@@ -8,11 +10,12 @@ import hydra
 import pandas as pd
 from omegaconf import DictConfig, OmegaConf
 
+from evals.analysis.loading_data import find_matching_base_dir
 from evals.apis.inference.api import InferenceAPI
 from evals.apis.inference.cache_manager import CacheManager
 from evals.data_models.inference import LLMParams
-from evals.data_models.messages import ChatMessage, PromptTemplate, Prompt
-from evals.load.mmlu import load_mmlu
+from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
+from evals.generate_few_shot import generate_few_shot_data
 from evals.utils import async_function_with_retry, setup_environment
 
 LOGGER = logging.getLogger(__name__)
@@ -24,14 +27,12 @@ class DatasetRunner:
         prompt_template: PromptTemplate,
         llm_params: LLMParams,
         inference_api: InferenceAPI,
-        swap: bool,
         print_prompt_and_response: bool = False,
         cache_manager: CacheManager = None,
     ):
         self.prompt_template = prompt_template
         self.llm_params = llm_params
         self.inference_api = inference_api
-        self.swap = swap
         self.print_prompt_and_response = print_prompt_and_response
         self.cache_manager = cache_manager
 
@@ -45,6 +46,7 @@ class DatasetRunner:
                 LOGGER.info(f"Loaded cache for row {index}")
                 return {
                     "answer": cache.responses[0].completion,
+                    "logprobs": cache.responses[0].logprobs,
                     "complete": True,
                 }
 
@@ -57,35 +59,68 @@ class DatasetRunner:
                 top_p=self.llm_params.top_p,
                 num_candidates_per_completion=self.llm_params.num_candidates_per_completion,
                 insufficient_valids_behaviour=self.llm_params.insufficient_valids_behaviour,
-                is_valid=lambda x: "Answer:" in x,
+                is_valid=lambda x: True,  # len(x) > 0 and len(x) < 10 and " " not in x, # x should be a single word
                 print_prompt_and_response=self.print_prompt_and_response,
+                logprobs=self.llm_params.logprobs,
+                seed=self.llm_params.seed,
             )
             # save successful prompt/response to file
             if self.cache_manager is not None:
                 self.cache_manager.save_cache(prompt, self.llm_params, responses)
 
             answer = responses[0].completion
+            logprobs = responses[0].logprobs
             complete = True
             self.inference_api.log_model_timings()
             LOGGER.info(f"Completed row {index}\tRunning cost: ${self.inference_api.running_cost:.3f}")
         except RuntimeError as e:
             complete = False
             answer = traceback.format_exc()
+            logprobs = None
             LOGGER.warning(f"Failed row {index} with error {e}")
             LOGGER.warning(answer)
         return {
             "answer": answer,
+            "logprobs": logprobs,
             "complete": complete,
         }
 
     def process_prompt(self, row: pd.Series) -> Prompt:
-        answer_a = row["correct_answer"] if not self.swap else row["negative_answer"]
-        answer_b = row["negative_answer"] if not self.swap else row["correct_answer"]
+        # extract the few-shot strings and responses
+        # # this isn't safe, but then again, who would expect an AI model to not be safe?
+        few_shot_strings = eval(row["few-shot_string"])
+        few_shot_strings = [str(s) for s in few_shot_strings]
+        few_shot_responses = eval(row["few-shot_response"])
+        few_shot_responses = [str(s) for s in few_shot_responses]
 
         messages = []
-        for message in self.prompt_template.messages:
+        system_messages = [m for m in self.prompt_template.messages if m.role == "system"]
+        user_messages = [m for m in self.prompt_template.messages if m.role == "user"]
+
+        # add system messages
+        for message in system_messages:
             t = Template(message.content)
-            content = t.safe_substitute(question=row["question"], answer_a=answer_a, answer_b=answer_b)
+            content = t.safe_substitute(string=row["string"])
+            messages.append(ChatMessage(role=message.role, content=content))
+
+        # add in few shot messages into the context
+        assert len(few_shot_strings) == len(
+            few_shot_responses
+        ), f"Expected the same number of few-shot strings and responses, but got {len(row['few-shot_string'])} strings and {len(row['few-shot_response'])} responses."
+        for few_shot_string, few_shot_response in zip(few_shot_strings, few_shot_responses):
+            for message in user_messages:
+                # add in the few-shot string for each user message (usually just one)
+                t = Template(message.content)
+                content = t.safe_substitute(string=few_shot_string)
+                messages.append(ChatMessage(role=message.role, content=content))
+                # add in the few-shot response for each user message (usually just one)
+                m = ChatMessage(role=MessageRole.assistant, content=few_shot_response)
+                messages.append(m)
+
+        # add the actual query message
+        for message in user_messages:
+            t = Template(message.content)
+            content = t.safe_substitute(string=row["string"])
             messages.append(ChatMessage(role=message.role, content=content))
 
         return Prompt(messages=messages)
@@ -96,12 +131,12 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int =
     full_df = pd.read_csv(filename)
     if limit is not None:
         full_df = full_df.head(limit)
-    if "answer" not in full_df.columns:
-        full_df["answer"] = ""
+    if "response" not in full_df.columns:
+        full_df["response"] = ""
     if "complete" not in full_df.columns:
         full_df["complete"] = False
-    if "swap" not in full_df.columns:
-        full_df["swap"] = ""
+    if "logprobs" not in full_df.columns:
+        full_df["logprobs"] = {}
     df = full_df[~(full_df["complete"])]
 
     # run each question concurrently
@@ -115,7 +150,8 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int =
     df.update(
         pd.DataFrame(
             {
-                "answer": [result["answer"] for result in results],
+                "response": [result["answer"] for result in results],
+                "logprobs": [result["logprobs"] for result in results],
                 "complete": [result["complete"] for result in results],
             },
             index=df.index,
@@ -137,7 +173,6 @@ async def async_main(cfg: DictConfig):
     LOGGER.info(f"Using experiment directory {cfg.exp_dir}")
     LOGGER.info(f"Using model {cfg.language_model.model}")
     LOGGER.info(f"Using method {cfg.prompt.method}")
-    LOGGER.info(f"Using swap: {cfg.swap}")
 
     # setup api handler
     setup_environment(anthropic_tag=cfg.anthropic_tag, logging_level=cfg.logging)
@@ -153,16 +188,21 @@ async def async_main(cfg: DictConfig):
     llm_params = LLMParams(**OmegaConf.to_container(cfg.language_model, resolve=True))
     cache_manager = CacheManager(Path(cfg.cache_dir)) if cfg.cache_dir is not None else None
     dataset_runner = DatasetRunner(
-        prompt_parts, llm_params, inference_api, cfg.swap, cfg.print_prompt_and_response, cache_manager
+        prompt_parts, llm_params, inference_api, cfg.print_prompt_and_response, cache_manager
     )
 
     # load dataset and save to file
     exp_dir = Path(cfg.exp_dir)
     exp_dir.mkdir(parents=True, exist_ok=True)
-    filename = exp_dir / f"data{cfg.seed}_swap{cfg.swap}.csv"
+    filename = exp_dir / f"data{cfg.base_seed}.csv"
     if not filename.exists() or cfg.reset:
+        # have to make the data_{seed}.csv file
         LOGGER.info(f"File {filename} does not exist. Creating...")
-        load_mmlu(filename, topics=["high_school_mathematics"], num_per_topic=25)
+        new_filename = setup_data_file(cfg, exp_dir, filename)
+        assert new_filename == filename, f"Expected {new_filename} to be {filename}"
+        LOGGER.info(f"Generated data{cfg.base_seed}.csv at {filename}")
+    else:
+        LOGGER.info(f"File {filename} exists. Skipping generation.")
 
     # run dataset (with retry)
     complete = await async_function_with_retry(
@@ -174,8 +214,38 @@ async def async_main(cfg: DictConfig):
     return complete
 
 
-@hydra.main(version_base=None, config_path="conf", config_name="config")
+def setup_data_file(cfg, exp_dir, filename):
+    # we have to create the data{seed}.csv file
+    if cfg.strings_path != "none":
+        strings_path = Path(cfg.strings_path)
+        assert (
+            strings_path.exists()
+        ), f"Strings file {strings_path} does not exist. Use evals/extract_[...].py to generate strings file"
+    else:
+        strings_path = None
+        LOGGER.info("No strings file provided. Using the base data as the strings file.")
+    if cfg.base_dir is None or cfg.base_dir == "none":
+        LOGGER.info(f"No base data directory provided. Trying to find one in {cfg.study_dir}")
+        base_data_path = find_matching_base_dir(cfg)
+    else:
+        base_data_path = Path(cfg.seeding_base_dir)
+    base_data_path = base_data_path / f"data{cfg.base_seed}.csv"
+    new_filename = generate_few_shot_data(
+        base_data_path=base_data_path,
+        strings_path=strings_path,
+        n_shot=cfg.dataset.n_shot,
+        output_path=filename,
+        seed=cfg.seed,
+        how=cfg.dataset.n_shot_seeding,
+        string_modifier=cfg.string_modifier.string_modifier,
+        response_property=cfg.response_property.response_property,
+    )
+    return new_filename
+
+
+@hydra.main(version_base=None, config_path="conf", config_name="config_self_prediction")
 def main(cfg: DictConfig):
+    print(cfg)
     asyncio.run(async_main(cfg))
 
 

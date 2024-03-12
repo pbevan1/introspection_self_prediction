@@ -8,9 +8,9 @@ from typing import Optional
 from anthropic import AsyncAnthropic
 from anthropic.types.completion import Completion as AnthropicCompletion
 
-from evals.data_models.messages import Prompt
 from evals.apis.inference.model import InferenceAPIModel
 from evals.data_models.inference import LLMResponse
+from evals.data_models.messages import Prompt
 
 ANTHROPIC_MODELS = {"claude-instant-1", "claude-2.0", "claude-v1.3", "claude-2.1"}
 LOGGER = logging.getLogger(__name__)
@@ -31,6 +31,8 @@ class AnthropicChatModel(InferenceAPIModel):
         max_attempts: int,
         **kwargs,
     ) -> list[LLMResponse]:
+        # HACK Anthropic doesn't give us logprobs, so we take them out of kwargs if they're there
+        kwargs.pop("logprobs", None)
         start = time.time()
         assert len(model_ids) == 1, "Anthropic implementation only supports one model at a time."
         model_id = model_ids[0]
@@ -65,6 +67,7 @@ class AnthropicChatModel(InferenceAPIModel):
             duration=duration,
             api_duration=api_duration,
             cost=0,
+            logprobs=[],  # HACK Anthropic doesn't give us logprobs
         )
         responses = [response]
 

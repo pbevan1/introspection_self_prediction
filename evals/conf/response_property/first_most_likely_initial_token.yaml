@@ -1,0 +1,3 @@
+name: first_most_likely_initial_token
+instruction: What is the most likely initial token of the response that you gave? Respond only with that single token.
+response_property: first_most_likely_initial_token

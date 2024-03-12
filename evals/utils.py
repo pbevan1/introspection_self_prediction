@@ -1,7 +1,10 @@
+import importlib
 import json
 import logging
 import os
+from pathlib import Path
 
+import omegaconf
 import openai
 import yaml
 from tenacity import retry, retry_if_result, stop_after_attempt
@@ -23,7 +26,7 @@ def setup_environment(
     openai_tag: str = "OPENAI_API_KEY",
 ):
     setup_logging(logging_level)
-    secrets = load_secrets("SECRETS")
+    secrets = load_secrets(Path(__file__).parent.parent / "SECRETS")
     openai.api_key = secrets[openai_tag]
     os.environ["ANTHROPIC_API_KEY"] = secrets[anthropic_tag]
 
@@ -101,3 +104,47 @@ def function_with_retry(function, *args, **kwargs):
 )
 async def async_function_with_retry(function, *args, **kwargs):
     return await function(*args, **kwargs)
+
+
+def get_maybe_nested_from_dict(d, keys):
+    """Helper function to get a value from a nested dictionary."""
+    try:
+        if isinstance(keys, str):
+            keys = [keys]
+        if len(keys) == 1:
+            return d[keys[0]]
+        else:
+            return get_maybe_nested_from_dict(d[keys[0]], keys[1:])
+    except KeyError:
+        return None
+
+
+def load_string_and_reponse_functions(string_modifier, response_property):
+    if string_modifier == "None":
+        string_modifier = None
+    if response_property == "None":
+        response_property = None
+    if string_modifier is not None:
+        string_modifier = import_function_from_string("evals.string_modifier", string_modifier)
+        LOGGER.info(f"Loaded string modifier function {string_modifier.__name__} from evals.string_modifier")
+    if response_property is not None:
+        response_property = import_function_from_string("evals.response_property", response_property)
+        LOGGER.info(f"Loaded output property function {response_property.__name__} from evals.response_property")
+    return string_modifier, response_property
+
+
+def import_function_from_string(module_name, function_name):
+    module = importlib.import_module(module_name)
+    function = getattr(module, function_name)
+    return function
+
+
+def sanitize_folder_name(key: str) -> str:
+    """Sometimes we need to clean Hydra keys so we can use them as folder names. This function does that."""
+    # Replace ":" with "_" or another suitable character
+    sanitized_key = key.replace(":", "_")
+    return sanitized_key
+
+
+# ensure that the sanitize function is registered
+omegaconf.OmegaConf.register_new_resolver("sanitize", sanitize_folder_name)

@@ -1,0 +1,30 @@
+hydra:
+  run:
+    dir: ${exp_dir}/logs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${exp_dir}/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+  job_logging:
+    root:
+      level: INFO
+
+study_dir: exp/finetuning/${study_name} # the folder of the study which contains multiple experiments
+exp_dir: ${sanitize:${study_dir}/${language_model.model}_${epochs}_epochs}
+
+study_name: debug_finetuning_run #?? # the name of the study
+
+defaults:
+  - language_model: gpt-3.5-turbo
+
+language_model:
+  model: gpt-3.5-turbo-1106 # 0125 isn't available yet
+
+epochs: 4 # how many epochs to train for
+
+notes: "test_note" # notes about the run
+
+organization: OWAIN_ORG
+openai_tag: OPENAI_API_KEY
+
+use_wandb: true
+ask_to_validate_training: false

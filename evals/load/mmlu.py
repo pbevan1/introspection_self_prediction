@@ -1,11 +1,11 @@
-from pathlib import Path
-import random
-import pandas as pd
-
-from datasets import load_dataset
-import fire
-from tqdm import tqdm
 import logging
+import random
+from pathlib import Path
+
+import fire
+import pandas as pd
+from datasets import load_dataset
+from tqdm import tqdm
 
 LOGGER = logging.getLogger(__name__)
 

@@ -1,0 +1,3 @@
+name: greater_than_500
+instruction: Is the answer that you gave greater than 500? Respond only with "true" for greater and "false" for smaller or equal.
+response_property: greater_than_500

@@ -1,0 +1,3 @@
+name: number_of_letters
+instruction: How many letters does the answer that you gave have? Respond only with the number of letters as an integer.
+response_property: number_of_letters

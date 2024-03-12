@@ -9,12 +9,16 @@ hydra:
       level: INFO
 
 defaults:
-  - prompt: zero-shot
+  - prompt: base_completion_bergenia
   - language_model: gpt-3.5-turbo
+  - dataset: random_words
 
 # Common Params
-exp_dir: ???
-swap: false
+study_name: ??
+study_dir: exp/${study_name}
+exp_dir: ${sanitize:${study_dir}/base_${language_model.model}_${prompt.method}_prompt_${dataset.topic}_dataset}_${note}_note
+note: "" # natural language description of the note of this run. Can be anything.
+strings_path: none # if this is set, do not generate data, but use this instead
 seed: 0
 limit: 50
 reset: false
@@ -23,9 +27,14 @@ print_prompt_and_response: false
 cache_dir: ${exp_dir}/cache
 prompt_history_dir: ${exp_dir}/prompt_history
 
+# Model
+language_model:
+  temperature: 0.0
+  logprobs: 2
+
 # API
-organization: DEFAULT_ORG
+organization: OWAIN_ORG
 anthropic_tag: ANTHROPIC_API_KEY
 openai_tag: OPENAI_API_KEY
-anthropic_num_threads: 20
+anthropic_num_threads: 2
 openai_fraction_rate_limit: 0.9

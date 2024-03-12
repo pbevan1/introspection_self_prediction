@@ -2,9 +2,9 @@ import io
 import json
 from pathlib import Path
 
+import fire
 import openai
 import pandas as pd
-import fire
 
 from evals.utils import save_jsonl, setup_environment
 

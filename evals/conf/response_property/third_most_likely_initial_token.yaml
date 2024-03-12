@@ -1,0 +1,3 @@
+name: third_most_likely_initial_token
+instruction: What is the third most likely initial token of the response that you gave? Respond only with that single token.
+response_property: third_most_likely_initial_token

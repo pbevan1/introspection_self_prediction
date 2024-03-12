@@ -1,0 +1,10 @@
+method: "base-completion-azalea-system"
+word_limit: 1
+messages:
+  - role: "system"
+    content: |
+      Please respond with a single ${dataset.item_descriptor} that you think is the most likely completion for the following sequence of ${dataset.item_descriptor}s. It cannot be one that is already in the sequence. Do not respond with anything but a single ${dataset.item_descriptor}.
+
+  - role: "user"
+    content: |
+      $string

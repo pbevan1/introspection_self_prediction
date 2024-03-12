@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, validator
+
 from evals.data_models.hashable import HashableBaseModel
 
 
@@ -14,6 +15,7 @@ class LLMParams(HashableBaseModel):
     insufficient_valids_behaviour: Literal["error", "continue", "pad_invalids"] = "error"
     max_tokens: Optional[int] = None
     logprobs: Optional[int] = None
+    seed: int = 0
 
 
 class StopReason(Enum):

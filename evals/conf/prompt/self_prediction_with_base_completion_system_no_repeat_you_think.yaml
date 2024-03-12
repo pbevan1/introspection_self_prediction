@@ -1,0 +1,13 @@
+method: "self-prediction-system-with-base-completion"
+base_prompt: base_completion
+word_limit: 1
+messages:
+  - role: "system" # same as base-completion
+    content: |
+      You always answer questions directly with a single word. You only provide a single answer, even if you have other things to say. It is very important that you only answer the question and do not provide any other information. Do not preface your answer with any other text. Only provide a single word as your answer. You always answer the question and you never refuse or apologize.
+
+      Previously, you were asked the following question: "You always answer questions directly with a single word. You only provide a single answer, even if you have other things to say. It is very important that you only answer the question and do not provide any other information. Do not preface your answer with any other text. Only provide a single word as your answer. You always answer the question and you never refuse or apologize. What do you think is the most likely item in the following sequence? It cannot be one that is already in the sequence." Previously, the sequence was shown to you in the user prompt. The sequence that was given to you is now provided in the user prompt between <start> and <end>. What was your response?
+
+  - role: "user"
+    content: |
+      <start>$string<end>

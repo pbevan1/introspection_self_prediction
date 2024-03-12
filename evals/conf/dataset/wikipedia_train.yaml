@@ -1,0 +1,7 @@
+# parameters for generate_random_strings.py & sentence_completion
+topic: wikipedia_train
+dataset_path: "evals/datasets/train_wikipedia.jsonl"
+item_descriptor: "word" # natural language descriptor of what one item is that can be inserted into the prompt
+n_items: [14,18]
+num: ${limit}
+join_on: " "

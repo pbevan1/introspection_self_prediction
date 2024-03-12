@@ -14,26 +14,31 @@ This repository contains the `run.py` script and associated files for conducting
 ### Installation
 
 1. **Create and Activate a Virtual Environment:**
-    ```bash
-    virtualenv --python python3.11 .venv
-    source .venv/bin/activate
-    ```
-2. Install Required Packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
-3. Install Pre-Commit Hooks:
-    ```bash
-    make hooks
-    ```
-4. Create a SECRETS file
-    ```bash
-    touch SECRETS
-    echo OPENAI_API_KEY=<INSERT_HERE> >> SECRETS
-    echo ANTHROPIC_API_KEY=<INSERT_HERE> >> SECRETS
-    echo DEFAULT_ORG=org-<INSERT_HERE> >> SECRETS
-    echo FARAI_ORG=org-<INSERT_HERE> >> SECRETS
-    ```
+  ```bash
+  virtualenv --python python3.11 .venv
+  source .venv/bin/activate
+  ```
+2. Install the package:
+  ```bash
+  pip install -e .
+  ```
+  The package can then be imported as `evals` in your Python code.
+  Make sure that you're using the right version of pip and python. You can check this by running `which pip` and `which python` and making sure they point to the right locations.
+3. Install Required Packages:
+  ```bash
+  pip install -r requirements.txt
+  ```
+4. Install Pre-Commit Hooks:
+  ```bash
+  make hooks
+  ```
+5. Create a SECRETS file
+  ```bash
+  touch SECRETS
+  echo OPENAI_API_KEY=<INSERT_HERE> >> SECRETS
+  echo ANTHROPIC_API_KEY=<INSERT_HERE> >> SECRETS
+  echo DEFAULT_ORG=org-<INSERT_HERE> >> SECRETS
+  ```
 
 ## Usage
 ### Running Inference
@@ -64,6 +69,24 @@ This repository contains the `run.py` script and associated files for conducting
     Control number of threads with `anthropic_num_threads` and `openai_fraction_rate_limit` which you can set via the command line or in the config file.
 
 ### Running Finetuning
+
+#### Creating a JSONL File
+The JSONL files are created using the `evals.apis.finetuning.create_dataset.py` file.
+Pass a path to a folder containing config files for the dataset you want to create. The config files should be in the following format:
+```yaml
+name: number_triplets
+base_dir: exp/number_triplets_azalea/base_gpt-3.5-turbo-0125_base-completion-azalea-system_prompt_number_triplets_dataset
+
+defaults:
+  - dataset: number_triplets
+  - prompt: base_completion_azalea_system # using which prompt?
+
+dataset:
+  num: 100 # how many strings to generate? None for all in the base_dir
+  response_property: None # When seeding the strings, extract the property from the string and score against it. Use `None` or any function from evals/response_property.py. Remember to change the prompt!
+  string_modifier: None # Require that the string has to be reconstructed. None or any function from evals/string_modification.py. Remember to change the prompt!
+```
+The dataset will be saved out into the folder.
 
 - **Basic Run:**
     Prepare a jsonl file according to the openai format and run the following command:

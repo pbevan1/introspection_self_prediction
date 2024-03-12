@@ -1,0 +1,8 @@
+# parameters for generate_random_strings.py & sentence_completion
+topic: daily_dialog
+dataset_path: "evals/datasets/daily_dialog.jsonl"
+item_descriptor: "word" # natural language descriptor of what one item is that can be inserted into the prompt
+n_items: [14,18]
+start_at_beginning: false
+num: ${limit}
+join_on: " "

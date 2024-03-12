@@ -1,0 +1,3 @@
+name: ratio_first_second_token_confidence
+instruction: How much more certain were you about the most likely initial token of the response that you gave than the second most likely initial token? Respond only with the ratio of the log probs of the most likely initial token to the log probs of the second most likely initial token.
+response_property: ratio_first_second_token_confidence

@@ -1,6 +1,5 @@
 import tiktoken
 
-
 COMPLETION_MODELS = {
     "davinci-002",
     "babbage-002",
@@ -18,6 +17,7 @@ _GPT_4_MODELS = [
     "gpt-4-32k-0314",
     "gpt-4-32k-0613",
     "gpt-4-1106-preview",
+    "gpt-4-0125-preview",
 ]
 _GPT_TURBO_MODELS = [
     "gpt-3.5-turbo",
@@ -25,6 +25,7 @@ _GPT_TURBO_MODELS = [
     "gpt-3.5-turbo-16k",
     "gpt-3.5-turbo-16k-0613",
     "gpt-3.5-turbo-1106",
+    "gpt-3.5-turbo-0125",
 ]
 GPT_CHAT_MODELS = set(_GPT_4_MODELS + _GPT_TURBO_MODELS)
 
@@ -57,6 +58,8 @@ def price_per_token(model_id: str) -> tuple[float, float]:
         prices = 0.02, 0.02
     elif "ft:gpt-3.5-turbo" in model_id:
         prices = 0.012, 0.016
+    elif "ft:gpt-4" in model_id:
+        prices = 0.0450, 0.0900
     else:
         raise ValueError(f"Invalid model id: {model_id}")
 
