@@ -5,6 +5,11 @@ from typing import Callable
 import pandas as pd
 
 
+def identity(row: pd.Series) -> str:
+    """Used for prediction."""
+    return row["response"]
+
+
 def nth_most_likely_initial_token(row: pd.Series, n: int) -> str | None:
     """Extract the nth most likely initial token of the response."""
     # get tokens

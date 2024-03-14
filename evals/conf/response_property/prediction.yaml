@@ -1,3 +1,0 @@
-name: prediction
-instruction: What is the answer you most likely gave? Respond only with that single ${dataset.item_descriptor}.
-response_property: None

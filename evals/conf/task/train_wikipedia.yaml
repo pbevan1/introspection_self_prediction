@@ -1,0 +1,7 @@
+name: wikipedia (train)
+dataset_path: "evals/datasets/train_wikipedia.jsonl"
+item_descriptor: "word" # natural language descriptor of what one item is that can be inserted into the prompt
+filter_strings_path: none # if this is set, use this to filter the strings
+prompt: What is the next word in the following text? Respond only with a single word.\n$string # is there a dataset specific prompt? This will only be applied when paired with a prompt that contains ${task.prompt}. It should contain $string.
+num: none # how many? none means all
+shuffle: true # shuffle the strings

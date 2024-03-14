@@ -1,6 +1,0 @@
-# parameters for generate_random_strings.py
-topic: english_words
-item_descriptor: "word" # natural language descriptor of what one item is that can be inserted into the prompt
-n_items: [5,5]
-num: ${limit}
-join_on: " "

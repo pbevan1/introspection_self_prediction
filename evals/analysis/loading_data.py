@@ -99,7 +99,7 @@ def load_and_prep_dfs(
         dfs[name]["response"] = dfs[name]["response"].apply(apply_all_cleaning)
         # if the model has a continuation with multiple responses, we only want the first one
         try:
-            join_on = name["dataset"]["join_on"]
+            join_on = name["task"]["join_on"]
         except KeyError:
             join_on = " "
             print(
@@ -191,7 +191,9 @@ def load_and_prep_dfs(
         # )
 
     for name in dfs.keys():
-        dfs[name]["compliance"] = dfs[name]["raw_response"].apply(check_compliance)
+        dfs[name]["compliance"] = dfs[name]["raw_response"].apply(
+            lambda x: check_compliance(x, name.get("compliance_checks", {}).get("excludion_rule_groups", ["default"]))
+        )
         print(f"[{pretty_names[name]}]:\n  Compliance: {(dfs[name]['compliance'] == True).mean():.2%}")  # noqa: E712
 
     # for name in dfs.keys():
@@ -368,12 +370,12 @@ def find_matching_base_dir(config: DictConfig):
     """Finds the base dir for a config"""
     # check the config
     study_dir = Path(config["study_dir"])
-    # search exp_dir for a base dir that matches on dataset and language_model.model
+    # search exp_dir for a base dir that matches on task and language_model.model
     base_dir = None
     for base in study_dir.glob("base*"):
         base_config = get_hydra_config(base)
         if (
-            base_config["dataset"]["topic"] == config["dataset"]["topic"]
+            base_config["task"]["name"] == config["task"]["name"]
             and base_config["language_model"]["model"] == config["language_model"]["model"]
         ):
             base_dir = base

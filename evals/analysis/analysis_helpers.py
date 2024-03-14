@@ -71,12 +71,10 @@ CONFIG_VALUES_OF_INTEREST = [
     "base_dir",
     "exp_dir",
     "limit",
-    # "dataset",
-    ["dataset", "topic"],
-    ["dataset", "n_shot"],
-    ["dataset", "n_shot_seeding"],
-    ["dataset", "string_modifier"],
-    ["dataset", "response_property"],
+    ["task", "name"],
+    "n_shot",
+    "n_shot_seeding",
+    ["response_property", "name"],
     "prediction_target",
 ]
 
@@ -232,7 +230,7 @@ def filter_configs_by_conditions(
             ```
             {
                 ("language_model","model"): ["gpt-4-1106-preview"],
-                ("dataset","n_shot"): [100, None]
+                ("n_shot"): [100, None]
             }
             ```
 

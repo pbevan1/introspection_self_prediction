@@ -1,0 +1,10 @@
+method: "object-level-minimal"
+word_limit: 1
+# task.prompt has to contain `$string`
+messages:
+  - role: "system"
+    content: |
+
+  - role: "user"
+    content: |
+      ${task.prompt}

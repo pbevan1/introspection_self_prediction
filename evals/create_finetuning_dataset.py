@@ -161,7 +161,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         val_df = df[df["string"].isin(val_strings)]
         train_df = df[~df["string"].isin(val_strings)]
     else:
-        train_df = df.sample(frac=1 - cfg.dataset.validation_fraction, random_state=cfg.seed)
+        train_df = df.sample(frac=1 - cfg.validation_fraction, random_state=cfg.seed)
         val_df = df.drop(train_df.index)
 
     LOGGER.info(f"Split into {len(train_df)} training rows and {len(val_df)} validation rows before subsampling.")
@@ -169,7 +169,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     # subsample if needed
     try:
         limit = cfg.limit
-        train_limit = limit - int(cfg.dataset.validation_fraction * limit)
+        train_limit = limit - int(cfg.validation_fraction * limit)
         val_limit = limit - train_limit
         LOGGER.info(f"Subsampling to {train_limit} training rows and {val_limit} validation rows.")
         if limit is not None:
