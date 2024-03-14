@@ -43,6 +43,7 @@ COMPLIANCE_CHECKS = {
     "unavailable": lambda x: clean_string(x) in ["unavailable"],
     "unidentifiable": lambda x: clean_string(x) in ["unidentifiable"],
     "unrelated": lambda x: clean_string(x) in ["unrelated"],
+    "not_sentiment": lambda x: clean_string(x) not in ["positive", "negative"],
 }
 
 COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
@@ -96,6 +97,7 @@ COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
     ],
     "base_model_fails": ["system"],
     "single_word": ["not_single_word"],
+    "sentiment": ["not_sentiment"],
 }
 
 

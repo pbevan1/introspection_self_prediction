@@ -1,4 +1,4 @@
-"""This is used to run the self prediction task."""
+"""This file is used to use an LLM to extract properties from object-level responses."""
 
 import asyncio
 import logging
@@ -10,13 +10,16 @@ import hydra
 import pandas as pd
 from omegaconf import DictConfig, OmegaConf
 
-from evals.analysis.loading_data import find_matching_base_dir
+from evals.analysis.loading_data import get_data_path
 from evals.apis.inference.api import InferenceAPI
 from evals.apis.inference.cache_manager import CacheManager
 from evals.data_models.inference import LLMParams
-from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
-from evals.generate_few_shot import generate_few_shot_data
-from evals.utils import async_function_with_retry, setup_environment
+from evals.data_models.messages import ChatMessage, Prompt, PromptTemplate
+from evals.utils import (
+    async_function_with_retry,
+    import_function_from_string,
+    setup_environment,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,6 +27,7 @@ LOGGER = logging.getLogger(__name__)
 class DatasetRunner:
     def __init__(
         self,
+        cfg: DictConfig,
         prompt_template: PromptTemplate,
         llm_params: LLMParams,
         inference_api: InferenceAPI,
@@ -31,6 +35,8 @@ class DatasetRunner:
         cache_manager: CacheManager = None,
     ):
         self.prompt_template = prompt_template
+        self.property_name = cfg.response_property.name
+        self.cfg = cfg
         self.llm_params = llm_params
         self.inference_api = inference_api
         self.print_prompt_and_response = print_prompt_and_response
@@ -47,7 +53,7 @@ class DatasetRunner:
                 return {
                     "answer": cache.responses[0].completion,
                     "logprobs": cache.responses[0].logprobs,
-                    "complete": True,
+                    f"{self.property_name}_complete": True,
                 }
 
         try:
@@ -82,17 +88,10 @@ class DatasetRunner:
         return {
             "answer": answer,
             "logprobs": logprobs,
-            "complete": complete,
+            f"{self.property_name}_complete": complete,
         }
 
     def process_prompt(self, row: pd.Series) -> Prompt:
-        # extract the few-shot strings and responses
-        # # this isn't safe, but then again, who would expect an AI model to not be safe?
-        few_shot_strings = eval(row["few-shot_string"])
-        few_shot_strings = [str(s) for s in few_shot_strings]
-        few_shot_responses = eval(row["few-shot_response"])
-        few_shot_responses = [str(s) for s in few_shot_responses]
-
         messages = []
         system_messages = [m for m in self.prompt_template.messages if m.role == "system"]
         user_messages = [m for m in self.prompt_template.messages if m.role == "user"]
@@ -100,44 +99,25 @@ class DatasetRunner:
         # add system messages
         for message in system_messages:
             t = Template(message.content)
-            content = t.safe_substitute(string=row["string"])
+            content = t.safe_substitute(response=row["response"])
             messages.append(ChatMessage(role=message.role, content=content))
 
-        # add in few shot messages into the context
-        assert len(few_shot_strings) == len(
-            few_shot_responses
-        ), f"Expected the same number of few-shot strings and responses, but got {len(row['few-shot_string'])} strings and {len(row['few-shot_response'])} responses."
-        for few_shot_string, few_shot_response in zip(few_shot_strings, few_shot_responses):
-            for message in user_messages:
-                # add in the few-shot string for each user message (usually just one)
-                t = Template(message.content)
-                content = t.safe_substitute(string=few_shot_string)
-                messages.append(ChatMessage(role=message.role, content=content))
-                # add in the few-shot response for each user message (usually just one)
-                m = ChatMessage(role=MessageRole.assistant, content=few_shot_response)
-                messages.append(m)
-
-        # add the actual query message
         for message in user_messages:
             t = Template(message.content)
-            content = t.safe_substitute(string=row["string"])
+            content = t.safe_substitute(response=row["response"])
             messages.append(ChatMessage(role=message.role, content=content))
 
         return Prompt(messages=messages)
 
 
-async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int = None) -> bool:
+async def run_dataset(filename: str, property_name: str, dataset_runner: DatasetRunner, limit: int = None) -> bool:
     # load dataset and filter out completed rows
     full_df = pd.read_csv(filename)
-    if limit is not None:
-        full_df = full_df.head(limit)
-    if "response" not in full_df.columns:
-        full_df["response"] = ""
-    if "complete" not in full_df.columns:
-        full_df["complete"] = False
-    if "logprobs" not in full_df.columns:
-        full_df["logprobs"] = {}
-    df = full_df[~(full_df["complete"])]
+    if property_name not in full_df.columns:
+        full_df[property_name] = ""
+    if f"{property_name}_complete" not in full_df.columns:
+        full_df[f"{property_name}_complete"] = False
+    df = full_df[~(full_df[f"{property_name}_complete"])]
 
     # run each question concurrently
     LOGGER.info(f"Processing {len(df)} rows")
@@ -145,14 +125,13 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int =
     results = await asyncio.gather(*tasks)
 
     # update dataframe with results
-    completed = sum([bool(result["complete"]) for result in results])
+    completed = sum([bool(result[f"{property_name}_complete"]) for result in results])
     LOGGER.info(f"Processed {len(results)} rows. {completed} were complete.")
     df.update(
         pd.DataFrame(
             {
-                "response": [result["answer"] for result in results],
-                "logprobs": [result["logprobs"] for result in results],
-                "complete": [result["complete"] for result in results],
+                property_name: [result["answer"] for result in results],
+                f"{property_name}_complete": [result[f"{property_name}_complete"] for result in results],
             },
             index=df.index,
         )
@@ -161,7 +140,7 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int =
     full_df.to_csv(filename, index=False, encoding="utf-8")
 
     # return whether all rows are complete
-    if full_df["complete"].eq(True).all():
+    if full_df[f"{property_name}_complete"].eq(True).all():
         LOGGER.info("All rows complete!")
         return True
     else:
@@ -172,7 +151,16 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int =
 async def async_main(cfg: DictConfig):
     LOGGER.info(f"Using experiment directory {cfg.exp_dir}")
     LOGGER.info(f"Using model {cfg.language_model.model}")
-    LOGGER.info(f"Using method {cfg.prompt.method}")
+    LOGGER.info(f"Using property {cfg.response_property.name}")
+
+    # we load the file from the dir and change it in place
+    filepath = get_data_path(cfg.dir)
+
+    # do we have a python function set? In that case, we bail on the LLM stuff and just run the function
+    if cfg.response_property.python_function is not None and cfg.response_property.python_function != "none":
+        LOGGER.info(f"Running python function {cfg.response_property.python_function}")
+        apply_python_function(cfg.response_property, filepath)
+        return True
 
     # setup api handler
     setup_environment(anthropic_tag=cfg.anthropic_tag, logging_level=cfg.logging)
@@ -188,61 +176,38 @@ async def async_main(cfg: DictConfig):
     llm_params = LLMParams(**OmegaConf.to_container(cfg.language_model, resolve=True))
     cache_manager = CacheManager(Path(cfg.cache_dir)) if cfg.cache_dir is not None else None
     dataset_runner = DatasetRunner(
-        prompt_parts, llm_params, inference_api, cfg.print_prompt_and_response, cache_manager
+        cfg, prompt_parts, llm_params, inference_api, cfg.print_prompt_and_response, cache_manager
     )
-
-    # load dataset and save to file
-    exp_dir = Path(cfg.exp_dir)
-    exp_dir.mkdir(parents=True, exist_ok=True)
-    filename = exp_dir / f"data{cfg.base_seed}.csv"
-    if not filename.exists() or cfg.reset:
-        # have to make the data_{seed}.csv file
-        LOGGER.info(f"File {filename} does not exist. Creating...")
-        new_filename = setup_data_file(cfg, exp_dir, filename)
-        assert new_filename == filename, f"Expected {new_filename} to be {filename}"
-        LOGGER.info(f"Generated data{cfg.base_seed}.csv at {filename}")
-    else:
-        LOGGER.info(f"File {filename} exists. Skipping generation.")
 
     # run dataset (with retry)
     complete = await async_function_with_retry(
         run_dataset,
-        filename,
+        filepath,
+        cfg.response_property.name,
         dataset_runner,
-        limit=cfg.limit,
+        limit=None,
     )
     return complete
 
 
-def setup_data_file(cfg, exp_dir, filename):
-    # we have to create the data{seed}.csv file
-    if cfg.strings_path != "none" and cfg.strings_path is not None:
-        strings_path = Path(cfg.strings_path)
-        assert (
-            strings_path.exists()
-        ), f"Strings file {strings_path} does not exist. Use evals/extract_[...].py to generate strings file"
-    else:
-        strings_path = None
-        LOGGER.info("No strings file provided. Using the base data as the strings file.")
-    if cfg.base_dir is None or cfg.base_dir == "none":
-        LOGGER.warning(f"No base data directory provided. Trying to find one in {cfg.study_dir}")
-        base_data_path = find_matching_base_dir(cfg)
-    else:
-        base_data_path = Path(cfg.base_dir)
-    base_data_path = base_data_path / f"data{cfg.base_seed}.csv"
-    new_filename = generate_few_shot_data(
-        base_data_path=base_data_path,
-        strings_path=strings_path,
-        filter_strings_path=cfg.task.get("filter_strings_path", None),
-        n_shot=cfg.n_shot,
-        output_path=filename,
-        seed=cfg.seed,
-        how=cfg.get("n_shot_seeding", "true"),
-    )
-    return new_filename
+def apply_python_function(response_property: DictConfig, filepath: str):
+    """Apply a python function to the dataset."""
+    LOGGER.info(f"Applying python function {response_property.python_function} to {filepath}")
+    try:
+        function = import_function_from_string("evals.response_property", response_property.python_function)
+    except ImportError:
+        LOGGER.error(f"Could not import python function {response_property.python_function}")
+        raise
+    # load the dataset
+    df = pd.read_csv(filepath)
+    # apply the function
+    df[response_property.name] = df.apply(function, axis=1)
+    # save the dataset
+    df.to_csv(filepath, index=False, encoding="utf-8")
+    LOGGER.info(f"Applied python function {response_property.python_function} to {filepath}")
 
 
-@hydra.main(version_base=None, config_path="conf", config_name="config_meta_level")
+@hydra.main(version_base=None, config_path="conf", config_name="config_property_extraction")
 def main(cfg: DictConfig):
     print(cfg)
     asyncio.run(async_main(cfg))

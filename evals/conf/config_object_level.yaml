@@ -16,7 +16,7 @@ defaults:
 # Common Params
 study_name: ???
 study_dir: exp/${study_name}
-exp_dir: ${sanitize:${study_dir}/base_${language_model.model}_${prompt.method}_prompt_${task.name}_task}_${note}_note
+exp_dir: ${sanitize:${study_dir}/object_level_${language_model.model}_${prompt.method}_prompt_${task.name}_task}_${note}_note
 note: "" # natural language description of the note of this run. Can be anything.
 seed: 0
 limit: 500
