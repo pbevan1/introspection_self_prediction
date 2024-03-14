@@ -3,10 +3,7 @@ from typing import List, Union
 
 import numpy as np
 
-try:
-    from .string_cleaning import clean_string
-except ImportError:
-    from evals.analysis.string_cleaning import clean_string
+from evals.analysis.string_cleaning import clean_string
 
 LOGGER = logging.getLogger(__name__)
 
@@ -108,7 +105,7 @@ def check_compliance(
     """Check if a string is compliant with the compliance checks. Returns True if compliant, list of the names of the failed checks if not."""
     failed = []
     for group in compliance_checks:
-        for name in group:
+        for name in COMPLIANCE_CHECKS_GROUPS[group]:
             try:
                 check = COMPLIANCE_CHECKS[name]
             except KeyError:

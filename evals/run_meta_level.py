@@ -24,6 +24,7 @@ LOGGER = logging.getLogger(__name__)
 class DatasetRunner:
     def __init__(
         self,
+        cfg: DictConfig,
         prompt_template: PromptTemplate,
         llm_params: LLMParams,
         inference_api: InferenceAPI,
@@ -31,6 +32,7 @@ class DatasetRunner:
         cache_manager: CacheManager = None,
     ):
         self.prompt_template = prompt_template
+        self.cfg = cfg
         self.llm_params = llm_params
         self.inference_api = inference_api
         self.print_prompt_and_response = print_prompt_and_response
@@ -131,6 +133,8 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int =
     full_df = pd.read_csv(filename)
     if limit is not None:
         full_df = full_df.head(limit)
+    if dataset_runner.cfg.response_property.name not in full_df.columns:
+        full_df[dataset_runner.cfg.response_property.name] = ""
     if "response" not in full_df.columns:
         full_df["response"] = ""
     if "complete" not in full_df.columns:
@@ -151,6 +155,9 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: int =
         pd.DataFrame(
             {
                 "response": [result["answer"] for result in results],
+                dataset_runner.cfg.response_property.name: [
+                    result["answer"] for result in results
+                ],  # also save the answer into the response property for later comparision
                 "logprobs": [result["logprobs"] for result in results],
                 "complete": [result["complete"] for result in results],
             },
@@ -188,7 +195,7 @@ async def async_main(cfg: DictConfig):
     llm_params = LLMParams(**OmegaConf.to_container(cfg.language_model, resolve=True))
     cache_manager = CacheManager(Path(cfg.cache_dir)) if cfg.cache_dir is not None else None
     dataset_runner = DatasetRunner(
-        prompt_parts, llm_params, inference_api, cfg.print_prompt_and_response, cache_manager
+        cfg, prompt_parts, llm_params, inference_api, cfg.print_prompt_and_response, cache_manager
     )
 
     # load dataset and save to file

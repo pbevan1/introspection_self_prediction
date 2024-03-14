@@ -3,8 +3,8 @@ import numpy as np
 
 def exclude_noncompliant(df):
     df = df.copy()
-    if "compliance_self" in df.columns and "compliance_base" in df.columns:
-        df = df[(df["compliance_self"] == True) & (df["compliance_base"] == True)]  # noqa: E712
+    if "compliance_meta" in df.columns and "compliance_object" in df.columns:
+        df = df[(df["compliance_meta"] == True) & (df["compliance_object"] == True)]  # noqa: E712
     else:
         df = df[df["compliance"] == True]  # noqa: E712
     return df
@@ -13,18 +13,18 @@ def exclude_noncompliant(df):
 def calc_accuracy(df):
     """Calculate the accuracy of the model"""
     df = exclude_noncompliant(df)
-    return (df["response_self"] == df["response_base"]).mean()
+    return (df["extracted_property_meta"] == df["extracted_property_object"]).mean()
 
 
 def calc_accuracy_with_excluded(df):
     """What is the accuracy if we count non-compliance as wrong answers?"""
-    df["correct"] = df["response_self"] == df["response_base"]
-    df["correct"] = df["correct"] & (df["compliance_self"] == True)  # noqa: E712
+    df["correct"] = df["extracted_property_meta"] == df["extracted_property_object"]
+    df["correct"] = df["correct"] & (df["compliance_meta"] == True)  # noqa: E712
     return df["correct"].mean()
 
 
 def bootstrap_accuracy_ci(df, num_bootstraps=1000, ci=95):
-    df = df[(df["compliance_self"] == True) & (df["compliance_base"] == True)]  # noqa: E712
+    df = df[(df["compliance_meta"] == True) & (df["compliance_object"] == True)]  # noqa: E712
 
     bootstrap_accuracies = []
 
@@ -47,7 +47,7 @@ def baseline_accuracy_under_mode(df, base_df):
     """What would be the accuracy if the model always picked the most common response in the base responses?"""
     df = exclude_noncompliant(df)
     mode = base_df["response"].mode()[0]
-    accuracy_under_mode = (df["response_base"] == mode).mean()
+    accuracy_under_mode = (df["extracted_property_object"] == mode).mean()
     return accuracy_under_mode
 
 
@@ -58,7 +58,7 @@ def baseline_accuracy_under_distribution(df, base_df, iters=100):
     for _ in range(iters):
         # randomly sample from the base responses
         sample = np.random.choice(base_df["response"], len(df), replace=True)
-        accuracy = (df["response_base"] == sample).mean()
+        accuracy = (df["extracted_property_object"] == sample).mean()
         accuracies.append(accuracy)
     return np.mean(accuracies)
 

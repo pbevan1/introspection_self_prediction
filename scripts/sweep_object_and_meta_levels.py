@@ -1,4 +1,4 @@
-"""Sweep over base and self-predictions across tasks and across models."""
+"""Sweep over object and meta_levels configs across tasks and across models."""
 
 import argparse
 import subprocess
@@ -41,7 +41,7 @@ def parse_arguments():
 def main():
     """
     Example usage:
-        python -m scripts.sweep_base_and_self_preds
+        python -m scripts.sweep_object_and_meta_levels
         --study_dir="exp/finetuned_numbers_wikipedia_bergenia_various_response_properties"
         --model_configs="finetuned/numbers_wikipedia_bergenia_various_response_properties/finetuned_numbers_wikipedia_bergenia_various_response_properties_35.yaml,gpt-3.5-turbo"
         --task_configs="random_words"
@@ -60,25 +60,25 @@ def main():
     object_level_command = f"python -m evals.run_object_level study_dir={args.study_dir}"
     meta_level_command = f"python -m evals.run_meta_level study_dir={args.study_dir}"
 
-    # run sweep over base completions
+    # run sweep over object and meta levels
     for model_config in model_configs:
-        for data_config in task_configs:
-            cmd = f"{object_level_command} language_model={model_config} task={data_config} {' '.join(overrides)}"
+        for task_config in task_configs:
+            cmd = f"{object_level_command} language_model={model_config} task={task_config} {' '.join(overrides)}"
             print("Running command:", cmd)
             run_command(cmd)
 
-    print("Finished running base completions.")
+    print("Finished running object completions.")
 
-    # run sweep over self completions
+    # run sweep over meta completions
     for model_config in model_configs:
-        for data_config in task_configs:
+        for task_config in task_configs:
             for response_property_config in response_property_configs:
                 for string_modifier_config in string_modifier_configs:
-                    cmd = f"{meta_level_command} language_model={model_config} task={data_config} response_property={response_property_config} string_modifier={string_modifier_config} {' '.join(overrides)}"
+                    cmd = f"{meta_level_command} language_model={model_config} task={task_config} response_property={response_property_config} string_modifier={string_modifier_config} {' '.join(overrides)}"
                     print("Running command:", cmd)
                     run_command(cmd)
 
-    print("Finished running self completions.")
+    print("Finished running meta completions.")
 
 
 if __name__ == "__main__":

@@ -75,7 +75,7 @@ def generate_few_shot_data(
     base_df = list(load_and_prep_dfs([base_data_path]).values())[0]
     LOGGER.info(f"Loaded {len(base_df)} rows from {base_data_path}")
     # load base config
-    base_config = get_hydra_config(base_data_path)
+    base_config = get_hydra_config(base_data_path.parent)
 
     # enforce compliance checks
     if enforce_compliance:
