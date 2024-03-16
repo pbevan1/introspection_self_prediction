@@ -240,6 +240,7 @@ def setup_data_file(cfg, exp_dir, filename):
     new_filename = generate_few_shot_data(
         base_data_path=base_data_path,
         strings_path=strings_path,
+        response_property_name=cfg.response_property.name,
         filter_strings_path=cfg.task.get("filter_strings_path", None),
         n_shot=cfg.n_shot,
         output_path=filename,

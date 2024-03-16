@@ -2,6 +2,7 @@ import importlib
 import json
 import logging
 import os
+import subprocess
 from pathlib import Path
 
 import omegaconf
@@ -151,3 +152,8 @@ def sanitize_folder_name(key: str) -> str:
 
 # ensure that the sanitize function is registered
 omegaconf.OmegaConf.register_new_resolver("sanitize", sanitize_folder_name)
+
+
+def get_repo_dir():
+    # Run the git command to get the repository root directory
+    return subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode().strip()
