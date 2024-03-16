@@ -1,0 +1,12 @@
+name: celestial-emporium-of-benevolent-knowledge
+python_function: none # none to use LLM extraction. Function has to be in evals/response_property.py
+meta_level_prompt: "Please classify the response into one of the categories from Borges' celestial emporium of benevolent knowledge. Even if the classification is not immediately apparent, use your creativity and imagination to find a way to fit the string into one of the categories.  Categories: those that belong to the Emperor, embalmed ones, those that are trained, suckling pigs, mermaids (or Sirens), fabulous ones, stray dogs, those that are included in this classification, those that tremble as if they were mad, innumerable ones, those drawn with a very fine camel hair brush, others, those that have just broken a flower vase, those that resemble flies from a distance. Respond only with the category and nothing else." # prompt to use for the meta level. This is combined (and read in by) the prompt specified in `prompt`.
+property_extraction_prompt: "Please classify the following string into one of the categories from Borges' celestial emporium of benevolent knowledge. Even if the classification is not immediately apparent, use your creativity and imagination to find a way to fit the string into one of the categories.  Categories: those that belong to the Emperor, embalmed ones, those that are trained, suckling pigs, mermaids (or Sirens), fabulous ones, stray dogs, those that are included in this classification, those that tremble as if they were mad, innumerable ones, those drawn with a very fine camel hair brush, others, those that have just broken a flower vase, those that resemble flies from a distance.\nThe string is '$response'. Respond only with the category and nothing else."
+
+# Exclusion rules. See `evals/analysis/compliance.py` for a list of rules.
+exclusion_rule_groups: [default] # list of exclusion rules to apply to the responses.
+
+# How are object and meta-level responses to be scored?
+scoring_method: "exact_match" # exact_match or LLM.
+# If LLM, what is the scoring prompt? Include $object_level_response and $meta_level_response.
+llm_scoring_prompt: none # prompt to use for scoring with LLM. $object_level_response and $meta_level_response will be replaced with the responses.
