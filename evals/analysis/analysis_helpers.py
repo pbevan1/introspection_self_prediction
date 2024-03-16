@@ -1,5 +1,3 @@
-import subprocess
-from pathlib import Path
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -7,6 +5,9 @@ import pandas as pd
 import tqdm
 from IPython.display import HTML, display
 
+from evals.load.lazy_object_level_llm_extraction import (
+    lazy_add_response_property_to_object_level,
+)
 from evals.utils import get_maybe_nested_from_dict
 
 
@@ -75,20 +76,7 @@ def merge_object_and_meta_dfs_and_run_property_extraction(object_df, meta_df, ob
     """Joins the dataframes as above. When the meta-level response property is not in the object level data, compute it on the fly."""
     # do we have the response property in the object level data?
     response_property_name = meta_cfg.response_property.name
-    if response_property_name not in object_df.columns:
-        # we need to run the property extraction command
-        run_property_extraction_command = f"python -m evals.run_property_extraction response_property={response_property_name} dir={object_cfg.exp_dir}"
-        print(
-            f"Response property {response_property_name} not in object level dataframe. Running property extraction with `{run_property_extraction_command}`."
-        )
-        # run the shell command
-        main_path = Path(__file__).parent.parent.parent  # get the repo directory
-        subprocess.run(run_property_extraction_command, shell=True, check=True, cwd=main_path)
-        # now the file in the exp_dir should have the response property
-        updated_object_df = pd.read_csv(str(main_path) + "/" + object_cfg.exp_dir + "/" + f"data{object_cfg.seed}.csv")
-        # load in the new column from the object level dataframe into the current one by joining on string
-        object_df = pd.merge(object_df, updated_object_df[["string", response_property_name]], on="string")
-        print(f"Loaded response property {response_property_name} from object level dataframe.")
+    object_df = lazy_add_response_property_to_object_level(object_df, object_cfg, response_property_name)
     return merge_object_and_meta_dfs(object_df, meta_df, response_property_name)
 
 

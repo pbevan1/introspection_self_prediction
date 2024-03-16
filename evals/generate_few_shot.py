@@ -1,30 +1,23 @@
 import logging
 import random
-import subprocess
-import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 import pandas as pd
 
-LOGGER = logging.getLogger(__name__)
-
-# Run the git command to get the repository root directory
-REPO_DIR = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode().strip()
-
-LOGGER.info("Repository directory:", REPO_DIR)
-sys.path.append(REPO_DIR)
-
-from evals.analysis.compliance_checks import enforce_compliance_on_df  # noqa: E402
-from evals.analysis.loading_data import (  # noqa: E402
-    get_hydra_config,
-    load_and_prep_dfs,
+from evals.analysis.compliance_checks import enforce_compliance_on_df
+from evals.analysis.loading_data import get_hydra_config, load_and_prep_dfs
+from evals.load.lazy_object_level_llm_extraction import (
+    lazy_add_response_property_to_object_level,
 )
+
+LOGGER = logging.getLogger(__name__)
 
 
 def generate_few_shot_data(
     base_data_path,
     strings_path,
+    response_property_name,
     filter_strings_path,
     n_shot,
     how: str,
@@ -72,15 +65,15 @@ def generate_few_shot_data(
 
     # load the data
     # base_df = pd.read_csv(base_data_path)
-    base_df = list(load_and_prep_dfs([base_data_path]).values())[0]
-    LOGGER.info(f"Loaded {len(base_df)} rows from {base_data_path}")
+    object_df = list(load_and_prep_dfs([base_data_path]).values())[0]
+    LOGGER.info(f"Loaded {len(object_df)} rows from {base_data_path}")
     # load base config
-    base_config = get_hydra_config(base_data_path.parent)
+    object_config = get_hydra_config(base_data_path.parent)
 
     # enforce compliance checks
     if enforce_compliance:
-        base_df = enforce_compliance_on_df(
-            base_df, base_config.get("response_property", {}).get("exclusion_rule_groups", ["default"])
+        object_df = enforce_compliance_on_df(
+            object_df, object_config.get("response_property", {}).get("exclusion_rule_groups", ["default"])
         )
 
     # load the strings
@@ -88,14 +81,14 @@ def generate_few_shot_data(
         strings = pd.read_csv(strings_path)[["string"]]
         LOGGER.info(f"Loaded {len(strings)} rows from strings_path: {strings_path}")
     else:
-        strings = base_df[["string"]].copy()
+        strings = object_df[["string"]].copy()
         LOGGER.info("No strings provided, using the base data as the strings file")
 
     # are the strigns the same?
-    shared_strings = set(base_df["string"].unique()).intersection(set(strings["string"].unique()))
+    shared_strings = set(object_df["string"].unique()).intersection(set(strings["string"].unique()))
     if len(shared_strings) > 0:
         LOGGER.warning(
-            f"Found {len(shared_strings)} shared strings between the base data {len(base_df)} and the strings file ({len(strings)})."
+            f"Found {len(shared_strings)} shared strings between the base data {len(object_df)} and the strings file ({len(strings)})."
         )
 
     if filter_strings_path is not None and filter_strings_path != "none":
@@ -119,10 +112,15 @@ def generate_few_shot_data(
     out_df["few-shot_string"] = None
     out_df["few-shot_response"] = None
 
+    # ensure that the response property has already been extracted
+    object_df = lazy_add_response_property_to_object_level(object_df, object_config, response_property_name)
+
     # add in few-shot strings
     for i, row in out_df.iterrows():
         string = row["string"]
-        few_shot_strings, few_shot_responses = get_few_shot_completions(string, base_df, n_shot, how)
+        few_shot_strings, few_shot_responses = get_few_shot_completions(
+            string, object_df, n_shot, how, response_property_name
+        )
         out_df.at[i, "few-shot_string"] = few_shot_strings
         out_df.at[i, "few-shot_response"] = few_shot_responses
 
@@ -142,6 +140,7 @@ def get_few_shot_completions(
     base_df: pd.DataFrame,
     n: int,
     how: str,
+    response_property_name: str,
 ) -> Tuple[List[str], List[str]]:
     """
     Get the few-shot completions for a string.
@@ -166,7 +165,7 @@ def get_few_shot_completions(
         while n != 0:
             row = base_df.sample(1)
             base_string = row["string"].iloc[0]
-            base_response = row["response"].iloc[0]
+            base_response = row[response_property_name].iloc[0]
             if base_string != string:
                 strings.append(base_string)
                 responses.append(base_response)
@@ -180,7 +179,7 @@ def get_few_shot_completions(
             row_B = rows.iloc[1]
             if row_A["string"] != row_B["string"]:
                 strings.append(row_A["string"])
-                responses.append(row_B["response"])
+                responses.append(row_B[response_property_name])
                 n -= 1
     else:
         raise ValueError(f"Invalid how argument: {how}")
