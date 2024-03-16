@@ -1,5 +1,7 @@
 import numpy as np
 
+VOCAB_SIZE = 50257  # gpt-3.5-turbo—using the same vocab size for all models
+
 
 def exclude_noncompliant(df):
     df = df.copy()
@@ -64,5 +66,24 @@ def baseline_accuracy_under_distribution(df, base_df, iters=100):
 
 
 def likelihood_of_correct_first_token(df):
+    """What is the log likelihood of the correct answer under the first token distribution of the meta response?"""
+
+    def first_log_prob_likelihood(row):
+        # get logprobs for first token
+        logprobs = row["logprobs_meta"]
+        if isinstance(logprobs, str):
+            logprobs = eval(logprobs)
+        logprobs = logprobs[0]  # only the first token
+        if logprobs is None or len(logprobs) == 0:
+            return None
+        target = row["extracted_property_object"]
+        for token, log_prob in logprobs.items():
+            if target.startswith(token):
+                return log_prob
+        # if the log prob is not in the top n, so we calculate the flat probability of the outside of the top n
+        top_n_mass = np.sum([v for k, v in logprobs.items()])
+        outside_top_n_mass = 1 - top_n_mass
+        return np.log(outside_top_n_mass / (VOCAB_SIZE - len(logprobs)))
+
     df = exclude_noncompliant(df)
-    return df["first_logprob_likelihood"].mean()
+    return df.apply(first_log_prob_likelihood, axis=1).dropna().mean()
