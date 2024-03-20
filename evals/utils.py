@@ -156,4 +156,4 @@ omegaconf.OmegaConf.register_new_resolver("sanitize", sanitize_folder_name)
 
 def get_repo_dir():
     # Run the git command to get the repository root directory
-    return subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode().strip()
+    return Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode().strip())
