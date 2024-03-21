@@ -43,6 +43,7 @@ language_model:
 
 task:
   num: ${limit}1
+  set: val # either all, train, or val. For meta level, use val.
 
 # API
 organization: OWAIN_ORG

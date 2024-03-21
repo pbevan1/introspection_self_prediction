@@ -8,7 +8,12 @@ hydra:
     root:
       level: INFO
 
-# when using, these values will be overwritten by the config files in the folder the data is created in
+# when using, these values will be overwritten by the config files in the folder the data is created in.
+
+defaults: # these should be overwritten in the particular finetuning files!
+  - task: wikipedia
+  - prompt: meta_level/minimal
+  - response_property: identity
 
 study_dir: exp/finetuning/${study_name} #??? # the folder of the study which contains multiple experiments
 
@@ -17,14 +22,14 @@ base_dir: ??
 
 exp_dir: ${sanitize:${study_dir}}
 
+task:
+  set: train # either all, train, or val. For finetuning, use train.
+
 train_strings_path: none # overwrite to use fix the strings to use in training
 val_strings_path: none # overwrite to use fix the strings to use in va—dation
 
 limit: 1250 # default for the number of strings to use in training and validation together. Overwrite with limit in the config file in the finetuning folder
 
 validation_fraction: 0.2 # fraction of the dataset to use for validation
-
-task: # these will be overwritten if the field is in the dataset config file
-  # num: 1250 # how many? Includes both training and validation. Overwrite with dataset.num in the config file in the finetuning folder
 
 seed: 0 # seed for the random number generator

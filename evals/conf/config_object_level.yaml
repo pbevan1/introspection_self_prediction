@@ -36,6 +36,7 @@ language_model:
 
 task:
   num: ${limit}
+  set: ??? # either all, train, or val. If generating training data, use train. If comparing with meta level, use val.
 
 # API
 organization: OWAIN_ORG
