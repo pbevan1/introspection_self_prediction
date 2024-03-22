@@ -10,26 +10,25 @@ hydra:
 
 # when using, these values will be overwritten by the config files in the folder the data is created in.
 
-defaults: # these should be overwritten in the particular finetuning files!
+defaults: # these should be overwritten in the particular finetuning files, again using defaults
   - task: wikipedia
   - prompt: meta_level/minimal
   - response_property: identity
 
-study_dir: exp/finetuning/${study_name} #??? # the folder of the study which contains multiple experiments
+study_dir: exp/finetuning/${study_name}/${dataset_folder} # the folder of the dataset which contains multiple experiments
 
-study_name: ??
-base_dir: ??
+study_name: ?? # the name of the study
+
+dataset_folder: ?? # the name of the folder containing the dataset infos
 
 exp_dir: ${sanitize:${study_dir}}
 
-task:
-  set: train # either all, train, or val. For finetuning, use train.
+train_base_dir: ?? # the folder of the object level responses to use for training. Should be generated with `task.set = train`.
+n_train_items: 10000 # number of strings to use in train set. Use `~` to use all strings in the train set.
+val_base_dir: ~ # the folder of the object level responses to use for validation. Use `~` to not use a val set. Should be generated with `task.set = val`.
+n_val_items: 2500 # number of strings to use in val set. Use `~` to use all strings in the val set.
 
-train_strings_path: none # overwrite to use fix the strings to use in training
-val_strings_path: none # overwrite to use fix the strings to use in va—dation
-
-limit: 1250 # default for the number of strings to use in training and validation together. Overwrite with limit in the config file in the finetuning folder
-
-validation_fraction: 0.2 # fraction of the dataset to use for validation
+train_strings_path: ~ # if set, filter the strings from the train_base_dir with this file
+val_strings_path: ~ # if set, filter the strings from the val_base_dir with this file
 
 seed: 0 # seed for the random number generator

@@ -11,17 +11,14 @@ hydra:
 study_dir: exp/finetuning/${study_name} # the folder of the study which contains multiple experiments
 exp_dir: ${sanitize:${study_dir}/${language_model.model}_${epochs}_epochs}
 
-study_name: debug_finetuning_run #?? # the name of the study
+study_name: ??? # the name of the study
 
 defaults:
   - language_model: gpt-3.5-turbo
 
-language_model:
-  model: gpt-3.5-turbo-1106 # 0125 isn't available yet
-
 epochs: 4 # how many epochs to train for
 
-notes: "test_note" # notes about the run
+notes: ??? # notes about the run
 
 organization: OWAIN_ORG
 openai_tag: OPENAI_API_KEY
