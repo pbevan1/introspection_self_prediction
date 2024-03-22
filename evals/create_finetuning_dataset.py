@@ -19,7 +19,6 @@ from pydantic_core._pydantic_core import ValidationError
 
 from evals.analysis.loading_data import get_data_path, load_single_df
 from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
-from evals.utils import load_string_and_reponse_functions
 
 CONFIG_PATH = "conf"
 
@@ -109,18 +108,35 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         train_filepath (Path): The path to save the file to.
         val_filepath (Path): The path to save the validation file to.
     """
-    base_dir = Path(cfg.base_dir)
-    assert base_dir.exists(), f"Base directory {base_dir} does not exist."
-    LOGGER.info(f"Loading base data from {base_dir}")
-    datapath = get_data_path(cfg.base_dir)
-    df = load_single_df(datapath)
+    train_base_dir = Path(cfg.train_base_dir)
+    assert train_base_dir.exists(), f"Base directory {train_base_dir} does not exist."
+    LOGGER.info(f"Loading base data from {train_base_dir}")
+    datapath = get_data_path(cfg.train_base_dir)
+    train_df = load_single_df(datapath)
+    LOGGER.info(f"Loaded {len(train_df)} rows from {datapath}")
+
+    # do we have a validation set?
+    if cfg.val_base_dir is not None:
+        val_base_dir = Path(cfg.val_base_dir)
+        assert val_base_dir.exists(), f"Validation Base directory {val_base_dir} does not exist."
+        LOGGER.info(f"Loading val base data from {val_base_dir}")
+        val_datapath = get_data_path(cfg.val_base_dir)
+        val_df = load_single_df(val_datapath)
+        LOGGER.info(f"Loaded {len(val_df)} rows from {val_datapath}")
+    else:
+        val_df = pd.DataFrame(columns=train_df.columns)
+        LOGGER.info("No validation base directory found. Using an empty dataframe for validation.")
 
     # do we have a strings path?
     # for train
     try:
-        if cfg.train_strings_path is not None and cfg.train_strings_path != "none":
+        if cfg.train_strings_path is not None:
             train_strings = pd.read_csv(cfg.train_strings_path)["string"].values
             LOGGER.info(f"(Strings) Loaded {len(train_strings)} strings from {cfg.train_strings_path}")
+            train_df = train_df[train_df["string"].isin(train_strings)]
+            LOGGER.info(
+                f"Filtered train data to only include strings from {cfg.train_strings_path} down to length {len(train_df)}."
+            )
         else:
             train_strings = None
     except AttributeError:
@@ -128,67 +144,23 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         train_strings = None
     # for val
     try:
-        if cfg.val_strings_path is not None and cfg.val_strings_path != "none":
+        if cfg.val_strings_path is not None:
             val_strings = pd.read_csv(cfg.val_strings_path)["string"].values
             LOGGER.info(f"(Strings) Loaded {len(val_strings)} strings from {cfg.val_strings_path}")
-        else:
-            val_strings = None
+            val_df = val_df[val_df["string"].isin(val_strings)]
+            LOGGER.info(
+                f"Filtered val data to only include strings from {cfg.val_strings_path} down to length {len(val_df)}."
+            )
     except AttributeError:
         LOGGER.info("No val_strings_path found in config. Not using any strings.")
-        val_strings = None
-
-    # do we have the unmodified string?
-    if "unmodified_string" in df.columns:
-        df["string"] = df["unmodified_string"]
-        LOGGER.info("Using unmodified string column.")
-
-    # do we have string modifier?
-    string_modifier, response_property = load_string_and_reponse_functions(
-        cfg.string_modifier.string_modifier, cfg.response_property.response_property
-    )
-    if string_modifier is not None:
-        df["string"] = df["string"].apply(string_modifier)
-        LOGGER.info(f"Applied string modifier {string_modifier.__name__} to string column.")
-    if response_property is not None:
-        df["response"] = df.apply(response_property, axis=1)
-        LOGGER.info(f"Applied response property {response_property.__name__} to response column.")
-
-    # split into train and validation
-    if train_strings is not None:
-        train_df = df[df["string"].isin(train_strings)]
-        val_df = df[~df["string"].isin(train_strings)]
-    elif val_strings is not None:
-        val_df = df[df["string"].isin(val_strings)]
-        train_df = df[~df["string"].isin(val_strings)]
-    else:
-        train_df = df.sample(frac=1 - cfg.validation_fraction, random_state=cfg.seed)
-        val_df = df.drop(train_df.index)
-
-    LOGGER.info(f"Split into {len(train_df)} training rows and {len(val_df)} validation rows before subsampling.")
 
     # subsample if needed
-    try:
-        limit = cfg.limit
-        train_limit = limit - int(cfg.validation_fraction * limit)
-        val_limit = limit - train_limit
-        LOGGER.info(f"Subsampling to {train_limit} training rows and {val_limit} validation rows.")
-        if limit is not None:
-            if train_limit < len(train_df):
-                LOGGER.info(f"Subsampling to {train_limit} rows.")
-                train_df = train_df.sample(train_limit, random_state=cfg.seed, replace=False)
-            else:
-                LOGGER.info(
-                    f"Training limit is {train_limit}, which is higher than the number of rows in the dataframe. Not subsampling."
-                )
-            if val_limit < len(val_df):
-                LOGGER.info(f"Subsampling to {val_limit} rows.")
-                val_df = val_df.sample(val_limit, random_state=cfg.seed, replace=False)
-            else:
-                LOGGER.info(
-                    f"Validation limit is {val_limit}, which is higher than the number of rows in the dataframe. Not subsampling."
-                )
-    except AttributeError:
-        LOGGER.info("No limit found in config. Not subsampling.")
+    if cfg.n_train_items is not None and cfg.n_train_items < len(train_df):
+        LOGGER.info(f"Subsampling to {cfg.n_train_items} training rows.")
+        train_df = train_df.sample(cfg.n_train_items, random_state=cfg.seed, replace=False)
+    if cfg.n_val_items is not None and cfg.n_val_items < len(val_df):
+        LOGGER.info(f"Subsampling to {cfg.n_val_items} validation rows.")
+        val_df = val_df.sample(cfg.n_val_items, random_state=cfg.seed, replace=False)
 
     # do we have to scramble the input?
     try:
