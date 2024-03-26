@@ -17,20 +17,14 @@ def parse_arguments():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description="Run a Hydra-configured script with YAML configuration overrides.")
     # Accept comma-separated strings for all list-type arguments
-    parser.add_argument("--study_dir", type=str, help="The directory to save the study results.")
+    parser.add_argument("--study_name", type=str, help="The name of the study. Defines the output directory.")
     parser.add_argument("--model_configs", type=str, help="Comma-separated list of model configurations to sweep over.")
     parser.add_argument("--task_configs", type=str, help="Comma-separated list of data configurations to sweep over.")
     parser.add_argument(
         "--response_property_configs",
         type=str,
         help="Comma-separated list of response property configurations to sweep over.",
-        default="prediction",
-    )
-    parser.add_argument(
-        "--string_modifier_configs",
-        type=str,
-        help="Comma-separated list of string modifier configurations to sweep over.",
-        default="unmodified",
+        default="identity",
     )
     parser.add_argument(
         "--overrides", type=str, help="Comma-separated list of Hydra configuration overrides.", default=""
@@ -42,10 +36,10 @@ def main():
     """
     Example usage:
         python -m scripts.sweep_object_and_meta_levels
-        --study_dir="exp/finetuned_numbers_wikipedia_bergenia_various_response_properties"
+        --study_name="number_triplets_reproduction"
         --model_configs="finetuned/numbers_wikipedia_bergenia_various_response_properties/finetuned_numbers_wikipedia_bergenia_various_response_properties_35.yaml,gpt-3.5-turbo"
-        --task_configs="random_words"
-        --response_property_configs="prediction,ends_with_vowel,number_of_letters"
+        --task_configs="wikipedia"
+        --response_property_configs="identity,sentiment"
         --overrides="limit=500, strings_path=exp/random_words_bergenia/model_divergent_strings_35_4.csv"
     """
     args = parse_arguments()
@@ -54,11 +48,10 @@ def main():
     model_configs = args.model_configs.split(",")
     task_configs = args.task_configs.split(",")
     response_property_configs = args.response_property_configs.split(",")
-    string_modifier_configs = args.string_modifier_configs.split(",")
     overrides = args.overrides.split(",") if args.overrides else []
 
-    object_level_command = f"python -m evals.run_object_level study_dir={args.study_dir}"
-    meta_level_command = f"python -m evals.run_meta_level study_dir={args.study_dir}"
+    object_level_command = f"python -m evals.run_object_level study_name={args.study_name} task.set=val"
+    meta_level_command = f"python -m evals.run_meta_level study_name={args.study_name} task.set=val"
 
     # run sweep over object and meta levels
     for model_config in model_configs:
@@ -73,10 +66,9 @@ def main():
     for model_config in model_configs:
         for task_config in task_configs:
             for response_property_config in response_property_configs:
-                for string_modifier_config in string_modifier_configs:
-                    cmd = f"{meta_level_command} language_model={model_config} task={task_config} response_property={response_property_config} string_modifier={string_modifier_config} {' '.join(overrides)}"
-                    print("Running command:", cmd)
-                    run_command(cmd)
+                cmd = f"{meta_level_command} language_model={model_config} task={task_config} response_property={response_property_config} {' '.join(overrides)}"
+                print("Running command:", cmd)
+                run_command(cmd)
 
     print("Finished running meta completions.")
 

@@ -7,11 +7,21 @@ from omegaconf import DictConfig
 
 from evals.apis.finetuning.run import FineTuneHyperParams, FineTuneParams, run_finetune
 from evals.apis.finetuning.syncer import WandbSyncer
+from evals.locations import CONF_DIR
 from evals.utils import load_secrets, setup_environment
 
 LOGGER = logging.getLogger(__name__)
 
 ROOT_DIR = Path(__file__).parent.parent
+
+FT_CONFIG_TEMPLATE = """
+model: ${model}
+temperature: 0.0
+top_p: 1.0
+max_tokens: null
+num_candidates_per_completion: 1
+insufficient_valids_behaviour: "error"
+"""
 
 
 @hydra.main(config_path="conf", config_name="config_finetuning_run")
@@ -51,7 +61,7 @@ def main(cfg: DictConfig) -> str:
         LOGGER.error(f"Organization {cfg.organization} not found in secrets")
         raise
 
-    results = run_finetune(
+    model_id = run_finetune(
         params=params,
         data_path=data_path,
         syncer=syncer,
@@ -60,8 +70,25 @@ def main(cfg: DictConfig) -> str:
         organisation=org,
     )
 
-    LOGGER.info(f"Done with results: {results}")
-    return results
+    LOGGER.info(f"Done with model_id: {model_id}")
+    # adding a config file for this finetuned model
+    config_id = create_finetuned_model_config(cfg, model_id)
+    print(config_id)
+    return model_id
+
+
+def create_finetuned_model_config(cfg, ft_model_id, overwrite=False):
+    """Creates a model config file for the finetuned model in the config directory."""
+    safe_model_id = ft_model_id.replace(":", "_")
+    directory = CONF_DIR / "language_model" / "finetuned" / cfg.study_name
+    file_path = directory / f"{safe_model_id}.yaml"
+    directory.mkdir(parents=True, exist_ok=True)
+    if file_path.exists() and not overwrite:
+        LOGGER.warning(f"File already exists at {file_path}. Not overwriting.")
+        return f"finetuned/{cfg.study_name}/{safe_model_id}"
+    with open(directory / file_path, "w") as f:
+        f.write(FT_CONFIG_TEMPLATE.replace("${model}", ft_model_id))
+    return f"finetuned/{cfg.study_name}/{safe_model_id}"  # return the name of the config that can be loaded by Hydra
 
 
 if __name__ == "__main__":

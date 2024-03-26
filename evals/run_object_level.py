@@ -189,6 +189,7 @@ async def async_main(cfg: DictConfig):
         dataset_runner,
         limit=cfg.limit,
     )
+    print(exp_dir)  # print the experiment directory for scripting purposes
     return complete
 
 
