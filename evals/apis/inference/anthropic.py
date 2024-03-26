@@ -12,7 +12,16 @@ from evals.apis.inference.model import InferenceAPIModel
 from evals.data_models.inference import LLMResponse
 from evals.data_models.messages import Prompt
 
-ANTHROPIC_MODELS = {"claude-instant-1", "claude-2.0", "claude-v1.3", "claude-2.1"}
+ANTHROPIC_MODELS = {
+    "claude-instant-1",
+    "claude-instant-1.2",
+    "claude-2.0",
+    "claude-v1.3",
+    "claude-2.1",
+    "claude-3-haiku-20240307",
+    "claude-3-sonnet-20240229",
+    "claude-3-opus-20240229",
+}
 LOGGER = logging.getLogger(__name__)
 
 
