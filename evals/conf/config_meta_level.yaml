@@ -49,5 +49,5 @@ task:
 organization: OWAIN_ORG
 anthropic_tag: ANTHROPIC_API_KEY
 openai_tag: OPENAI_API_KEY
-anthropic_num_threads: 2
+anthropic_num_threads: 12
 openai_fraction_rate_limit: 0.9

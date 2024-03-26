@@ -84,24 +84,34 @@ class Prompt(HashableBaseModel):
         line = {"messages": msgs}
         return json.dumps(line)
 
-    def anthropic_format(self) -> str:
+    def anthropic_format(self) -> list[dict]:
         if self.is_none_in_messages():
             raise ValueError(f"Anthropic chat prompts cannot have a None role. Got {self.messages}")
+
+        messages = []
+        for msg in self.messages:
+            if msg.role == MessageRole.system:
+                messages.append({"role": "system", "content": msg.content})
+            elif msg.role == MessageRole.user:
+                messages.append({"role": "user", "content": msg.content})
+            elif msg.role == MessageRole.assistant:
+                messages.append({"role": "assistant", "content": msg.content})
+
+        return messages
+
+    def anthropic_format_string(self) -> str:
+        if self.is_none_in_messages():
+            raise ValueError(f"Anthropic chat prompts cannot have a None role. Got {self.messages}")
+
         message = ""
         for msg in self.messages:
-            match msg.role:
-                case MessageRole.user:
-                    message += f"{anthropic.HUMAN_PROMPT} {msg.content}"
-                case MessageRole.assistant:
-                    message += f"{anthropic.AI_PROMPT} {msg.content}"
-                case MessageRole.none:
-                    message += f"\n\n{msg.content}"
-                case MessageRole.system:
-                    # No need to add something infront for system messages
-                    message += f"\n\n{msg.content}"
-        # Add the required empty assistant tag for Claude models if the last message does not have the assistant role
-        if self.messages[-1].role != MessageRole.assistant:
-            message += f"{anthropic.AI_PROMPT}"
+            if msg.role == MessageRole.user:
+                message += f"{anthropic.HUMAN_PROMPT} {msg.content}"
+            elif msg.role == MessageRole.assistant:
+                message += f"{anthropic.AI_PROMPT} {msg.content}"
+            elif msg.role == MessageRole.none:
+                message += f"\n\n{msg.content}"
+
         return message
 
     def pretty_print(self, responses: list[LLMResponse]) -> None:
