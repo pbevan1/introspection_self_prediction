@@ -341,7 +341,15 @@ class StudyRunner:
         )  # we need the name of the subfolder
         for data_folder in finetuning_study_names:
             command = f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder}"
+            if command not in self.state["finetuning_dataset_creation"]:
+                self.state["finetuning_dataset_creation"][command] = {"status": "incomplete"}
+                self.write_state_file()
+            elif self.state["finetuning_dataset_creation"][command]["status"] == "complete":
+                print(f"Skipping {data_folder} because it is already complete.")
+                continue
             self.run_command(command)
+            self.state["finetuning_dataset_creation"][command]["status"] = "complete"
+            self.write_state_file()
         print(f"Created {len(finetuning_study_names)} finetuning datasets.")
 
         #### run finetuning ####
