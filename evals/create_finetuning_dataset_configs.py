@@ -39,6 +39,9 @@ def create_finetuning_dataset_config(
 
     overrides_str = "\n".join(overrides)
 
+    if "meta_level/" not in prompt_config:  # we need to load the meta level prompt
+        prompt_config = f"meta_level/{prompt_config}"
+
     config = TEMPLATE.replace("$name", name)
     config = config.replace("$task", task_config)
     config = config.replace("$prompt", prompt_config)
