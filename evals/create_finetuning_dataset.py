@@ -17,8 +17,11 @@ from hydra.core.global_hydra import GlobalHydra
 from omegaconf import DictConfig, OmegaConf
 from pydantic_core._pydantic_core import ValidationError
 
-from evals.analysis.loading_data import get_data_path, load_single_df
+from evals.analysis.loading_data import get_data_path, get_hydra_config, load_single_df
 from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
+from evals.load.lazy_object_level_llm_extraction import (
+    lazy_add_response_property_to_object_level,
+)
 
 CONFIG_PATH = "conf"
 
@@ -113,6 +116,9 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     LOGGER.info(f"Loading base data from {train_base_dir}")
     datapath = get_data_path(cfg.train_base_dir)
     train_df = load_single_df(datapath)
+    train_df = lazy_add_response_property_to_object_level(
+        train_df, get_hydra_config(datapath.parent), cfg.response_property.name
+    )
     LOGGER.info(f"Loaded {len(train_df)} rows from {datapath}")
 
     # do we have a validation set?
@@ -122,6 +128,9 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         LOGGER.info(f"Loading val base data from {val_base_dir}")
         val_datapath = get_data_path(cfg.val_base_dir)
         val_df = load_single_df(val_datapath)
+        val_df = lazy_add_response_property_to_object_level(
+            val_df, get_hydra_config(val_datapath.parent), cfg.response_property.name
+        )
         LOGGER.info(f"Loaded {len(val_df)} rows from {val_datapath}")
     else:
         val_df = pd.DataFrame(columns=train_df.columns)
@@ -178,8 +187,8 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     # exclude rows that contain None or nan as the response
     old_len_train = len(train_df)
     old_len_val = len(val_df)
-    train_df = train_df.dropna(subset=["response"])
-    val_df = val_df.dropna(subset=["response"])
+    train_df = train_df.dropna(subset=[cfg.response_property.name])
+    val_df = val_df.dropna(subset=[cfg.response_property.name])
     LOGGER.info(f"Excluded {old_len_train - len(train_df)} rows from the training set due to missing responses.")
     LOGGER.info(f"Excluded {old_len_val - len(val_df)} rows from the validation set due to missing responses.")
 
@@ -188,7 +197,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     with open(train_filepath, "a") as f:
         for i, row in tqdm.tqdm(train_df.iterrows(), total=len(train_df), desc="Generating train messages"):
             try:
-                prompt = process_prompt(row, prompt_template)
+                prompt = process_prompt(row, prompt_template, cfg.response_property.name)
                 f.write(prompt.openai_finetuning_format())  # this might not work—use different format if it complains
                 f.write("\n")
             except ValidationError as e:
@@ -196,7 +205,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
 
     with open(val_filepath, "a") as f:
         for i, row in tqdm.tqdm(val_df.iterrows(), total=len(val_df), desc="Generating validation messages"):
-            prompt = process_prompt(row, prompt_template)
+            prompt = process_prompt(row, prompt_template, cfg.response_property.name)
             f.write(prompt.openai_finetuning_format())
             f.write("\n")
 
@@ -209,7 +218,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     )
 
 
-def process_prompt(row: pd.Series, prompt_template: PromptTemplate) -> Prompt:
+def process_prompt(row: pd.Series, prompt_template: PromptTemplate, response_col: str = "response") -> Prompt:
     messages = []
     system_messages = [m for m in prompt_template.messages if m.role == "system"]
     user_messages = [m for m in prompt_template.messages if m.role == "user"]
@@ -230,7 +239,7 @@ def process_prompt(row: pd.Series, prompt_template: PromptTemplate) -> Prompt:
         messages.append(ChatMessage(role=message.role, content=content))
 
     # add the assistant response
-    m = ChatMessage(role=MessageRole.assistant, content=row["response"])
+    m = ChatMessage(role=MessageRole.assistant, content=row[response_col])
     messages.append(m)
 
     return Prompt(messages=messages)
