@@ -192,15 +192,15 @@ class StudyRunner:
                 "commands": [],
             }
             # write the state file
-            with open(state_file_path, "w") as f:
-                json.dump(state, f)
+            self.state = state
+            self.write_state_file()
             print(f"New state file created at {state_file_path}")
         return state
 
     def write_state_file(self):
         state_file = Path(EXP_DIR / self.args.study_name / "state.json")
         with open(state_file, "w") as f:
-            json.dump(self.state, f)
+            json.dump(self.state, f, indent=4)
         print(f"State file written to {state_file}")
 
     def get_finetuned_model_configs(self):
@@ -283,13 +283,16 @@ class StudyRunner:
                     self.write_state_file()
 
         #### extract model divergent strings ####
-        for task in self.args.val_task_configs:
+        for task in self.args.task_configs + self.args.val_task_configs:
             # get the model divergent strings
             if task not in self.state["divergent_strings"]:
                 self.state["divergent_strings"][task] = {"status": "incomplete"}
+            if self.state["divergent_strings"][task]["status"] == "complete":
+                print(f"Skipping divergent strings for {task} because it is already complete.")
+                continue
             folders = self.get_folders_by_task(task, set="val", block="object_val_runs")
             target_file = EXP_DIR / self.args.study_name / f"divergent_strings_{task}.csv"
-            if not target_file.exists():
+            if not target_file.exists() or not self.state["divergent_strings"][task]["status"] == "complete":
                 command = f"python -m evals.extract_model_divergent_strings {' '.join(folders)} --output {target_file}"
                 try:
                     self.run_command(command)
