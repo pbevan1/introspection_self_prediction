@@ -239,7 +239,7 @@ def process_prompt(row: pd.Series, prompt_template: PromptTemplate, response_col
         messages.append(ChatMessage(role=message.role, content=content))
 
     # add the assistant response
-    m = ChatMessage(role=MessageRole.assistant, content=row[response_col])
+    m = ChatMessage(role=MessageRole.assistant, content=str(row[response_col]))
     messages.append(m)
 
     return Prompt(messages=messages)

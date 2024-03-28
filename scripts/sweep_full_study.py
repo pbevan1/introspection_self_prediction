@@ -7,27 +7,17 @@
 	- as validation set during finetuning
 	- overgenerating to find model disagreement here
 - generate finetuning datasets, sweeping across `response_property`, `task`, other args(?)
-	- can't rely on caching here
 	- using the above directories
-	- cross-connecting across language models (but we don't need to keep track of LLM assignments and can just pairs LLMs & the folders at this point)
-		- but we need to keep track of the `task.set` values to pair them up properly
 	- sweeping across other configs (response property, task)
 	- => new model codes need to be kept track of
 - run finetuning
-	- this can't rely on caching either
-	- make a file in the folder containing the model name and skip if not necessary?
-		- wandb url
-		- complete status
-		- OAI model ID (or other model ID for OSS models)
 - generate `500` meta-level completions on `val`, sweeping across `response_property`, `task`
-	- use `2500` val generated ones to do model_divergence filtering down to 500 -> string filter
-	- maybe also additional combined args?
-		- maybe represented as cfg files?
+	- use `2500` val generated ones to do model_divergence filtering down to 500
 	- this also needs to include the newly generated models from above
 
-
 Example usage:
-python -m scripts.sweep_full_experiment
+```bash
+python -m scripts.sweep_full_study
 --study_name="full_sweep_test"
 --model_configs="gpt-3.5-turbo"
 --val_only_model_configs="gpt-4"
@@ -38,6 +28,7 @@ python -m scripts.sweep_full_experiment
 --n_object_train=1000
 --n_object_val=250
 --n_meta_val=50
+```
 """
 
 import argparse
@@ -153,6 +144,7 @@ class StudyRunner:
         parser.add_argument(
             "--n_meta_val", type=int, help="Number of meta level completions to generate for validation.", default=500
         )
+        parser.add_argument("--skip_finetuning", action="store_true", help="Skip the finetuning step.", default=False)
         # add the arguments to the object
         self.args = parser.parse_args()
 
@@ -363,6 +355,10 @@ class StudyRunner:
                 elif self.state["finetuning_runs"][command]["status"] == "complete":
                     print(f"Skipping {command} because it is already complete.")
                     continue
+                if self.args.skip_finetuning:
+                    print(f"Skipping finetuning for {model} because --skip_finetuning is set.")
+                    self.state["finetuning_runs"][command]["status"] = "skipped"
+                    self.write_state_file()
                 self.write_state_file()
                 try:
                     ft_model_config = self.run_command(command)

@@ -41,6 +41,21 @@ COMPLIANCE_CHECKS = {
     "unidentifiable": lambda x: clean_string(x) in ["unidentifiable"],
     "unrelated": lambda x: clean_string(x) in ["unrelated"],
     "not_sentiment": lambda x: clean_string(x) not in ["positive", "negative"],
+    "lexical_category": lambda x: clean_string(x)
+    not in [
+        "noun",
+        "pronoun",
+        "verb",
+        "adjective",
+        "adverb",
+        "preposition",
+        "conjunction",
+        "interjection",
+        "article",
+        "determiner",
+    ],
+    "kiki_bouba": lambda x: clean_string(x) not in ["kiki", "bouba"],
+    "not_number": lambda x: not x.isnumeric(),
 }
 
 COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
@@ -95,6 +110,9 @@ COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
     "base_model_fails": ["system"],
     "single_word": ["not_single_word"],
     "sentiment": ["not_sentiment"],
+    "lexical_category": ["lexical_category"],
+    "kiki_bouba": ["kiki_bouba"],
+    "numeric": ["not_number"],
 }
 
 

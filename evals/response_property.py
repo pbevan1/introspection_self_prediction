@@ -10,6 +10,10 @@ def identity(row: pd.Series) -> str:
     return row["response"]
 
 
+def identity_reversed(row: pd.Series) -> str:
+    return row["response"][::-1]
+
+
 def nth_most_likely_initial_token(row: pd.Series, n: int) -> str | None:
     """Extract the nth most likely initial token of the response."""
     # get tokens
@@ -127,6 +131,16 @@ def first_character(row: pd.Series):
     return first_character
 
 
+def last_character(row: pd.Series):
+    """Extract the last character of the response."""
+    response = row["response"]
+    try:
+        last_character = response[-1]
+    except (TypeError, IndexError):
+        last_character = None
+    return last_character
+
+
 def starts_with_vowel(row: pd.Series):
     """Extract whether the response starts with a vowel."""
     response = row["response"]
@@ -173,3 +187,21 @@ def ratio_first_second_token_confidence(row: pd.Series):
     except IndexError:
         ratio = None
     return f"{ratio:.2f}" if ratio is not None else None
+
+
+def more_than_n_characters(row: pd.Series, n: int):
+    """Extract whether the response is longer than n characters."""
+    response = row["response"]
+    try:
+        more_than_n_characters = len(response) > n
+    except (TypeError, IndexError):
+        more_than_n_characters = None
+    return str(more_than_n_characters).lower()
+
+
+def more_than_3_characters(row: pd.Series):
+    return more_than_n_characters(row, 3)
+
+
+def more_than_5_characters(row: pd.Series):
+    return more_than_n_characters(row, 5)
