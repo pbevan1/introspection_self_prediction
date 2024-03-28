@@ -17,7 +17,7 @@
 
 Example usage:
 ```bash
-python -m scripts.sweep_full_experiment
+python -m scripts.sweep_full_study
 --study_name="full_sweep_test"
 --model_configs="gpt-3.5-turbo"
 --val_only_model_configs="gpt-4"
