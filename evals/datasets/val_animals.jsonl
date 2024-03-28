@@ -1,0 +1,2500 @@
+{"string": "fox sheep duck panda rat cow fox "}
+{"string": "sheep mouse lion zebra mouse dog shark cow turtle "}
+{"string": "zebra elephant fish mouse chicken cat duck rat shark "}
+{"string": "fox horse rabbit cow cat deer turtle giraffe "}
+{"string": "squirrel cat snake panda squirrel frog mouse lizard "}
+{"string": "goat turtle wolf dog deer pig frog turtle bear "}
+{"string": "turtle elephant wolf kangaroo snake squirrel lion zebra rat "}
+{"string": "deer chicken lion snake zebra frog giraffe rabbit wolf squirrel "}
+{"string": "fish dog rat rabbit pig zebra squirrel shark pig pig "}
+{"string": "frog kangaroo goat chicken squirrel snake snake sheep horse rabbit "}
+{"string": "sheep cat panda cow sheep wolf lizard duck shark deer "}
+{"string": "lion goat zebra elephant snake fish sheep lizard "}
+{"string": "lion fish fish pig horse elephant rabbit duck fox frog "}
+{"string": "dog deer horse frog lizard mouse giraffe "}
+{"string": "kangaroo turtle deer fox fish dog panda "}
+{"string": "giraffe giraffe tiger sheep elephant cat fish mouse "}
+{"string": "dog goat bear cow rat lion lion duck lion "}
+{"string": "wolf horse lion frog fish panda wolf "}
+{"string": "duck turtle fish zebra tiger cow chicken shark pig wolf "}
+{"string": "lizard turtle fish frog turtle lizard lizard "}
+{"string": "lion lion sheep mouse sheep shark turtle zebra "}
+{"string": "dog rabbit dog sheep tiger deer lion squirrel wolf "}
+{"string": "duck deer bear kangaroo turtle sheep horse "}
+{"string": "duck fish bear rabbit dog turtle shark sheep "}
+{"string": "mouse rat zebra duck fox zebra duck shark cat snake "}
+{"string": "goat zebra rat goat goat kangaroo fish mouse snake cat "}
+{"string": "duck chicken pig wolf bear duck cow shark zebra "}
+{"string": "goat rat chicken elephant goat shark horse kangaroo rat "}
+{"string": "shark elephant fish mouse cow pig cow pig frog panda "}
+{"string": "deer rat fox rat mouse chicken cat "}
+{"string": "frog elephant panda snake wolf lizard kangaroo deer lizard squirrel "}
+{"string": "horse kangaroo mouse squirrel cat cat deer fox "}
+{"string": "snake fish shark chicken zebra rat fish bear "}
+{"string": "snake horse lion frog elephant bear snake sheep wolf "}
+{"string": "duck cat cow goat goat chicken elephant goat giraffe "}
+{"string": "giraffe squirrel sheep turtle rabbit kangaroo bear mouse rat giraffe "}
+{"string": "dog lizard panda shark deer bear cow panda "}
+{"string": "zebra rat lizard giraffe lion chicken elephant cat dog giraffe "}
+{"string": "pig lizard dog kangaroo turtle elephant fox rabbit wolf shark "}
+{"string": "kangaroo goat zebra turtle fish giraffe mouse "}
+{"string": "goat fox chicken snake duck shark goat rat chicken tiger "}
+{"string": "elephant giraffe mouse chicken kangaroo rat snake giraffe mouse "}
+{"string": "deer fox tiger shark rabbit snake chicken "}
+{"string": "bear cat squirrel cat sheep horse sheep fox rabbit "}
+{"string": "giraffe horse duck panda snake turtle cow snake "}
+{"string": "panda chicken goat snake horse frog giraffe turtle "}
+{"string": "rat rat lion rat rabbit frog zebra lion sheep "}
+{"string": "rat kangaroo rabbit lizard wolf frog goat fish giraffe sheep "}
+{"string": "cat wolf duck mouse giraffe bear fish cow lion horse "}
+{"string": "cat cat horse horse squirrel goat snake bear rabbit lion "}
+{"string": "duck panda panda turtle deer rabbit tiger "}
+{"string": "mouse zebra shark goat wolf cow duck chicken "}
+{"string": "frog tiger fox horse lion duck bear sheep "}
+{"string": "chicken pig elephant rat tiger cat turtle lizard "}
+{"string": "giraffe pig turtle panda rabbit cow fox fish duck "}
+{"string": "pig elephant fish chicken fish sheep rabbit zebra shark zebra "}
+{"string": "lizard bear elephant lizard horse horse chicken "}
+{"string": "dog lizard fox kangaroo cow bear cat "}
+{"string": "rabbit zebra bear lion wolf frog goat "}
+{"string": "rabbit deer duck pig zebra dog kangaroo horse horse pig "}
+{"string": "mouse zebra panda rat fish duck goat fox goat "}
+{"string": "tiger goat zebra snake chicken lion fish panda "}
+{"string": "tiger elephant chicken cat panda lion fish cow panda "}
+{"string": "chicken tiger giraffe horse squirrel duck pig kangaroo wolf "}
+{"string": "wolf rat dog goat bear cat cat wolf fish "}
+{"string": "pig elephant cow sheep elephant lion kangaroo cow "}
+{"string": "turtle wolf cat bear panda cow wolf sheep "}
+{"string": "deer sheep mouse cat giraffe snake tiger "}
+{"string": "lion duck panda kangaroo horse bear goat zebra squirrel "}
+{"string": "lizard fox lizard pig goat panda panda "}
+{"string": "dog duck wolf kangaroo wolf rat cat rabbit snake sheep "}
+{"string": "tiger fox cow fox bear lion goat elephant wolf snake "}
+{"string": "panda panda snake wolf cat elephant deer cow turtle "}
+{"string": "bear squirrel rabbit cat chicken rat wolf bear elephant "}
+{"string": "duck cat lion duck frog turtle mouse "}
+{"string": "lion panda rabbit kangaroo shark chicken turtle bear "}
+{"string": "shark rat tiger zebra frog kangaroo giraffe "}
+{"string": "tiger frog lizard sheep fish chicken dog "}
+{"string": "kangaroo deer fox elephant pig turtle squirrel rat tiger "}
+{"string": "cow cat snake bear bear rat kangaroo shark deer tiger "}
+{"string": "deer fox frog goat horse chicken rabbit rabbit mouse bear "}
+{"string": "rabbit cow goat cat giraffe horse sheep sheep rabbit wolf "}
+{"string": "duck shark bear fox tiger sheep shark panda wolf "}
+{"string": "elephant wolf fish fish panda mouse rat rabbit giraffe dog "}
+{"string": "rabbit fish turtle tiger frog turtle cat rat "}
+{"string": "squirrel snake elephant fox wolf snake wolf "}
+{"string": "elephant lizard cat dog cow elephant kangaroo dog fox "}
+{"string": "squirrel fox fox chicken shark squirrel deer "}
+{"string": "shark fox fish goat mouse zebra cat lion squirrel "}
+{"string": "kangaroo lizard shark tiger dog squirrel lizard sheep lion "}
+{"string": "cow zebra lizard turtle cow giraffe mouse shark lizard sheep "}
+{"string": "rabbit goat elephant lion rabbit rabbit zebra "}
+{"string": "cow horse frog pig bear kangaroo wolf horse rat "}
+{"string": "pig kangaroo cow cow duck shark rabbit "}
+{"string": "kangaroo wolf duck duck sheep turtle horse rabbit giraffe rat "}
+{"string": "deer kangaroo horse panda lion pig chicken "}
+{"string": "deer horse zebra kangaroo fox cow zebra wolf shark "}
+{"string": "fish dog rat deer tiger bear dog "}
+{"string": "squirrel chicken wolf fish rat cow sheep pig bear duck "}
+{"string": "goat deer cat bear frog frog lion chicken bear "}
+{"string": "frog rat lion turtle chicken mouse chicken horse cow elephant "}
+{"string": "fox deer fox tiger rat cow chicken dog tiger tiger "}
+{"string": "duck tiger pig elephant fox turtle panda zebra "}
+{"string": "rat dog horse sheep tiger shark mouse bear tiger chicken "}
+{"string": "goat panda duck wolf frog cat chicken "}
+{"string": "cow panda squirrel fox squirrel shark deer fish "}
+{"string": "wolf giraffe panda giraffe goat horse elephant chicken "}
+{"string": "panda frog panda elephant snake elephant panda rabbit "}
+{"string": "bear lion turtle wolf mouse horse frog lion "}
+{"string": "pig turtle chicken dog tiger giraffe horse snake "}
+{"string": "goat frog chicken pig giraffe lion giraffe turtle fish fox "}
+{"string": "sheep shark lizard lizard horse bear snake panda cat "}
+{"string": "lizard lion bear fish goat turtle squirrel rat squirrel "}
+{"string": "turtle lion deer frog chicken mouse cat dog giraffe frog "}
+{"string": "dog shark turtle duck sheep goat lion shark bear "}
+{"string": "deer elephant fox duck shark rat rat rabbit "}
+{"string": "frog kangaroo mouse duck cat kangaroo duck wolf tiger "}
+{"string": "zebra cat frog fish snake zebra goat lion rat zebra "}
+{"string": "lizard duck shark rabbit fish horse rat dog dog fox "}
+{"string": "frog elephant rabbit cat sheep rat horse lizard panda tiger "}
+{"string": "elephant elephant rat lizard zebra wolf sheep snake "}
+{"string": "deer dog zebra cow turtle goat panda "}
+{"string": "fox panda shark rabbit fox goat lion deer chicken pig "}
+{"string": "giraffe chicken goat pig tiger duck kangaroo "}
+{"string": "sheep rat frog elephant bear giraffe rat panda panda tiger "}
+{"string": "elephant rat elephant lion goat lizard chicken panda lion "}
+{"string": "chicken pig cat lion fox fish bear bear fox panda "}
+{"string": "lizard panda wolf chicken frog frog cow squirrel wolf "}
+{"string": "zebra frog tiger cow mouse lion wolf chicken chicken wolf "}
+{"string": "turtle rabbit bear shark cow deer rat shark "}
+{"string": "zebra tiger kangaroo mouse bear mouse shark turtle kangaroo "}
+{"string": "giraffe turtle snake goat lizard pig goat rabbit chicken panda "}
+{"string": "rabbit mouse snake goat giraffe rat cow turtle "}
+{"string": "chicken chicken dog mouse deer zebra bear duck "}
+{"string": "kangaroo snake elephant chicken turtle turtle elephant shark "}
+{"string": "lion squirrel panda elephant horse tiger cow shark chicken "}
+{"string": "shark rabbit lizard fish frog duck zebra "}
+{"string": "dog dog dog bear mouse sheep lion zebra mouse "}
+{"string": "wolf mouse chicken lion kangaroo pig giraffe kangaroo cow "}
+{"string": "goat mouse horse rabbit chicken wolf cat dog dog "}
+{"string": "wolf snake panda cat lizard fish bear "}
+{"string": "elephant dog horse rat cow wolf dog elephant "}
+{"string": "fish dog deer mouse rabbit cat panda lizard goat "}
+{"string": "tiger dog fox horse squirrel squirrel dog frog "}
+{"string": "frog turtle fox giraffe frog horse goat frog cow deer "}
+{"string": "pig tiger shark snake sheep shark chicken "}
+{"string": "panda turtle cow duck bear deer shark "}
+{"string": "wolf shark lizard wolf pig goat kangaroo giraffe fish wolf "}
+{"string": "rabbit cat goat giraffe pig bear sheep "}
+{"string": "pig cat cat pig shark wolf shark fox horse "}
+{"string": "sheep pig duck bear turtle mouse pig duck "}
+{"string": "lion bear sheep chicken squirrel lion frog zebra pig rabbit "}
+{"string": "goat frog tiger wolf deer goat lizard "}
+{"string": "wolf horse bear turtle fish panda squirrel "}
+{"string": "lizard cow cow fish fish bear sheep duck rat "}
+{"string": "pig duck lion sheep kangaroo shark mouse duck "}
+{"string": "elephant duck fish wolf lion chicken dog panda duck tiger "}
+{"string": "snake mouse lion fish cow zebra chicken rat fox mouse "}
+{"string": "mouse kangaroo squirrel cow lizard horse rat "}
+{"string": "squirrel cat cow turtle rat pig rat "}
+{"string": "lion cat turtle dog tiger lion turtle rabbit pig "}
+{"string": "lion fish shark sheep duck cat chicken turtle "}
+{"string": "frog squirrel horse lizard panda rabbit mouse frog "}
+{"string": "cat pig squirrel sheep fox tiger tiger cow wolf squirrel "}
+{"string": "cat rat sheep snake rat bear cat sheep sheep "}
+{"string": "tiger pig rat giraffe lion mouse horse deer "}
+{"string": "deer lizard duck goat lion cow fish "}
+{"string": "wolf kangaroo frog zebra pig tiger squirrel "}
+{"string": "shark lion bear wolf kangaroo snake bear lizard wolf "}
+{"string": "frog elephant cow zebra zebra zebra deer frog "}
+{"string": "fox dog fish mouse rabbit cow tiger turtle turtle "}
+{"string": "panda sheep duck cat panda cow shark zebra "}
+{"string": "kangaroo dog panda zebra cow wolf turtle bear horse goat "}
+{"string": "wolf zebra mouse pig lizard kangaroo horse "}
+{"string": "snake frog fox bear wolf duck lizard "}
+{"string": "fox rat kangaroo rat duck cat cow horse "}
+{"string": "mouse fox horse fish kangaroo elephant dog shark panda "}
+{"string": "zebra tiger rabbit zebra wolf zebra frog fox "}
+{"string": "chicken fish fox dog zebra fox horse fish frog lizard "}
+{"string": "rat bear duck panda rat pig snake pig mouse "}
+{"string": "giraffe horse chicken snake sheep zebra lizard pig "}
+{"string": "kangaroo duck lizard duck horse wolf snake "}
+{"string": "chicken snake goat bear fish cow dog tiger tiger "}
+{"string": "cat cat pig duck goat cow horse fish shark "}
+{"string": "rat cat mouse cat duck elephant horse "}
+{"string": "rabbit bear rat goat duck wolf elephant giraffe pig mouse "}
+{"string": "fish horse giraffe zebra pig elephant deer snake horse dog "}
+{"string": "rabbit giraffe fox lizard bear panda lizard fish "}
+{"string": "kangaroo fox panda snake bear panda panda bear zebra "}
+{"string": "goat lion kangaroo panda frog cat rabbit "}
+{"string": "kangaroo giraffe giraffe fish lion horse squirrel "}
+{"string": "squirrel mouse bear snake sheep deer frog horse chicken "}
+{"string": "goat zebra wolf frog dog horse duck "}
+{"string": "cow frog sheep turtle giraffe fox frog frog "}
+{"string": "fish frog pig bear rat rat mouse "}
+{"string": "pig kangaroo bear chicken wolf giraffe pig tiger elephant dog "}
+{"string": "bear wolf fox pig frog fish wolf bear "}
+{"string": "turtle mouse chicken kangaroo shark zebra duck chicken "}
+{"string": "sheep fish bear giraffe pig bear bear panda rat turtle "}
+{"string": "frog tiger sheep rat chicken lion turtle cat "}
+{"string": "lion dog lion wolf kangaroo chicken cow fish "}
+{"string": "zebra panda sheep tiger shark fish kangaroo wolf squirrel bear "}
+{"string": "cat tiger snake lizard lizard rat rabbit snake bear "}
+{"string": "chicken dog goat bear shark pig mouse turtle lizard horse "}
+{"string": "elephant chicken dog dog pig horse horse shark cow cat "}
+{"string": "squirrel fox shark goat cow lion frog chicken "}
+{"string": "mouse deer lion wolf zebra rat squirrel kangaroo giraffe "}
+{"string": "duck duck kangaroo rabbit cow snake rabbit frog snake "}
+{"string": "panda pig cat fish shark cat fox "}
+{"string": "kangaroo sheep rabbit giraffe horse chicken kangaroo cow "}
+{"string": "lizard frog zebra chicken snake snake mouse shark wolf tiger "}
+{"string": "snake rabbit goat turtle shark sheep sheep tiger elephant duck "}
+{"string": "frog deer giraffe duck squirrel lion frog pig shark rabbit "}
+{"string": "chicken fox wolf cow elephant chicken tiger fox "}
+{"string": "lizard lizard rat duck snake rat goat "}
+{"string": "tiger snake cat fish sheep wolf tiger panda "}
+{"string": "kangaroo giraffe wolf giraffe goat mouse dog chicken lion "}
+{"string": "lion fish turtle kangaroo lion mouse zebra duck turtle sheep "}
+{"string": "shark zebra lizard frog rabbit shark cat deer cow duck "}
+{"string": "rabbit snake lizard cow deer duck panda giraffe giraffe kangaroo "}
+{"string": "shark elephant frog giraffe cow giraffe duck horse snake "}
+{"string": "wolf panda cat elephant wolf duck snake tiger kangaroo elephant "}
+{"string": "zebra lion cow rat zebra turtle lizard sheep squirrel "}
+{"string": "bear lion rabbit cow frog kangaroo duck kangaroo rabbit deer "}
+{"string": "lizard chicken wolf snake elephant wolf snake horse lizard "}
+{"string": "deer fish fish cat panda snake shark squirrel deer "}
+{"string": "mouse zebra duck fox goat goat mouse tiger "}
+{"string": "panda kangaroo goat squirrel duck lizard lion chicken "}
+{"string": "panda duck squirrel snake mouse panda tiger rat sheep pig "}
+{"string": "pig zebra goat fox kangaroo goat turtle lion "}
+{"string": "deer chicken bear panda panda elephant tiger dog turtle "}
+{"string": "cat snake snake chicken frog bear horse deer snake lion "}
+{"string": "wolf fox rabbit fish shark duck giraffe "}
+{"string": "mouse snake chicken cat fox dog wolf "}
+{"string": "wolf fish mouse frog cat bear horse "}
+{"string": "bear elephant panda horse frog duck chicken bear "}
+{"string": "mouse sheep cow zebra tiger turtle cow fox "}
+{"string": "panda turtle duck squirrel wolf lizard sheep "}
+{"string": "snake fish shark snake fox giraffe giraffe elephant fox rat "}
+{"string": "elephant cat fox frog sheep giraffe deer goat zebra "}
+{"string": "deer elephant lizard giraffe cat lizard wolf giraffe goat dog "}
+{"string": "fox giraffe pig bear bear duck rat bear cow mouse "}
+{"string": "shark fox squirrel giraffe goat cat frog cow "}
+{"string": "cat duck chicken giraffe pig giraffe goat panda "}
+{"string": "turtle squirrel pig fish giraffe kangaroo sheep "}
+{"string": "frog goat cat shark horse elephant frog "}
+{"string": "frog pig squirrel goat elephant shark shark rabbit "}
+{"string": "pig lion squirrel turtle rat tiger fish cat "}
+{"string": "fish mouse elephant bear lion zebra fish sheep cat mouse "}
+{"string": "dog bear zebra bear rat cat elephant "}
+{"string": "fox fish horse mouse deer goat goat fox "}
+{"string": "pig chicken zebra zebra pig shark duck wolf "}
+{"string": "turtle rabbit mouse snake shark frog turtle elephant "}
+{"string": "cat duck giraffe dog wolf panda pig zebra panda "}
+{"string": "horse kangaroo goat fish tiger elephant duck chicken "}
+{"string": "horse mouse tiger elephant snake bear goat duck "}
+{"string": "zebra sheep squirrel deer fish chicken horse kangaroo mouse rat "}
+{"string": "squirrel wolf lizard cow rabbit goat cat rat "}
+{"string": "fox elephant fish frog horse turtle fish kangaroo rat "}
+{"string": "turtle kangaroo shark bear cat kangaroo tiger shark "}
+{"string": "fox elephant rabbit turtle panda cat chicken chicken cow "}
+{"string": "zebra wolf chicken panda pig zebra giraffe lion squirrel giraffe "}
+{"string": "mouse sheep elephant shark kangaroo kangaroo rat "}
+{"string": "fish horse elephant cat cow mouse chicken shark turtle "}
+{"string": "giraffe kangaroo pig shark lizard fox turtle dog "}
+{"string": "turtle pig rat wolf bear cat wolf "}
+{"string": "squirrel wolf wolf goat snake duck goat lion kangaroo "}
+{"string": "wolf fish shark lion dog rat wolf cat squirrel "}
+{"string": "frog snake deer dog zebra frog cow rat "}
+{"string": "turtle dog cat squirrel lizard lizard deer tiger mouse bear "}
+{"string": "duck mouse wolf wolf pig tiger mouse snake mouse fish "}
+{"string": "squirrel elephant deer goat elephant mouse sheep horse "}
+{"string": "cow fish goat rat giraffe kangaroo fox "}
+{"string": "mouse lion fox lizard bear elephant pig cow "}
+{"string": "deer wolf lion pig lizard fox lizard rat kangaroo mouse "}
+{"string": "frog shark duck turtle shark shark deer bear mouse "}
+{"string": "horse squirrel fish fish elephant shark fish dog panda "}
+{"string": "goat horse kangaroo lion duck tiger fox shark "}
+{"string": "squirrel panda turtle fox cow deer bear snake "}
+{"string": "tiger turtle mouse turtle snake shark rabbit dog mouse "}
+{"string": "lion rabbit fox elephant squirrel giraffe kangaroo "}
+{"string": "panda lizard wolf fish kangaroo pig duck fox "}
+{"string": "snake elephant frog bear shark rabbit deer fish "}
+{"string": "horse frog cow panda mouse rabbit snake cow mouse "}
+{"string": "zebra cat panda tiger tiger fox shark rabbit kangaroo "}
+{"string": "deer horse giraffe pig zebra rat pig tiger elephant "}
+{"string": "cow deer cow snake kangaroo lion rat tiger deer "}
+{"string": "lizard panda squirrel lion panda panda rat bear "}
+{"string": "snake frog horse fish turtle rabbit shark fox "}
+{"string": "lizard rabbit wolf wolf horse squirrel cow zebra "}
+{"string": "chicken goat rat tiger deer kangaroo deer dog "}
+{"string": "bear wolf lion pig fox mouse bear snake shark rat "}
+{"string": "shark kangaroo deer chicken mouse zebra rat zebra sheep frog "}
+{"string": "fish snake panda squirrel giraffe frog zebra snake mouse "}
+{"string": "elephant lizard giraffe snake turtle duck rat lion "}
+{"string": "lion mouse turtle pig cat cat rabbit "}
+{"string": "panda rabbit cat lion cow cow panda mouse "}
+{"string": "fish horse kangaroo mouse duck goat kangaroo wolf "}
+{"string": "cow lion lizard rat wolf deer fish horse duck mouse "}
+{"string": "cat duck duck dog cow shark elephant elephant tiger "}
+{"string": "fox cow pig bear chicken horse cat fox "}
+{"string": "horse lion horse elephant panda wolf deer rabbit chicken "}
+{"string": "lizard fox shark rat tiger kangaroo cat "}
+{"string": "mouse snake kangaroo panda tiger panda sheep panda lion shark "}
+{"string": "pig zebra pig kangaroo snake elephant chicken shark "}
+{"string": "wolf chicken turtle cat duck giraffe deer shark "}
+{"string": "lizard wolf tiger shark pig cat frog "}
+{"string": "snake kangaroo kangaroo panda fish giraffe snake sheep "}
+{"string": "lion goat zebra tiger wolf tiger squirrel kangaroo goat zebra "}
+{"string": "dog pig cat frog wolf fox dog "}
+{"string": "cat sheep shark shark rabbit tiger cat giraffe "}
+{"string": "horse giraffe snake snake elephant turtle mouse rat bear turtle "}
+{"string": "horse fish panda chicken lizard fish goat lizard squirrel "}
+{"string": "giraffe pig duck horse sheep giraffe bear "}
+{"string": "fish kangaroo giraffe tiger mouse lion bear giraffe frog dog "}
+{"string": "pig kangaroo pig dog mouse bear chicken mouse "}
+{"string": "bear fox sheep sheep goat squirrel lion "}
+{"string": "bear panda bear rabbit zebra fox zebra frog panda "}
+{"string": "deer rabbit tiger zebra chicken snake mouse lion tiger "}
+{"string": "rat giraffe lizard mouse pig squirrel horse "}
+{"string": "elephant turtle fish cow chicken cat cat fox cat "}
+{"string": "giraffe fox snake mouse pig panda goat "}
+{"string": "tiger pig tiger deer sheep horse frog giraffe "}
+{"string": "deer dog chicken horse turtle turtle mouse "}
+{"string": "horse snake deer rat kangaroo panda duck turtle squirrel elephant "}
+{"string": "zebra panda panda shark snake duck pig sheep cow "}
+{"string": "dog cat squirrel goat sheep bear tiger zebra shark "}
+{"string": "turtle snake duck cow deer goat rat duck fish lizard "}
+{"string": "sheep duck squirrel panda panda wolf pig panda chicken "}
+{"string": "lion snake lion frog elephant squirrel rabbit rabbit "}
+{"string": "dog squirrel elephant lion fish kangaroo fox dog fish "}
+{"string": "fish lizard bear fox kangaroo pig chicken rat panda "}
+{"string": "shark duck giraffe shark panda giraffe tiger sheep rat shark "}
+{"string": "cow mouse turtle chicken sheep dog snake fish giraffe shark "}
+{"string": "kangaroo pig cow pig kangaroo goat horse mouse lion "}
+{"string": "elephant elephant goat rabbit kangaroo dog lion snake lizard "}
+{"string": "sheep cow lizard fish bear rabbit duck "}
+{"string": "squirrel kangaroo fish frog wolf tiger chicken wolf frog "}
+{"string": "mouse zebra panda bear tiger cow bear panda sheep "}
+{"string": "fish elephant elephant fox shark deer elephant rat chicken squirrel "}
+{"string": "wolf pig fox sheep wolf dog rabbit tiger giraffe "}
+{"string": "lizard horse panda turtle rat wolf tiger rabbit pig fox "}
+{"string": "pig lion frog zebra horse giraffe fish "}
+{"string": "cat lion rat shark lion snake bear "}
+{"string": "cow horse fox cat squirrel elephant fox "}
+{"string": "horse pig chicken zebra lion snake frog panda horse "}
+{"string": "squirrel fox lion duck bear lizard fish rabbit mouse "}
+{"string": "shark cat frog giraffe fox elephant panda fox cow shark "}
+{"string": "deer lion deer wolf duck elephant bear horse "}
+{"string": "lion snake mouse duck lion pig turtle rabbit mouse "}
+{"string": "wolf pig pig panda chicken lion chicken bear elephant horse "}
+{"string": "deer fish sheep deer deer frog kangaroo elephant "}
+{"string": "tiger chicken sheep fish bear cow squirrel "}
+{"string": "wolf panda turtle squirrel deer zebra squirrel snake "}
+{"string": "elephant squirrel duck bear giraffe elephant shark rabbit squirrel "}
+{"string": "lion kangaroo giraffe cat cat lizard bear "}
+{"string": "sheep deer elephant pig rabbit snake pig "}
+{"string": "rat frog fish bear lizard horse zebra "}
+{"string": "rat goat snake cat turtle zebra giraffe goat mouse "}
+{"string": "dog lion horse kangaroo rabbit zebra deer horse frog "}
+{"string": "rat giraffe sheep wolf frog cat turtle sheep squirrel "}
+{"string": "shark duck pig fox deer pig cat giraffe frog "}
+{"string": "wolf tiger shark elephant pig cow rat goat "}
+{"string": "wolf mouse kangaroo wolf fish fox dog "}
+{"string": "zebra cat fish mouse kangaroo mouse mouse "}
+{"string": "cat panda lion horse cat cat turtle lion panda lion "}
+{"string": "deer wolf rat cow lion fish cow duck "}
+{"string": "shark duck snake frog bear cow mouse chicken fox fox "}
+{"string": "rat shark rat fox tiger lion mouse bear "}
+{"string": "mouse kangaroo kangaroo zebra fox shark sheep fox goat "}
+{"string": "horse rat rabbit fox zebra snake goat "}
+{"string": "wolf kangaroo wolf pig zebra pig sheep wolf squirrel "}
+{"string": "bear rat panda giraffe kangaroo lizard lizard "}
+{"string": "shark duck kangaroo dog duck dog panda "}
+{"string": "dog panda bear chicken duck chicken duck lion goat shark "}
+{"string": "shark horse wolf pig frog lizard cat shark "}
+{"string": "elephant fox cow panda lion lizard frog panda kangaroo bear "}
+{"string": "deer deer lizard goat wolf mouse rabbit kangaroo squirrel panda "}
+{"string": "panda dog panda chicken rat horse wolf turtle "}
+{"string": "lizard bear cow tiger snake panda shark turtle "}
+{"string": "elephant fox chicken horse cat rabbit mouse chicken "}
+{"string": "deer cow goat wolf squirrel elephant kangaroo lizard "}
+{"string": "kangaroo sheep rat rat squirrel squirrel giraffe tiger "}
+{"string": "sheep duck mouse tiger fox mouse horse horse "}
+{"string": "snake horse lizard rabbit lizard panda mouse snake "}
+{"string": "fox fish lizard mouse giraffe rabbit horse panda goat "}
+{"string": "horse kangaroo zebra shark kangaroo lizard elephant mouse "}
+{"string": "mouse panda mouse cat bear elephant cat "}
+{"string": "bear snake fish elephant pig wolf cat lizard lion "}
+{"string": "goat lizard elephant chicken horse frog sheep duck tiger shark "}
+{"string": "giraffe dog giraffe snake frog kangaroo turtle "}
+{"string": "fox elephant rabbit fox sheep deer turtle tiger giraffe "}
+{"string": "lion cow cow chicken frog lizard snake panda elephant "}
+{"string": "frog dog pig lizard lion dog bear tiger "}
+{"string": "sheep wolf dog giraffe rat bear fish rabbit "}
+{"string": "frog bear fox pig cow panda bear chicken "}
+{"string": "kangaroo lion frog squirrel pig elephant mouse dog lizard "}
+{"string": "duck squirrel snake elephant snake fish fox zebra wolf cat "}
+{"string": "fish sheep rat horse horse tiger rabbit "}
+{"string": "horse wolf mouse zebra deer pig duck snake squirrel shark "}
+{"string": "tiger kangaroo horse lion sheep lizard frog dog "}
+{"string": "fox mouse fish lion mouse sheep lion cow bear "}
+{"string": "mouse giraffe sheep chicken fox shark rat deer fish kangaroo "}
+{"string": "deer lizard rat fox turtle pig cat horse "}
+{"string": "panda sheep deer pig horse shark rabbit "}
+{"string": "elephant frog squirrel elephant elephant snake zebra rat tiger cat "}
+{"string": "elephant kangaroo frog sheep panda frog zebra dog "}
+{"string": "zebra horse chicken lizard lion frog giraffe tiger squirrel "}
+{"string": "frog cow kangaroo tiger snake bear cat shark panda "}
+{"string": "mouse elephant mouse fish deer giraffe lizard fish squirrel lizard "}
+{"string": "elephant panda fish pig duck cow turtle cat giraffe turtle "}
+{"string": "wolf pig giraffe fish rat chicken cat zebra "}
+{"string": "lizard dog frog goat fox sheep sheep "}
+{"string": "wolf chicken squirrel cow rabbit kangaroo squirrel rat chicken "}
+{"string": "cow lion cat pig rat goat kangaroo "}
+{"string": "dog dog lizard mouse lion mouse squirrel rabbit "}
+{"string": "bear turtle bear giraffe dog frog cow horse deer panda "}
+{"string": "mouse tiger turtle turtle pig kangaroo cat elephant panda cat "}
+{"string": "fox giraffe cow giraffe wolf shark horse dog sheep "}
+{"string": "lion frog giraffe fish lion lizard bear "}
+{"string": "turtle bear tiger zebra shark goat goat "}
+{"string": "horse horse wolf pig sheep chicken shark frog "}
+{"string": "duck cow lizard squirrel bear bear fox duck lizard frog "}
+{"string": "sheep squirrel lizard lizard goat fox frog sheep "}
+{"string": "shark wolf fish giraffe fox rabbit horse deer "}
+{"string": "cat deer lizard shark cat deer fox fox "}
+{"string": "bear zebra cat goat kangaroo deer duck zebra "}
+{"string": "cat squirrel lion fox panda lizard fox chicken bear "}
+{"string": "fox lizard lizard wolf lizard bear duck deer rat "}
+{"string": "turtle giraffe sheep fish lion tiger horse "}
+{"string": "deer fox bear mouse snake elephant duck panda sheep "}
+{"string": "cat cat goat panda snake tiger squirrel "}
+{"string": "turtle sheep tiger goat pig panda dog elephant "}
+{"string": "wolf tiger frog cat cow elephant fox fox mouse snake "}
+{"string": "zebra turtle giraffe sheep dog cow horse "}
+{"string": "wolf horse cat cat shark horse pig zebra elephant "}
+{"string": "cow kangaroo duck mouse rabbit tiger chicken snake giraffe "}
+{"string": "mouse squirrel horse snake elephant chicken cow lion "}
+{"string": "giraffe duck frog fox snake horse snake giraffe turtle "}
+{"string": "frog fish frog squirrel bear pig rat fish deer tiger "}
+{"string": "rabbit bear tiger lion cat turtle turtle "}
+{"string": "elephant cat duck zebra chicken shark duck frog "}
+{"string": "duck lion fish rabbit fox rabbit zebra deer "}
+{"string": "pig turtle turtle duck shark cow chicken "}
+{"string": "shark snake lion pig panda shark cat sheep cat squirrel "}
+{"string": "bear giraffe kangaroo pig giraffe wolf goat chicken lion fish "}
+{"string": "duck panda tiger fish deer frog rabbit pig elephant "}
+{"string": "tiger sheep goat dog duck bear rat dog goat "}
+{"string": "zebra deer elephant fish pig rabbit horse dog "}
+{"string": "turtle frog tiger rat duck bear turtle panda goat fish "}
+{"string": "turtle lion goat pig deer mouse mouse chicken dog "}
+{"string": "turtle rabbit fox sheep snake elephant wolf wolf wolf snake "}
+{"string": "panda shark dog fish rabbit fox zebra kangaroo "}
+{"string": "snake pig squirrel cow lizard lizard duck fox lion mouse "}
+{"string": "rabbit dog shark chicken chicken elephant lizard "}
+{"string": "giraffe panda duck rat bear panda rat "}
+{"string": "rat dog rat lizard turtle horse lizard "}
+{"string": "horse mouse cow rat chicken tiger lizard kangaroo giraffe turtle "}
+{"string": "mouse horse lion duck cat mouse rat sheep deer mouse "}
+{"string": "pig zebra panda snake elephant giraffe giraffe giraffe zebra dog "}
+{"string": "turtle pig bear fish squirrel snake goat "}
+{"string": "mouse sheep frog pig lion chicken kangaroo dog dog "}
+{"string": "rabbit elephant snake mouse tiger lion shark "}
+{"string": "rat rat dog rat panda cat squirrel sheep squirrel pig "}
+{"string": "zebra lion mouse mouse duck mouse shark elephant zebra "}
+{"string": "rat cow turtle wolf elephant shark shark "}
+{"string": "horse goat lion goat kangaroo zebra elephant turtle fox "}
+{"string": "bear pig wolf kangaroo cat horse snake fox "}
+{"string": "snake dog rat cow wolf kangaroo cat turtle "}
+{"string": "panda bear sheep sheep deer squirrel zebra bear squirrel "}
+{"string": "fox rabbit bear lion pig dog panda shark kangaroo "}
+{"string": "cat pig rabbit duck pig chicken horse rabbit "}
+{"string": "rat chicken zebra rabbit turtle cow shark bear kangaroo dog "}
+{"string": "cow rabbit mouse goat lion fox bear shark frog horse "}
+{"string": "mouse deer frog tiger lion squirrel mouse cat "}
+{"string": "tiger giraffe snake fish sheep rat chicken sheep "}
+{"string": "horse cat squirrel tiger lizard pig cat turtle "}
+{"string": "fox mouse dog lion dog mouse horse sheep snake lizard "}
+{"string": "chicken fish lizard rat elephant shark mouse "}
+{"string": "giraffe giraffe duck elephant turtle horse turtle "}
+{"string": "zebra shark lizard frog cow goat shark deer giraffe panda "}
+{"string": "lion rat turtle deer shark sheep sheep "}
+{"string": "goat zebra lizard shark snake bear duck zebra "}
+{"string": "mouse fish chicken cat frog rat squirrel kangaroo snake giraffe "}
+{"string": "squirrel panda giraffe mouse horse chicken snake squirrel goat lizard "}
+{"string": "mouse rabbit lion cow pig mouse chicken "}
+{"string": "lizard chicken lizard kangaroo deer goat squirrel rabbit squirrel "}
+{"string": "dog duck lion lizard sheep mouse deer frog "}
+{"string": "pig giraffe snake mouse lizard sheep tiger shark lizard snake "}
+{"string": "cow chicken cat cat sheep elephant pig rat "}
+{"string": "deer goat cat rabbit cat bear squirrel "}
+{"string": "shark pig goat elephant cat frog fox sheep "}
+{"string": "giraffe giraffe tiger dog cat shark lion sheep "}
+{"string": "bear chicken snake rat squirrel duck deer "}
+{"string": "fox pig snake mouse tiger sheep snake fox "}
+{"string": "bear cat giraffe turtle frog chicken giraffe elephant cat "}
+{"string": "turtle bear snake sheep horse giraffe lizard panda "}
+{"string": "rabbit pig lizard mouse goat zebra panda goat cow "}
+{"string": "deer sheep duck horse rat zebra duck horse "}
+{"string": "lizard wolf elephant goat chicken fox giraffe dog squirrel mouse "}
+{"string": "mouse wolf turtle squirrel kangaroo rat squirrel zebra horse zebra "}
+{"string": "fox mouse bear cat horse duck dog "}
+{"string": "elephant rat dog horse pig goat giraffe snake "}
+{"string": "fox panda goat giraffe kangaroo chicken giraffe wolf kangaroo giraffe "}
+{"string": "elephant wolf bear deer giraffe elephant pig "}
+{"string": "mouse sheep panda frog squirrel fish turtle squirrel "}
+{"string": "fish zebra turtle cat bear lion turtle "}
+{"string": "snake cat elephant elephant mouse deer cow pig wolf horse "}
+{"string": "squirrel cow dog horse horse dog cat rabbit rabbit "}
+{"string": "frog lizard wolf wolf mouse goat sheep shark "}
+{"string": "bear bear squirrel turtle dog giraffe turtle "}
+{"string": "snake squirrel deer rat cow fox snake cow "}
+{"string": "wolf snake snake zebra tiger fox kangaroo tiger sheep "}
+{"string": "frog goat chicken mouse turtle squirrel shark tiger "}
+{"string": "pig cow tiger zebra squirrel squirrel squirrel snake cow "}
+{"string": "squirrel dog giraffe elephant panda fox panda "}
+{"string": "cow cat mouse squirrel frog goat wolf fish giraffe turtle "}
+{"string": "panda squirrel rabbit lion lion chicken kangaroo "}
+{"string": "horse bear chicken cat kangaroo shark deer fox duck "}
+{"string": "sheep fish zebra kangaroo tiger mouse snake tiger wolf zebra "}
+{"string": "snake frog goat panda zebra sheep cow cat "}
+{"string": "cat sheep fish squirrel elephant dog fish elephant "}
+{"string": "snake dog rabbit panda pig fox cat horse "}
+{"string": "turtle pig tiger lizard squirrel duck frog giraffe "}
+{"string": "lion elephant pig giraffe sheep panda panda kangaroo "}
+{"string": "lion kangaroo cat kangaroo elephant mouse rabbit "}
+{"string": "rabbit fox rabbit chicken rat giraffe lion mouse shark kangaroo "}
+{"string": "bear panda duck tiger fox tiger rabbit duck cow "}
+{"string": "elephant giraffe goat rat tiger cat sheep lizard "}
+{"string": "duck panda wolf pig panda elephant bear pig snake rat "}
+{"string": "frog dog frog dog lion squirrel turtle kangaroo "}
+{"string": "pig squirrel duck cat giraffe horse rabbit "}
+{"string": "chicken sheep elephant horse lion pig bear duck squirrel giraffe "}
+{"string": "deer panda deer duck cow panda duck "}
+{"string": "lizard kangaroo fox dog squirrel fish fish bear "}
+{"string": "rat shark duck horse goat lizard rabbit "}
+{"string": "chicken fish snake deer frog zebra lion "}
+{"string": "fish cat duck squirrel fox shark duck fox "}
+{"string": "shark cat sheep chicken tiger bear kangaroo shark bear pig "}
+{"string": "fish pig bear horse fish giraffe tiger panda "}
+{"string": "rat elephant lizard duck kangaroo lion kangaroo cat "}
+{"string": "tiger wolf lion giraffe tiger deer goat "}
+{"string": "shark turtle chicken tiger squirrel goat bear giraffe "}
+{"string": "chicken wolf zebra snake duck lizard fish "}
+{"string": "tiger lizard pig kangaroo lizard zebra shark horse "}
+{"string": "cow turtle tiger frog lion panda shark "}
+{"string": "horse panda kangaroo squirrel mouse mouse tiger deer "}
+{"string": "frog goat panda fish wolf frog duck cow cow deer "}
+{"string": "turtle horse cow sheep kangaroo cow tiger mouse "}
+{"string": "zebra giraffe rabbit panda zebra rabbit rat rabbit "}
+{"string": "duck pig chicken panda mouse lizard deer pig dog "}
+{"string": "giraffe shark horse panda squirrel turtle deer turtle zebra tiger "}
+{"string": "chicken rabbit kangaroo rat fox rabbit goat rabbit horse lion "}
+{"string": "elephant rabbit elephant bear zebra tiger lizard fish snake lion "}
+{"string": "wolf pig cat sheep snake fox mouse tiger zebra "}
+{"string": "tiger lion snake pig rabbit turtle fish frog frog "}
+{"string": "mouse bear lizard wolf shark fox chicken zebra "}
+{"string": "chicken squirrel goat shark pig duck mouse mouse "}
+{"string": "lizard pig zebra rabbit kangaroo pig squirrel "}
+{"string": "duck rat fox pig snake fox chicken lizard bear "}
+{"string": "chicken turtle fish pig panda kangaroo lizard "}
+{"string": "deer horse tiger panda cow lizard rat "}
+{"string": "pig rabbit sheep panda horse shark shark wolf "}
+{"string": "dog wolf rat horse sheep fish mouse panda "}
+{"string": "rabbit deer fish sheep turtle shark pig zebra "}
+{"string": "rat horse shark panda horse zebra fish dog "}
+{"string": "snake elephant cow fox frog mouse squirrel "}
+{"string": "elephant pig cat fish dog lizard pig bear horse elephant "}
+{"string": "horse pig dog snake zebra lizard chicken cat frog "}
+{"string": "mouse wolf frog fish sheep cow lizard tiger "}
+{"string": "sheep mouse turtle lizard duck lion tiger elephant elephant "}
+{"string": "fish tiger elephant panda lizard chicken pig "}
+{"string": "cow tiger fox squirrel turtle mouse wolf fox "}
+{"string": "dog fox cow pig sheep cow goat "}
+{"string": "lion goat zebra rat wolf bear sheep deer chicken lizard "}
+{"string": "giraffe panda panda horse lizard lizard lizard "}
+{"string": "zebra bear bear sheep kangaroo giraffe wolf cow panda "}
+{"string": "lizard dog elephant bear horse dog panda kangaroo "}
+{"string": "squirrel wolf horse dog mouse lizard rat tiger rabbit "}
+{"string": "kangaroo giraffe wolf frog dog shark bear cat "}
+{"string": "cat rat elephant snake tiger wolf dog snake frog "}
+{"string": "deer fish kangaroo squirrel tiger wolf zebra "}
+{"string": "squirrel wolf dog snake turtle lion kangaroo fish snake frog "}
+{"string": "tiger cow giraffe panda fish lizard horse "}
+{"string": "tiger lion cow turtle horse zebra mouse cow cat sheep "}
+{"string": "cat sheep turtle deer elephant zebra sheep panda goat "}
+{"string": "zebra fox deer deer cow panda lion cat "}
+{"string": "panda horse lion rat bear lizard mouse "}
+{"string": "goat fish cow frog rat fish duck giraffe dog "}
+{"string": "zebra sheep cat pig cat duck duck "}
+{"string": "squirrel fox wolf turtle pig zebra zebra frog "}
+{"string": "squirrel fox kangaroo fox wolf rabbit rabbit "}
+{"string": "goat frog snake panda zebra cat deer "}
+{"string": "pig elephant bear squirrel pig duck shark "}
+{"string": "cat squirrel frog horse goat zebra sheep "}
+{"string": "pig sheep frog cat fish shark zebra fox zebra rat "}
+{"string": "turtle frog wolf tiger duck lion duck chicken "}
+{"string": "sheep zebra bear goat tiger tiger chicken fish mouse rabbit "}
+{"string": "cow wolf shark mouse duck tiger snake lizard "}
+{"string": "squirrel pig zebra fox frog duck mouse "}
+{"string": "turtle turtle elephant turtle fox goat elephant turtle mouse "}
+{"string": "lizard snake cat elephant duck dog sheep "}
+{"string": "dog turtle fish squirrel mouse chicken horse "}
+{"string": "rat shark lizard giraffe horse rabbit giraffe frog "}
+{"string": "chicken duck cat mouse fox cow deer zebra shark "}
+{"string": "duck bear wolf kangaroo frog cat cat rabbit "}
+{"string": "horse horse fox rabbit lizard kangaroo turtle "}
+{"string": "deer lizard lion lizard kangaroo chicken panda rat tiger lizard "}
+{"string": "giraffe fish lion mouse chicken rat squirrel bear pig "}
+{"string": "fish lizard panda fox rabbit frog wolf snake "}
+{"string": "mouse kangaroo snake mouse dog lion mouse panda deer giraffe "}
+{"string": "rat goat duck sheep rabbit snake wolf sheep "}
+{"string": "elephant panda turtle sheep mouse chicken tiger dog horse fox "}
+{"string": "bear turtle cat snake zebra horse lizard goat "}
+{"string": "chicken panda rat frog snake chicken cat "}
+{"string": "rat wolf lion deer kangaroo lizard elephant deer goat "}
+{"string": "turtle giraffe fish turtle frog kangaroo fish frog squirrel fish "}
+{"string": "fish rabbit mouse shark wolf lizard panda dog lion mouse "}
+{"string": "tiger bear kangaroo snake turtle cow shark wolf fox "}
+{"string": "cat kangaroo tiger pig wolf rabbit frog rat duck fish "}
+{"string": "chicken chicken wolf fox fish sheep kangaroo tiger zebra "}
+{"string": "rat goat sheep panda panda wolf elephant bear rabbit horse "}
+{"string": "fish cow chicken cow cow cat chicken bear lion panda "}
+{"string": "zebra zebra frog kangaroo zebra cow elephant "}
+{"string": "cat lion sheep turtle rabbit dog deer turtle squirrel "}
+{"string": "zebra rabbit bear snake kangaroo turtle sheep giraffe "}
+{"string": "cow lion rat fish tiger fish lizard "}
+{"string": "cow squirrel panda pig lizard lion rabbit cat mouse "}
+{"string": "lion pig shark chicken cow kangaroo shark deer deer "}
+{"string": "bear cat wolf rat panda sheep pig fox elephant "}
+{"string": "frog tiger shark squirrel sheep rabbit panda horse horse "}
+{"string": "frog horse lion tiger panda sheep goat turtle "}
+{"string": "fox snake kangaroo wolf mouse rabbit turtle snake "}
+{"string": "mouse fox rat cow lizard zebra elephant kangaroo panda pig "}
+{"string": "mouse deer cat goat snake shark deer elephant "}
+{"string": "tiger zebra sheep fish elephant cat horse "}
+{"string": "cat fish goat squirrel duck cow sheep snake "}
+{"string": "squirrel dog shark goat sheep squirrel snake snake rat "}
+{"string": "elephant deer panda lion squirrel fox deer chicken "}
+{"string": "cat sheep lizard duck dog squirrel turtle "}
+{"string": "panda rat deer horse lion giraffe sheep bear "}
+{"string": "cat mouse snake snake horse sheep bear squirrel "}
+{"string": "kangaroo rabbit squirrel pig dog mouse shark bear mouse lizard "}
+{"string": "cow duck turtle frog giraffe kangaroo chicken turtle lion bear "}
+{"string": "squirrel wolf elephant kangaroo cat fish squirrel mouse "}
+{"string": "elephant squirrel fish rat wolf deer snake cat "}
+{"string": "turtle zebra elephant elephant goat lion turtle pig "}
+{"string": "mouse bear pig panda lion wolf snake fox duck "}
+{"string": "cat cow frog fish snake tiger fish cow kangaroo "}
+{"string": "sheep lizard goat rabbit turtle lion shark "}
+{"string": "tiger sheep dog goat bear lizard pig dog "}
+{"string": "panda rat shark deer dog wolf snake "}
+{"string": "horse tiger frog deer elephant shark wolf "}
+{"string": "bear turtle cow zebra elephant fish kangaroo sheep "}
+{"string": "turtle mouse mouse snake squirrel goat fish "}
+{"string": "frog bear turtle frog giraffe cow chicken lizard sheep mouse "}
+{"string": "sheep rat shark cat lion shark cat "}
+{"string": "lion shark tiger rabbit goat turtle rabbit pig "}
+{"string": "fox bear panda tiger rat horse wolf wolf lizard "}
+{"string": "rabbit fox cow duck goat rat cow fish goat "}
+{"string": "kangaroo sheep fox rat panda bear cat rat "}
+{"string": "kangaroo fish snake goat wolf rat giraffe goat lion turtle "}
+{"string": "lion deer cat turtle bear dog squirrel turtle "}
+{"string": "wolf rabbit turtle horse wolf snake kangaroo cow horse "}
+{"string": "snake sheep rabbit turtle cat kangaroo bear "}
+{"string": "giraffe frog chicken cow fox shark chicken tiger "}
+{"string": "sheep pig goat squirrel squirrel pig duck "}
+{"string": "elephant panda fox horse goat lion deer zebra "}
+{"string": "dog tiger goat sheep cat dog giraffe "}
+{"string": "frog mouse cat goat lion elephant zebra duck "}
+{"string": "lizard mouse frog lizard rat chicken frog "}
+{"string": "fish snake pig rabbit goat shark shark "}
+{"string": "snake bear bear squirrel dog deer bear goat "}
+{"string": "bear pig chicken turtle cow tiger duck lion shark wolf "}
+{"string": "elephant dog bear dog snake mouse dog deer mouse "}
+{"string": "snake tiger turtle fish chicken fish snake tiger "}
+{"string": "squirrel shark fish cat wolf panda tiger dog lion "}
+{"string": "bear goat dog sheep kangaroo shark wolf lion "}
+{"string": "wolf cow wolf dog lion bear tiger deer snake tiger "}
+{"string": "wolf fish panda turtle frog chicken shark frog giraffe "}
+{"string": "mouse turtle rat fish chicken shark squirrel bear "}
+{"string": "dog elephant dog cat panda fox panda "}
+{"string": "horse snake lion dog chicken chicken elephant deer duck "}
+{"string": "horse dog frog rat shark chicken sheep rat "}
+{"string": "zebra goat deer dog rabbit wolf kangaroo "}
+{"string": "panda rat snake wolf mouse sheep kangaroo duck rat lion "}
+{"string": "mouse panda horse lion mouse zebra cat sheep snake "}
+{"string": "cow cow rat mouse giraffe elephant wolf rat shark "}
+{"string": "fish fish rabbit wolf shark snake lizard pig "}
+{"string": "bear frog dog fox zebra tiger fox pig "}
+{"string": "frog turtle elephant rat goat lion fox "}
+{"string": "squirrel dog fox goat snake duck fish wolf frog sheep "}
+{"string": "lion lizard sheep cat squirrel lizard giraffe chicken snake "}
+{"string": "horse lizard bear turtle chicken elephant dog tiger dog frog "}
+{"string": "duck mouse chicken goat mouse zebra wolf chicken squirrel cow "}
+{"string": "elephant tiger lion shark snake zebra bear shark "}
+{"string": "rabbit panda zebra fish tiger wolf panda duck "}
+{"string": "panda cow lizard shark bear fox cow "}
+{"string": "kangaroo horse bear chicken lizard fish deer duck tiger "}
+{"string": "fox lion cow giraffe rat chicken frog "}
+{"string": "chicken goat chicken panda sheep frog giraffe pig fish "}
+{"string": "pig cat wolf frog pig elephant snake "}
+{"string": "horse rabbit turtle lion turtle dog frog cow "}
+{"string": "kangaroo sheep elephant turtle panda elephant cat "}
+{"string": "dog sheep tiger snake goat mouse goat tiger fox lion "}
+{"string": "giraffe dog squirrel elephant bear giraffe sheep "}
+{"string": "squirrel sheep squirrel tiger giraffe bear dog "}
+{"string": "snake deer turtle rabbit shark tiger giraffe zebra zebra "}
+{"string": "duck panda turtle turtle tiger horse squirrel "}
+{"string": "zebra fox frog turtle lizard panda zebra bear "}
+{"string": "chicken frog giraffe rabbit dog giraffe frog lion horse "}
+{"string": "tiger dog pig rabbit kangaroo deer turtle "}
+{"string": "squirrel cat sheep sheep squirrel squirrel horse panda goat "}
+{"string": "rat chicken bear snake giraffe elephant giraffe cow squirrel "}
+{"string": "cat panda frog frog pig fox squirrel deer "}
+{"string": "turtle bear cow cow cat elephant zebra fish turtle "}
+{"string": "lizard frog panda panda goat lizard shark pig rabbit "}
+{"string": "cat rabbit elephant goat squirrel elephant tiger turtle chicken lizard "}
+{"string": "snake snake tiger frog cow giraffe horse "}
+{"string": "bear turtle bear horse cow cow pig elephant "}
+{"string": "shark kangaroo turtle squirrel shark cat rabbit turtle "}
+{"string": "bear lion mouse dog goat dog frog turtle "}
+{"string": "snake shark zebra bear pig lizard lion snake fox "}
+{"string": "snake panda fish tiger wolf tiger horse panda mouse dog "}
+{"string": "pig panda horse fox pig horse shark giraffe "}
+{"string": "mouse pig mouse cat kangaroo lizard goat giraffe sheep lizard "}
+{"string": "rabbit rat cow sheep wolf chicken zebra bear panda "}
+{"string": "horse bear cow giraffe sheep horse bear "}
+{"string": "squirrel kangaroo dog fox horse turtle wolf "}
+{"string": "turtle cow goat giraffe tiger sheep bear pig rat "}
+{"string": "mouse horse rat squirrel frog kangaroo lizard "}
+{"string": "bear fox wolf frog bear wolf cow shark tiger "}
+{"string": "rabbit fox chicken cat panda snake frog "}
+{"string": "shark mouse chicken elephant lion pig zebra wolf dog tiger "}
+{"string": "sheep kangaroo rat giraffe elephant wolf mouse "}
+{"string": "duck dog giraffe chicken sheep deer tiger dog cow sheep "}
+{"string": "goat snake cow elephant goat fish cow "}
+{"string": "deer pig fox mouse duck chicken snake chicken elephant "}
+{"string": "pig horse frog zebra zebra sheep zebra snake shark bear "}
+{"string": "giraffe rabbit mouse duck lion turtle lion fox dog "}
+{"string": "duck snake cow rabbit sheep mouse wolf giraffe fox "}
+{"string": "horse dog cow tiger fox fish cat pig turtle pig "}
+{"string": "elephant duck kangaroo fish chicken cat elephant kangaroo panda squirrel "}
+{"string": "tiger rat frog dog deer panda bear horse "}
+{"string": "kangaroo chicken panda shark tiger zebra wolf tiger wolf "}
+{"string": "wolf cow lion shark fish lizard sheep goat "}
+{"string": "goat snake dog fish deer rabbit chicken duck rat rat "}
+{"string": "snake bear horse dog kangaroo cat horse goat chicken "}
+{"string": "giraffe goat fish shark kangaroo chicken rabbit fox "}
+{"string": "cat fox cow bear shark snake elephant frog fish duck "}
+{"string": "pig cow tiger fox chicken cow cow turtle "}
+{"string": "fish kangaroo sheep wolf rat cat cow rat "}
+{"string": "lion rat sheep sheep goat bear sheep "}
+{"string": "bear lion squirrel cow bear dog rabbit "}
+{"string": "horse cow rat elephant frog duck cat fish shark "}
+{"string": "frog cat cow squirrel cat chicken deer "}
+{"string": "duck wolf frog rat dog tiger pig lizard "}
+{"string": "cat frog kangaroo sheep bear elephant bear "}
+{"string": "mouse turtle turtle lizard wolf mouse wolf sheep frog "}
+{"string": "turtle giraffe kangaroo bear fox mouse zebra fish rat lion "}
+{"string": "cat kangaroo giraffe squirrel chicken sheep chicken cow bear "}
+{"string": "sheep sheep turtle rat lizard rat cat fox "}
+{"string": "fish turtle zebra kangaroo rabbit dog elephant pig tiger "}
+{"string": "rabbit shark mouse chicken sheep lizard mouse frog cow "}
+{"string": "dog snake zebra lion sheep panda dog mouse chicken "}
+{"string": "fox turtle lizard kangaroo turtle lizard chicken rabbit "}
+{"string": "chicken dog lizard frog fox deer cow cow kangaroo wolf "}
+{"string": "bear fish lion goat cat bear bear panda "}
+{"string": "wolf wolf kangaroo cat mouse goat fox rat "}
+{"string": "dog snake giraffe kangaroo panda giraffe bear shark sheep fish "}
+{"string": "rabbit tiger cat fish kangaroo lion deer sheep zebra "}
+{"string": "sheep deer dog elephant rabbit fish zebra chicken bear squirrel "}
+{"string": "chicken wolf frog goat lizard kangaroo lizard wolf "}
+{"string": "horse giraffe cat sheep cow chicken snake dog "}
+{"string": "cat fish dog bear squirrel mouse deer chicken "}
+{"string": "goat mouse turtle dog duck deer deer kangaroo fox zebra "}
+{"string": "shark dog deer snake pig panda sheep squirrel cow "}
+{"string": "fish shark tiger panda fish deer bear zebra frog "}
+{"string": "frog kangaroo pig wolf kangaroo fish lizard frog horse "}
+{"string": "kangaroo rabbit frog pig shark rat snake pig "}
+{"string": "rabbit turtle fish duck snake chicken shark goat shark sheep "}
+{"string": "zebra horse tiger squirrel goat rat bear lizard kangaroo cow "}
+{"string": "fox cow duck horse panda bear panda lizard deer "}
+{"string": "cow tiger deer shark elephant zebra zebra squirrel zebra "}
+{"string": "dog elephant pig zebra cow mouse dog "}
+{"string": "lizard bear snake rabbit tiger elephant horse goat sheep "}
+{"string": "deer mouse deer zebra cow goat rat "}
+{"string": "turtle lizard giraffe frog shark lion kangaroo pig "}
+{"string": "giraffe kangaroo shark cow fox horse bear wolf "}
+{"string": "kangaroo frog cow dog squirrel chicken wolf bear fox "}
+{"string": "squirrel wolf lizard mouse lizard goat panda squirrel "}
+{"string": "snake rabbit lizard lizard duck lion rabbit "}
+{"string": "frog lion turtle deer lizard dog squirrel "}
+{"string": "mouse goat rabbit chicken lizard horse duck turtle "}
+{"string": "chicken frog lizard wolf rabbit cat chicken wolf "}
+{"string": "pig elephant goat goat lizard shark sheep cat shark duck "}
+{"string": "frog zebra squirrel pig horse giraffe goat tiger turtle cat "}
+{"string": "squirrel mouse fox zebra snake rat shark mouse "}
+{"string": "rabbit zebra zebra chicken cat rabbit shark "}
+{"string": "deer dog snake cow rabbit dog dog dog mouse lion "}
+{"string": "dog lizard deer lizard snake giraffe squirrel kangaroo "}
+{"string": "kangaroo wolf deer shark giraffe giraffe giraffe horse elephant "}
+{"string": "chicken zebra turtle rabbit goat snake chicken kangaroo snake frog "}
+{"string": "duck cow goat tiger rabbit turtle deer lizard fox sheep "}
+{"string": "duck duck snake lion kangaroo rabbit wolf "}
+{"string": "cow kangaroo kangaroo wolf turtle tiger deer panda zebra lion "}
+{"string": "sheep rabbit rat deer lion wolf bear shark panda "}
+{"string": "elephant panda turtle sheep mouse giraffe horse rat pig "}
+{"string": "chicken lion sheep fox deer squirrel giraffe deer goat "}
+{"string": "fox lion squirrel bear cat fish sheep fox dog "}
+{"string": "turtle kangaroo fish sheep turtle panda frog cow lion "}
+{"string": "shark frog panda duck mouse shark goat sheep zebra fish "}
+{"string": "dog lion elephant zebra mouse rat panda tiger duck "}
+{"string": "turtle lion deer duck fox mouse lion rat bear "}
+{"string": "panda squirrel lion tiger chicken goat sheep zebra turtle deer "}
+{"string": "cat rabbit cow duck horse kangaroo zebra fox rabbit "}
+{"string": "horse wolf zebra squirrel cow sheep rat fish "}
+{"string": "frog lion fox lion cat panda kangaroo panda snake sheep "}
+{"string": "kangaroo chicken cow rabbit bear bear snake squirrel frog cow "}
+{"string": "pig bear shark deer chicken cow sheep fish bear bear "}
+{"string": "elephant rat squirrel tiger lizard tiger snake wolf cat "}
+{"string": "shark panda zebra goat shark kangaroo mouse "}
+{"string": "cat sheep frog duck giraffe cat elephant rabbit goat duck "}
+{"string": "fish lion shark dog zebra frog fish dog lizard "}
+{"string": "fish mouse cow giraffe cat snake fish kangaroo "}
+{"string": "kangaroo panda rat rat horse frog rat mouse rabbit elephant "}
+{"string": "zebra bear zebra deer rabbit frog sheep turtle bear "}
+{"string": "lizard fox chicken deer panda turtle zebra "}
+{"string": "pig wolf goat snake turtle chicken horse "}
+{"string": "dog cow fish goat squirrel giraffe dog squirrel lion "}
+{"string": "cow deer duck deer rabbit shark kangaroo shark deer kangaroo "}
+{"string": "fish shark wolf dog lion chicken snake cat chicken frog "}
+{"string": "cat cow snake snake turtle horse mouse bear "}
+{"string": "frog elephant sheep snake horse fox cow "}
+{"string": "rabbit duck turtle duck zebra cow deer rat kangaroo giraffe "}
+{"string": "fish pig fox snake panda fox squirrel "}
+{"string": "horse lizard chicken chicken lizard elephant zebra "}
+{"string": "deer chicken zebra fish duck rabbit horse fish "}
+{"string": "cat sheep cat turtle kangaroo goat shark squirrel rat dog "}
+{"string": "cat kangaroo rabbit fish rat shark cow giraffe turtle tiger "}
+{"string": "cow turtle cat fish shark kangaroo deer frog fish "}
+{"string": "horse dog duck bear deer fish pig turtle horse cat "}
+{"string": "cat mouse goat kangaroo kangaroo pig frog fox dog panda "}
+{"string": "frog shark frog shark squirrel squirrel mouse "}
+{"string": "kangaroo chicken turtle rabbit frog pig fish elephant horse "}
+{"string": "deer mouse pig snake deer dog kangaroo tiger chicken "}
+{"string": "shark elephant rat deer fish mouse goat giraffe "}
+{"string": "bear zebra bear dog chicken snake cow "}
+{"string": "tiger shark cat lion goat frog bear mouse "}
+{"string": "shark elephant kangaroo fox fox dog tiger duck lion "}
+{"string": "bear fish kangaroo goat turtle turtle cow "}
+{"string": "snake goat cat wolf squirrel tiger chicken elephant deer deer "}
+{"string": "frog turtle sheep tiger squirrel tiger panda lizard "}
+{"string": "shark fish pig giraffe zebra chicken deer "}
+{"string": "zebra tiger goat rat cow tiger deer tiger snake pig "}
+{"string": "cow mouse turtle bear turtle zebra zebra "}
+{"string": "rabbit mouse squirrel turtle giraffe rat mouse squirrel "}
+{"string": "squirrel rat frog zebra cat snake mouse squirrel giraffe "}
+{"string": "panda wolf fox snake sheep bear duck "}
+{"string": "snake turtle zebra cat fish snake goat pig "}
+{"string": "deer dog horse lion fish horse fish sheep "}
+{"string": "giraffe tiger snake bear lizard elephant chicken tiger "}
+{"string": "lizard fish frog goat tiger wolf turtle goat lizard "}
+{"string": "elephant squirrel panda fox elephant rat chicken rabbit "}
+{"string": "dog frog snake lion rat kangaroo elephant elephant "}
+{"string": "pig cow duck duck cat lion snake deer fox "}
+{"string": "turtle snake chicken giraffe fox bear rabbit tiger "}
+{"string": "deer frog chicken horse tiger tiger cat "}
+{"string": "horse panda snake wolf panda panda cat "}
+{"string": "sheep chicken zebra zebra dog cow elephant pig duck "}
+{"string": "shark shark frog kangaroo snake tiger horse elephant chicken giraffe "}
+{"string": "squirrel shark cow goat rabbit lion goat giraffe snake deer "}
+{"string": "bear pig duck rat sheep bear elephant rabbit wolf lizard "}
+{"string": "deer snake fox cow sheep dog rat "}
+{"string": "deer elephant panda frog mouse elephant fox cow "}
+{"string": "wolf rabbit squirrel rat cow deer panda "}
+{"string": "cow zebra shark goat panda dog turtle turtle rabbit "}
+{"string": "mouse cat duck dog shark goat horse bear tiger cow "}
+{"string": "elephant rabbit fish elephant rabbit duck fox "}
+{"string": "lion horse snake cow wolf snake fox lion "}
+{"string": "bear duck mouse cow zebra squirrel goat panda rabbit "}
+{"string": "shark elephant rat frog rabbit rabbit goat cow kangaroo "}
+{"string": "lion kangaroo giraffe bear deer shark wolf wolf duck lizard "}
+{"string": "wolf cow shark dog cow zebra turtle shark fish goat "}
+{"string": "kangaroo pig tiger cow pig bear panda lion wolf turtle "}
+{"string": "chicken cow panda giraffe rat panda fox duck wolf giraffe "}
+{"string": "fox snake deer shark squirrel deer wolf "}
+{"string": "sheep lizard rat goat turtle horse dog pig lizard wolf "}
+{"string": "fish pig mouse snake frog shark rat panda "}
+{"string": "wolf goat fish elephant kangaroo duck cat "}
+{"string": "rat rabbit horse kangaroo kangaroo cow cat rabbit mouse "}
+{"string": "pig chicken rabbit rat zebra duck chicken goat "}
+{"string": "shark tiger panda goat bear turtle cat fish pig "}
+{"string": "chicken dog goat deer bear lion turtle panda "}
+{"string": "rabbit frog turtle turtle rat turtle goat "}
+{"string": "shark giraffe horse wolf fish sheep giraffe "}
+{"string": "rat elephant rabbit snake panda rabbit squirrel lizard "}
+{"string": "rabbit cat horse horse rabbit zebra kangaroo snake "}
+{"string": "panda cat fish dog fox cat turtle sheep goat "}
+{"string": "kangaroo elephant snake rabbit lizard horse giraffe rabbit zebra "}
+{"string": "fox shark squirrel fox deer rat frog pig "}
+{"string": "deer mouse mouse squirrel fish deer squirrel "}
+{"string": "tiger squirrel kangaroo bear chicken zebra deer shark frog "}
+{"string": "cat squirrel kangaroo duck fish sheep snake shark frog dog "}
+{"string": "turtle rat snake lion kangaroo cow squirrel rat "}
+{"string": "tiger turtle lizard tiger rabbit snake elephant "}
+{"string": "mouse rat deer sheep giraffe tiger fish "}
+{"string": "tiger zebra deer lizard kangaroo turtle duck "}
+{"string": "mouse cow wolf cow deer pig cow goat pig "}
+{"string": "sheep frog turtle goat dog horse duck zebra elephant cow "}
+{"string": "horse duck pig wolf fish zebra cow "}
+{"string": "bear rat panda frog zebra goat dog tiger chicken "}
+{"string": "panda lion panda squirrel cat fish kangaroo "}
+{"string": "lion turtle mouse bear shark kangaroo lizard fish cow chicken "}
+{"string": "elephant rabbit panda rat goat horse panda elephant cow fox "}
+{"string": "turtle dog rabbit panda lizard squirrel rabbit "}
+{"string": "horse wolf cat horse cow sheep fish "}
+{"string": "squirrel tiger zebra giraffe giraffe pig chicken deer lion "}
+{"string": "pig elephant wolf zebra bear sheep duck "}
+{"string": "zebra frog turtle fox dog elephant giraffe horse rabbit tiger "}
+{"string": "pig horse tiger lizard duck fox panda shark wolf dog "}
+{"string": "panda sheep cow tiger horse pig pig fox giraffe shark "}
+{"string": "tiger rabbit lion deer kangaroo frog goat "}
+{"string": "tiger turtle chicken fish fish tiger dog turtle panda chicken "}
+{"string": "horse horse sheep rabbit shark lion duck duck "}
+{"string": "mouse zebra giraffe goat snake fish dog turtle deer "}
+{"string": "fish duck snake snake lion sheep snake cat cow "}
+{"string": "dog fox bear turtle giraffe bear giraffe "}
+{"string": "snake sheep fox duck lizard wolf bear "}
+{"string": "duck shark horse rat pig pig squirrel rat "}
+{"string": "elephant sheep tiger shark bear elephant chicken "}
+{"string": "wolf lizard panda wolf duck dog rat rat "}
+{"string": "zebra rabbit rabbit shark cow fox cat goat lizard "}
+{"string": "rabbit pig fox sheep cat pig giraffe duck "}
+{"string": "bear snake rabbit fish dog fish fish horse "}
+{"string": "dog fox horse turtle sheep fox duck "}
+{"string": "elephant cat shark dog kangaroo mouse elephant "}
+{"string": "deer horse duck rat deer tiger lion shark horse pig "}
+{"string": "deer mouse duck wolf dog elephant fox shark snake "}
+{"string": "rat mouse deer frog frog dog duck zebra tiger rat "}
+{"string": "elephant cow tiger fox elephant fish shark deer bear "}
+{"string": "frog duck cat chicken turtle rat frog rabbit shark "}
+{"string": "lizard wolf deer tiger dog fox turtle "}
+{"string": "pig rat kangaroo elephant goat pig horse zebra zebra "}
+{"string": "lion sheep cat fish bear fish fish duck "}
+{"string": "panda mouse duck rabbit elephant goat lion kangaroo duck "}
+{"string": "shark bear squirrel turtle fox chicken bear tiger panda "}
+{"string": "frog goat kangaroo dog snake rat tiger chicken goat horse "}
+{"string": "duck cat dog goat fox fish shark fish "}
+{"string": "lizard mouse duck zebra giraffe sheep chicken "}
+{"string": "rat zebra shark squirrel mouse turtle tiger frog tiger "}
+{"string": "goat turtle tiger shark frog elephant fox chicken shark "}
+{"string": "fish frog shark duck fox rat shark frog "}
+{"string": "fox rat kangaroo lizard wolf panda chicken "}
+{"string": "wolf fox lion fish duck wolf giraffe squirrel kangaroo "}
+{"string": "bear kangaroo zebra zebra rat turtle lizard "}
+{"string": "zebra lion pig cat squirrel lizard kangaroo "}
+{"string": "frog pig mouse cow bear giraffe mouse giraffe duck pig "}
+{"string": "giraffe horse cat pig horse horse snake kangaroo pig giraffe "}
+{"string": "turtle tiger horse tiger chicken rat lizard wolf horse "}
+{"string": "mouse snake goat deer goat chicken turtle "}
+{"string": "chicken fox horse elephant goat tiger lion snake snake "}
+{"string": "rabbit turtle pig goat lizard zebra duck "}
+{"string": "giraffe goat rat tiger sheep lion lion cow lion "}
+{"string": "kangaroo cat frog fish goat deer wolf shark mouse "}
+{"string": "chicken panda pig pig fish mouse deer "}
+{"string": "rat mouse squirrel shark horse zebra frog panda "}
+{"string": "squirrel duck rat goat dog cat chicken "}
+{"string": "tiger dog elephant goat snake cat deer horse goat giraffe "}
+{"string": "wolf giraffe horse panda chicken shark panda "}
+{"string": "turtle panda duck mouse fox rat fish kangaroo "}
+{"string": "sheep dog cat duck fox rat frog snake rabbit giraffe "}
+{"string": "kangaroo frog elephant bear elephant mouse squirrel "}
+{"string": "duck turtle horse dog rabbit fox cat shark rat "}
+{"string": "squirrel cat frog bear cat rat sheep elephant "}
+{"string": "pig frog shark snake sheep bear pig fish cow "}
+{"string": "rabbit cat goat tiger rabbit rabbit wolf lizard "}
+{"string": "mouse deer cat elephant frog shark tiger tiger goat lizard "}
+{"string": "panda pig chicken fox cat sheep goat horse "}
+{"string": "rabbit lizard lizard fish duck rat horse "}
+{"string": "pig fish lion deer lion fox rabbit "}
+{"string": "mouse bear elephant fish mouse horse elephant deer "}
+{"string": "lizard cat rabbit dog fox lion lion duck fox "}
+{"string": "lizard goat duck duck fish rat duck mouse lizard "}
+{"string": "goat goat zebra shark pig frog dog lion "}
+{"string": "deer horse shark sheep tiger squirrel zebra "}
+{"string": "squirrel bear sheep goat squirrel rat goat "}
+{"string": "cow lion squirrel chicken bear rat tiger panda cow "}
+{"string": "panda fox cat zebra fox giraffe turtle deer deer panda "}
+{"string": "mouse fish horse mouse fish fish kangaroo "}
+{"string": "wolf goat lizard tiger chicken fish rat frog "}
+{"string": "cat fish panda sheep tiger lizard horse snake giraffe "}
+{"string": "lion goat fish deer rabbit snake snake horse "}
+{"string": "sheep shark dog tiger duck cat zebra "}
+{"string": "lizard fish mouse duck wolf rat frog rat frog "}
+{"string": "goat frog zebra tiger duck cat horse rabbit shark "}
+{"string": "pig elephant fish giraffe bear kangaroo kangaroo duck cat goat "}
+{"string": "shark squirrel sheep horse tiger bear chicken cow snake giraffe "}
+{"string": "elephant sheep dog kangaroo tiger bear snake "}
+{"string": "rat deer turtle panda panda bear dog deer kangaroo "}
+{"string": "cat frog elephant rat fish dog snake kangaroo bear fish "}
+{"string": "tiger turtle kangaroo lizard elephant deer lizard chicken duck kangaroo "}
+{"string": "frog rabbit pig zebra elephant zebra mouse deer tiger fish "}
+{"string": "deer fish lion giraffe kangaroo cat rat zebra "}
+{"string": "turtle pig squirrel fox rabbit fox cat squirrel deer rabbit "}
+{"string": "squirrel rabbit pig shark panda bear fish "}
+{"string": "cow duck sheep rabbit dog dog mouse tiger deer lizard "}
+{"string": "lion horse pig chicken turtle fox horse bear kangaroo "}
+{"string": "wolf giraffe kangaroo wolf giraffe sheep chicken kangaroo lizard "}
+{"string": "zebra frog fish pig rabbit rabbit squirrel shark mouse squirrel "}
+{"string": "turtle tiger cat goat wolf rat snake sheep lion "}
+{"string": "panda zebra shark kangaroo dog mouse shark "}
+{"string": "pig fish goat tiger panda frog lion turtle "}
+{"string": "cow rat cat tiger pig deer horse kangaroo goat wolf "}
+{"string": "zebra duck duck wolf shark cow turtle "}
+{"string": "lion fox turtle deer lizard cat elephant snake "}
+{"string": "cat fish duck frog elephant elephant fox "}
+{"string": "lizard goat bear lion bear chicken chicken goat kangaroo wolf "}
+{"string": "frog fox sheep zebra goat bear kangaroo duck "}
+{"string": "pig pig zebra elephant panda kangaroo rat squirrel pig deer "}
+{"string": "kangaroo deer turtle panda frog squirrel duck panda cow sheep "}
+{"string": "duck squirrel wolf rabbit giraffe horse turtle zebra "}
+{"string": "panda rabbit wolf duck lion duck dog sheep pig turtle "}
+{"string": "frog lion kangaroo rabbit rabbit rabbit deer bear "}
+{"string": "dog snake lion fox lion tiger lion "}
+{"string": "zebra tiger rat horse lizard cow lion elephant fish turtle "}
+{"string": "elephant fox wolf fox kangaroo dog cow mouse "}
+{"string": "deer bear elephant zebra fish dog squirrel "}
+{"string": "cow turtle frog horse fish cat lizard lion "}
+{"string": "lizard squirrel bear panda chicken cat chicken lizard deer "}
+{"string": "turtle shark pig panda turtle wolf elephant tiger cow squirrel "}
+{"string": "lizard mouse tiger frog pig elephant lizard "}
+{"string": "snake giraffe shark fox shark cat sheep "}
+{"string": "sheep bear goat elephant mouse sheep frog rat rabbit mouse "}
+{"string": "chicken duck dog rat duck zebra wolf "}
+{"string": "sheep panda rabbit cat rat snake turtle squirrel chicken "}
+{"string": "snake rabbit squirrel rat rabbit rat sheep shark "}
+{"string": "snake cow lizard turtle goat chicken horse kangaroo kangaroo "}
+{"string": "bear fish rabbit horse fish snake turtle deer "}
+{"string": "wolf cat panda bear shark rat deer shark turtle sheep "}
+{"string": "frog turtle duck turtle frog elephant lizard rabbit cat "}
+{"string": "duck dog kangaroo dog frog duck frog bear deer kangaroo "}
+{"string": "pig turtle tiger duck pig turtle lizard "}
+{"string": "squirrel fox duck zebra deer deer shark panda giraffe cow "}
+{"string": "goat duck horse kangaroo frog panda fox shark zebra deer "}
+{"string": "fox kangaroo rat kangaroo lion lizard sheep squirrel elephant fish "}
+{"string": "turtle rat squirrel snake mouse bear goat horse mouse "}
+{"string": "duck kangaroo pig rabbit frog lion giraffe "}
+{"string": "rabbit duck fox fish zebra wolf horse "}
+{"string": "fish duck tiger rat pig lizard shark squirrel turtle "}
+{"string": "fox sheep fox cow fish elephant dog squirrel lion goat "}
+{"string": "horse deer lion lizard shark dog panda dog panda "}
+{"string": "zebra squirrel duck kangaroo tiger rat kangaroo frog chicken squirrel "}
+{"string": "panda bear squirrel cat cow kangaroo cat snake cat "}
+{"string": "goat mouse squirrel lizard goat fish elephant shark goat "}
+{"string": "cow rabbit fox wolf fox cat dog bear "}
+{"string": "bear giraffe rat mouse sheep sheep snake mouse zebra "}
+{"string": "tiger pig rat elephant elephant lion cow frog "}
+{"string": "chicken fish turtle cow wolf horse kangaroo squirrel sheep "}
+{"string": "lizard panda cat turtle tiger dog pig chicken kangaroo "}
+{"string": "rabbit giraffe wolf rabbit fish elephant panda shark "}
+{"string": "fish duck lion snake wolf deer horse "}
+{"string": "giraffe panda bear lizard chicken frog wolf turtle "}
+{"string": "panda pig dog snake lizard lizard elephant chicken "}
+{"string": "frog sheep squirrel duck wolf cat wolf chicken turtle elephant "}
+{"string": "cow zebra duck frog elephant horse rabbit horse goat lizard "}
+{"string": "lizard lizard giraffe lion rat giraffe kangaroo dog cow deer "}
+{"string": "duck fish pig fish fox frog deer "}
+{"string": "panda cat dog goat kangaroo squirrel cow "}
+{"string": "lizard rabbit lion cow lizard cow fish horse "}
+{"string": "panda panda cow duck zebra shark fish dog wolf kangaroo "}
+{"string": "rat mouse cow shark chicken wolf lizard bear rat elephant "}
+{"string": "deer lizard rat dog chicken lion elephant turtle "}
+{"string": "rat fox fish chicken giraffe kangaroo cat elephant panda kangaroo "}
+{"string": "sheep squirrel lizard lizard rat tiger bear "}
+{"string": "fox cat kangaroo bear shark rabbit rat giraffe rat "}
+{"string": "bear rabbit cow goat turtle chicken giraffe pig kangaroo elephant "}
+{"string": "lion shark horse panda elephant fish zebra cow "}
+{"string": "shark fox horse zebra cat mouse snake horse goat kangaroo "}
+{"string": "kangaroo goat turtle goat bear shark frog pig "}
+{"string": "deer lizard lion cat turtle shark tiger mouse "}
+{"string": "kangaroo zebra lizard snake cow horse fish sheep "}
+{"string": "zebra giraffe elephant cat mouse shark dog bear giraffe "}
+{"string": "pig turtle pig kangaroo lizard frog tiger kangaroo "}
+{"string": "lion fox fish cow sheep shark dog "}
+{"string": "frog shark rat elephant cow sheep sheep giraffe "}
+{"string": "lion turtle chicken fish lizard cow cow frog lizard rat "}
+{"string": "chicken frog horse bear shark shark zebra tiger giraffe "}
+{"string": "giraffe cow snake panda mouse elephant dog wolf frog elephant "}
+{"string": "rat rabbit fish elephant squirrel elephant lizard "}
+{"string": "lizard zebra horse panda shark turtle frog bear fox panda "}
+{"string": "chicken mouse tiger giraffe rat cow dog fish cow "}
+{"string": "turtle shark rabbit deer fox rat giraffe panda "}
+{"string": "shark shark rabbit deer panda sheep elephant "}
+{"string": "zebra giraffe panda chicken duck lion giraffe cow shark frog "}
+{"string": "wolf frog lizard horse lion rabbit duck "}
+{"string": "frog lion lizard kangaroo cat rat frog "}
+{"string": "cat dog sheep frog shark rat kangaroo bear fox "}
+{"string": "tiger rabbit cat snake fish mouse panda squirrel "}
+{"string": "deer deer cow sheep cat chicken lion giraffe lion "}
+{"string": "pig elephant cat elephant fish lion shark goat "}
+{"string": "lizard cat cat tiger horse rat horse fox lizard dog "}
+{"string": "tiger dog squirrel zebra rabbit cat frog deer turtle "}
+{"string": "tiger kangaroo sheep elephant shark rat snake "}
+{"string": "shark bear fish sheep dog snake bear tiger shark duck "}
+{"string": "giraffe horse chicken frog panda cat fox "}
+{"string": "kangaroo turtle turtle cat lion rabbit sheep fox chicken "}
+{"string": "frog chicken rat rat kangaroo duck shark shark "}
+{"string": "squirrel panda bear duck cow mouse wolf turtle elephant "}
+{"string": "horse pig sheep panda zebra shark rat tiger lion "}
+{"string": "elephant squirrel pig dog elephant cow lizard fish goat "}
+{"string": "dog mouse tiger deer elephant lion elephant fox lion "}
+{"string": "squirrel snake duck lizard chicken lizard tiger horse "}
+{"string": "cat chicken pig frog chicken cow kangaroo "}
+{"string": "cat zebra snake panda deer goat lizard "}
+{"string": "fish cat tiger squirrel kangaroo lizard turtle cat elephant "}
+{"string": "rabbit fox kangaroo goat panda shark chicken "}
+{"string": "turtle deer horse lizard wolf rabbit pig zebra lion "}
+{"string": "panda snake squirrel cow mouse fox wolf "}
+{"string": "mouse dog zebra kangaroo squirrel duck goat chicken "}
+{"string": "mouse dog tiger zebra rat squirrel elephant chicken mouse deer "}
+{"string": "lizard lion bear frog fish duck rat duck frog zebra "}
+{"string": "pig squirrel pig squirrel zebra elephant snake dog dog "}
+{"string": "wolf turtle mouse rat rabbit lizard deer "}
+{"string": "kangaroo kangaroo fish frog rabbit snake rabbit rabbit "}
+{"string": "fish rat rat fox squirrel horse dog tiger snake mouse "}
+{"string": "chicken fox chicken chicken goat fish tiger panda fox snake "}
+{"string": "pig pig rat elephant dog chicken elephant lion wolf fish "}
+{"string": "bear zebra lion rabbit snake chicken frog tiger "}
+{"string": "deer kangaroo rat kangaroo deer rat chicken pig pig "}
+{"string": "mouse fish pig goat zebra giraffe deer "}
+{"string": "snake fox pig bear fish wolf lizard duck "}
+{"string": "tiger shark horse snake goat cat tiger giraffe frog "}
+{"string": "dog kangaroo kangaroo horse bear dog fish sheep elephant "}
+{"string": "frog fox shark giraffe mouse panda pig "}
+{"string": "rat tiger goat chicken goat shark panda chicken giraffe "}
+{"string": "frog horse lion squirrel sheep rabbit horse rat deer bear "}
+{"string": "duck rat cow rat giraffe shark mouse deer "}
+{"string": "squirrel rabbit shark mouse duck frog bear sheep lizard "}
+{"string": "fox kangaroo cat rabbit deer dog zebra snake chicken "}
+{"string": "lion bear turtle elephant fox squirrel tiger kangaroo turtle "}
+{"string": "snake elephant duck cat turtle sheep chicken "}
+{"string": "fox horse shark goat cat kangaroo squirrel squirrel horse shark "}
+{"string": "zebra fox shark goat sheep fox wolf turtle chicken "}
+{"string": "turtle zebra squirrel duck squirrel wolf goat "}
+{"string": "pig mouse bear cow lion rat sheep fish turtle cow "}
+{"string": "shark kangaroo dog duck mouse giraffe dog bear lizard "}
+{"string": "dog shark shark chicken rat turtle panda duck "}
+{"string": "kangaroo bear cat pig frog chicken pig elephant "}
+{"string": "shark goat bear turtle kangaroo deer mouse frog wolf "}
+{"string": "goat rat zebra kangaroo elephant sheep frog elephant cat cow "}
+{"string": "rabbit lion giraffe squirrel snake panda fish "}
+{"string": "snake squirrel rat turtle tiger turtle dog lion "}
+{"string": "chicken horse duck cow turtle squirrel horse panda wolf "}
+{"string": "horse rabbit zebra zebra turtle deer kangaroo "}
+{"string": "turtle bear deer panda cow cow goat fish lizard "}
+{"string": "pig horse pig snake cat duck mouse "}
+{"string": "wolf squirrel fish lizard cow cow turtle cow dog lizard "}
+{"string": "panda wolf sheep kangaroo goat dog lizard frog sheep "}
+{"string": "panda tiger wolf duck dog squirrel panda "}
+{"string": "frog elephant zebra lizard lizard mouse bear giraffe lizard "}
+{"string": "dog deer cat giraffe lizard elephant dog panda squirrel "}
+{"string": "lizard shark bear dog turtle kangaroo fish kangaroo tiger "}
+{"string": "lizard duck fish cow bear wolf bear chicken "}
+{"string": "kangaroo giraffe shark wolf goat deer kangaroo fish dog kangaroo "}
+{"string": "lion kangaroo wolf kangaroo giraffe goat lion dog wolf panda "}
+{"string": "rat wolf elephant shark zebra wolf sheep "}
+{"string": "horse squirrel sheep shark panda giraffe cow elephant dog tiger "}
+{"string": "shark fish sheep cow panda frog rat elephant "}
+{"string": "snake sheep snake fox rat elephant deer lizard "}
+{"string": "tiger mouse turtle mouse bear mouse duck duck horse "}
+{"string": "lion goat fox snake dog shark kangaroo mouse "}
+{"string": "cow deer turtle panda fish dog cow giraffe "}
+{"string": "bear snake shark lizard rat horse turtle wolf "}
+{"string": "panda sheep chicken kangaroo panda fox pig lion wolf "}
+{"string": "frog frog snake cat shark goat turtle "}
+{"string": "turtle wolf kangaroo zebra wolf cat sheep snake elephant "}
+{"string": "lizard squirrel elephant frog duck kangaroo snake "}
+{"string": "tiger giraffe shark cow frog bear frog squirrel "}
+{"string": "fish wolf pig duck panda fish cat duck zebra panda "}
+{"string": "tiger dog wolf kangaroo turtle dog zebra wolf "}
+{"string": "zebra deer fox rabbit fish deer snake lizard cow lizard "}
+{"string": "elephant wolf frog lion pig kangaroo lizard tiger cat pig "}
+{"string": "squirrel rat rat rabbit mouse pig squirrel sheep horse dog "}
+{"string": "fox deer deer panda deer cow fish duck "}
+{"string": "elephant chicken goat squirrel tiger sheep elephant zebra "}
+{"string": "mouse deer dog wolf fox wolf duck deer bear "}
+{"string": "rabbit cow rat giraffe duck horse rat "}
+{"string": "mouse chicken squirrel panda cow fox duck panda deer tiger "}
+{"string": "snake rabbit shark sheep mouse cat lion "}
+{"string": "giraffe tiger chicken mouse panda tiger mouse "}
+{"string": "shark cow fox bear panda horse elephant panda squirrel horse "}
+{"string": "cat cat horse shark giraffe squirrel shark lion "}
+{"string": "dog lion lizard tiger frog squirrel squirrel squirrel frog goat "}
+{"string": "lion giraffe fish duck rat turtle zebra pig deer duck "}
+{"string": "elephant sheep panda kangaroo chicken elephant zebra "}
+{"string": "panda lion bear shark fish fox rat rabbit "}
+{"string": "deer panda squirrel fish zebra giraffe mouse "}
+{"string": "lizard panda duck rabbit wolf rat wolf "}
+{"string": "rabbit panda mouse wolf giraffe bear tiger duck "}
+{"string": "rat lizard lizard goat snake fox squirrel "}
+{"string": "squirrel sheep horse fish cow pig fox "}
+{"string": "panda elephant sheep mouse snake elephant bear fish turtle "}
+{"string": "squirrel kangaroo snake horse frog kangaroo deer duck mouse "}
+{"string": "goat pig chicken duck pig frog mouse zebra rat "}
+{"string": "cow kangaroo frog fox turtle turtle shark lion duck duck "}
+{"string": "snake sheep shark giraffe kangaroo fish lion panda rat "}
+{"string": "rabbit lizard cow dog panda tiger frog deer "}
+{"string": "tiger lion kangaroo goat tiger horse tiger "}
+{"string": "tiger shark lion pig sheep frog cow squirrel lizard "}
+{"string": "frog deer duck bear turtle rabbit rat "}
+{"string": "turtle tiger lion rat frog rat pig fish pig sheep "}
+{"string": "squirrel shark kangaroo giraffe shark rabbit rabbit "}
+{"string": "duck wolf squirrel fish rabbit cow squirrel mouse lizard "}
+{"string": "lizard squirrel duck giraffe mouse tiger rat turtle fox wolf "}
+{"string": "fish sheep fox lizard rat squirrel elephant fish zebra "}
+{"string": "deer fox horse snake panda sheep shark cat giraffe "}
+{"string": "mouse kangaroo panda pig duck kangaroo cow horse panda "}
+{"string": "sheep bear fox kangaroo horse rat rabbit "}
+{"string": "panda turtle shark giraffe tiger panda chicken "}
+{"string": "rabbit tiger rabbit cat deer tiger sheep tiger "}
+{"string": "giraffe fox wolf dog chicken kangaroo kangaroo zebra "}
+{"string": "wolf sheep bear duck turtle kangaroo zebra horse mouse "}
+{"string": "wolf lizard fox squirrel lizard bear fox rat rat goat "}
+{"string": "giraffe zebra turtle rabbit dog mouse deer squirrel tiger lion "}
+{"string": "sheep lion mouse goat zebra wolf rabbit rat sheep lizard "}
+{"string": "kangaroo mouse bear mouse horse elephant shark snake "}
+{"string": "deer pig fish chicken dog kangaroo goat "}
+{"string": "turtle shark shark wolf turtle squirrel lizard deer tiger "}
+{"string": "bear zebra dog snake fish pig snake "}
+{"string": "deer turtle shark bear wolf goat horse "}
+{"string": "horse fish turtle snake squirrel duck turtle "}
+{"string": "zebra sheep squirrel cow rat fox rabbit cow bear rabbit "}
+{"string": "cat zebra rabbit zebra turtle tiger shark cat cat rat "}
+{"string": "rat rat chicken bear shark elephant rat "}
+{"string": "rat mouse deer pig horse giraffe bear "}
+{"string": "rabbit tiger duck mouse lion tiger giraffe rat sheep elephant "}
+{"string": "tiger lizard fish squirrel cow elephant goat rat squirrel deer "}
+{"string": "frog panda fox kangaroo wolf zebra pig panda tiger duck "}
+{"string": "sheep zebra snake turtle lizard lion zebra "}
+{"string": "sheep panda fish wolf sheep deer rabbit zebra sheep "}
+{"string": "shark mouse mouse zebra fox rat tiger cat "}
+{"string": "lizard shark pig mouse kangaroo rabbit panda fish "}
+{"string": "frog wolf elephant tiger bear dog lizard "}
+{"string": "mouse fox sheep goat goat deer frog turtle mouse rat "}
+{"string": "lizard pig dog turtle pig deer shark chicken "}
+{"string": "fox lizard mouse duck elephant cow duck elephant "}
+{"string": "fox lion panda mouse zebra deer snake "}
+{"string": "fish pig snake giraffe deer chicken lion deer turtle "}
+{"string": "bear snake dog fox wolf squirrel cow "}
+{"string": "mouse kangaroo elephant horse cow goat frog lion "}
+{"string": "tiger tiger duck cat deer panda deer "}
+{"string": "rat kangaroo turtle cat wolf zebra goat "}
+{"string": "turtle mouse lizard zebra duck rabbit elephant lion rabbit dog "}
+{"string": "lion cat horse mouse kangaroo goat goat pig "}
+{"string": "lion pig panda dog frog bear rat snake elephant "}
+{"string": "kangaroo mouse wolf fox pig lizard panda goat elephant "}
+{"string": "rat tiger deer chicken dog fox fish deer rabbit "}
+{"string": "horse mouse giraffe bear lion squirrel fox goat panda "}
+{"string": "horse chicken zebra chicken kangaroo goat wolf "}
+{"string": "tiger turtle sheep mouse snake rat cat giraffe dog pig "}
+{"string": "mouse panda chicken giraffe squirrel giraffe frog zebra "}
+{"string": "horse mouse bear squirrel wolf dog pig cow "}
+{"string": "rat turtle horse frog rabbit fish frog duck duck lion "}
+{"string": "dog mouse cow kangaroo lizard deer fox fox cat pig "}
+{"string": "zebra panda fox duck turtle pig horse fish "}
+{"string": "snake snake chicken panda zebra deer fish bear kangaroo fish "}
+{"string": "mouse turtle rat cow elephant deer sheep lion kangaroo mouse "}
+{"string": "zebra pig fox pig zebra rabbit mouse rat deer "}
+{"string": "turtle deer tiger elephant kangaroo cow panda mouse "}
+{"string": "fox lion giraffe bear elephant rat fish "}
+{"string": "rat elephant giraffe lizard turtle goat bear lion chicken fish "}
+{"string": "cat panda tiger turtle bear duck tiger frog panda "}
+{"string": "deer wolf tiger fox duck bear elephant sheep chicken lizard "}
+{"string": "snake goat giraffe rabbit turtle panda elephant dog frog "}
+{"string": "sheep mouse wolf deer kangaroo cat rat mouse "}
+{"string": "horse mouse duck chicken kangaroo wolf frog "}
+{"string": "squirrel kangaroo deer dog chicken mouse cat dog elephant "}
+{"string": "rabbit rabbit giraffe fish cow horse shark bear "}
+{"string": "kangaroo lizard chicken duck elephant cow dog "}
+{"string": "fox squirrel fish lion bear deer sheep deer "}
+{"string": "duck rabbit elephant wolf lion lizard lizard turtle panda "}
+{"string": "lion rabbit zebra turtle wolf lion cow cat giraffe tiger "}
+{"string": "chicken panda lizard snake snake pig deer "}
+{"string": "kangaroo zebra shark sheep wolf lizard sheep "}
+{"string": "lizard bear shark cow cow lizard sheep dog sheep "}
+{"string": "giraffe lizard horse rabbit tiger elephant chicken kangaroo fox "}
+{"string": "sheep kangaroo wolf frog kangaroo turtle wolf "}
+{"string": "sheep deer pig lizard frog rabbit wolf panda "}
+{"string": "cat frog wolf lizard snake snake turtle "}
+{"string": "wolf chicken shark deer squirrel lion fish "}
+{"string": "shark snake duck pig panda dog tiger horse "}
+{"string": "goat goat dog cat horse horse sheep "}
+{"string": "pig rabbit kangaroo kangaroo elephant chicken horse "}
+{"string": "tiger fish pig cat lizard rabbit turtle lion sheep "}
+{"string": "snake chicken dog cat chicken turtle snake cat fox "}
+{"string": "rabbit lion tiger rat panda goat wolf elephant "}
+{"string": "tiger lizard bear wolf sheep shark goat kangaroo "}
+{"string": "deer snake shark mouse fish frog mouse "}
+{"string": "horse turtle fox pig chicken frog turtle shark zebra fish "}
+{"string": "wolf duck mouse dog bear horse cow "}
+{"string": "tiger turtle squirrel pig lizard turtle sheep turtle cat kangaroo "}
+{"string": "rabbit shark goat tiger duck wolf cow rat horse "}
+{"string": "mouse rat zebra elephant horse bear cow "}
+{"string": "wolf panda deer duck lion fox pig dog "}
+{"string": "zebra giraffe panda fish dog fox cow "}
+{"string": "kangaroo kangaroo dog lizard giraffe giraffe squirrel pig "}
+{"string": "dog lion sheep bear shark zebra kangaroo lion "}
+{"string": "rat horse tiger deer fish frog panda panda frog "}
+{"string": "elephant lion lizard lion lion goat fish fox "}
+{"string": "lion tiger deer chicken deer deer rat "}
+{"string": "sheep mouse wolf lion squirrel lion panda goat snake "}
+{"string": "snake turtle cat snake zebra fish panda cat "}
+{"string": "shark zebra deer fox shark mouse elephant giraffe "}
+{"string": "wolf frog bear squirrel cow rabbit bear "}
+{"string": "lion cow sheep fox pig horse cow lion chicken "}
+{"string": "duck tiger elephant goat zebra sheep turtle "}
+{"string": "zebra kangaroo frog fish fish shark mouse lion mouse "}
+{"string": "frog sheep kangaroo frog cat panda deer dog cat chicken "}
+{"string": "fish kangaroo rabbit kangaroo mouse pig frog squirrel "}
+{"string": "goat panda rabbit panda kangaroo goat lizard frog snake cow "}
+{"string": "duck squirrel bear squirrel sheep cat fox dog bear "}
+{"string": "bear dog rabbit horse lion rabbit snake snake panda "}
+{"string": "turtle cow zebra fox giraffe goat lizard mouse kangaroo chicken "}
+{"string": "turtle bear duck goat giraffe lizard snake snake mouse "}
+{"string": "giraffe dog chicken pig lion kangaroo duck elephant "}
+{"string": "deer horse cow fox pig wolf lion "}
+{"string": "frog sheep wolf squirrel shark turtle horse "}
+{"string": "cow turtle fish kangaroo deer mouse zebra horse frog lizard "}
+{"string": "horse cat sheep elephant rat sheep fox cat "}
+{"string": "fish sheep zebra deer duck elephant shark cat "}
+{"string": "deer cow turtle horse wolf bear kangaroo cat fox cat "}
+{"string": "duck horse fish snake duck lion goat frog "}
+{"string": "fox zebra giraffe rabbit turtle rat elephant "}
+{"string": "wolf chicken rat horse mouse duck wolf frog "}
+{"string": "frog kangaroo panda squirrel sheep pig goat snake pig "}
+{"string": "frog mouse panda frog rabbit cow squirrel lizard "}
+{"string": "goat frog sheep pig deer rabbit cow cat pig "}
+{"string": "fox sheep fish snake kangaroo lion pig pig shark "}
+{"string": "fish shark wolf rat rat duck lizard bear turtle "}
+{"string": "lion fox squirrel dog snake turtle duck kangaroo bear lizard "}
+{"string": "tiger lion kangaroo fox panda kangaroo lion "}
+{"string": "rat horse deer dog fox cat frog "}
+{"string": "rabbit lion tiger duck turtle sheep lion lizard "}
+{"string": "panda squirrel duck mouse mouse mouse giraffe rabbit lizard deer "}
+{"string": "turtle horse sheep deer tiger deer rabbit rat rabbit "}
+{"string": "deer kangaroo squirrel panda kangaroo rabbit lion deer duck wolf "}
+{"string": "fox cat goat cow shark sheep frog frog rabbit "}
+{"string": "frog turtle shark lizard snake rabbit sheep "}
+{"string": "tiger giraffe snake snake giraffe squirrel giraffe lion rat lizard "}
+{"string": "fish lion giraffe goat rabbit duck zebra mouse fish squirrel "}
+{"string": "lizard sheep tiger pig pig dog frog lizard fox sheep "}
+{"string": "fox horse duck snake kangaroo dog panda lion pig zebra "}
+{"string": "giraffe giraffe cat kangaroo snake tiger panda tiger rat "}
+{"string": "lizard mouse frog cat shark snake elephant "}
+{"string": "duck frog sheep dog giraffe kangaroo fish cow "}
+{"string": "deer tiger frog bear fox frog dog "}
+{"string": "cow squirrel cow duck horse giraffe deer "}
+{"string": "mouse tiger giraffe wolf zebra mouse giraffe shark sheep frog "}
+{"string": "cow cow lion zebra zebra tiger fish rat fox cat "}
+{"string": "shark shark horse rabbit duck chicken cat squirrel snake mouse "}
+{"string": "giraffe elephant chicken lizard tiger rabbit chicken snake cat "}
+{"string": "bear turtle cat rabbit duck bear squirrel panda goat duck "}
+{"string": "zebra rabbit squirrel rabbit duck duck kangaroo giraffe shark "}
+{"string": "cow horse fish frog tiger kangaroo panda snake "}
+{"string": "panda tiger lion kangaroo frog horse zebra rat lion kangaroo "}
+{"string": "shark cow duck rat fish panda goat lizard lion cow "}
+{"string": "panda lion giraffe sheep zebra pig goat cow shark pig "}
+{"string": "squirrel lion panda cow turtle wolf fish snake goat fish "}
+{"string": "squirrel elephant shark squirrel turtle cat mouse wolf "}
+{"string": "bear rabbit horse snake duck giraffe lizard "}
+{"string": "rat horse sheep zebra tiger frog giraffe "}
+{"string": "frog kangaroo cat rabbit dog shark mouse duck "}
+{"string": "turtle panda chicken sheep cow lion snake horse frog snake "}
+{"string": "lizard bear pig pig goat frog wolf lion panda lizard "}
+{"string": "duck rabbit goat frog elephant wolf sheep shark "}
+{"string": "turtle lizard cow horse pig lizard elephant bear cat "}
+{"string": "dog zebra rabbit chicken shark fox frog cow squirrel squirrel "}
+{"string": "sheep giraffe cow deer dog pig fish shark fox "}
+{"string": "tiger cow deer cow dog shark turtle rabbit pig bear "}
+{"string": "panda wolf horse sheep cow mouse tiger squirrel wolf squirrel "}
+{"string": "wolf cow snake lizard sheep kangaroo cow "}
+{"string": "panda panda deer deer lizard duck elephant "}
+{"string": "horse horse chicken tiger elephant fox sheep bear panda "}
+{"string": "deer turtle kangaroo giraffe shark goat kangaroo horse turtle "}
+{"string": "lion kangaroo mouse sheep cat dog duck rat duck cow "}
+{"string": "lizard fish cat deer cow frog panda "}
+{"string": "cow chicken rat cow cat zebra sheep giraffe lion panda "}
+{"string": "deer squirrel duck shark lizard goat elephant shark elephant "}
+{"string": "giraffe rabbit dog squirrel fox fish cow squirrel lion "}
+{"string": "snake cow shark bear sheep wolf lion "}
+{"string": "panda fish panda horse goat sheep rabbit "}
+{"string": "panda elephant fox pig shark tiger panda rat dog giraffe "}
+{"string": "horse tiger duck tiger fish deer elephant kangaroo frog "}
+{"string": "dog goat sheep horse wolf tiger panda cat deer pig "}
+{"string": "mouse fish rat mouse deer squirrel wolf elephant "}
+{"string": "sheep duck horse cat chicken fox chicken deer mouse "}
+{"string": "zebra duck snake dog horse mouse fox deer "}
+{"string": "chicken squirrel chicken fox tiger chicken rat wolf panda "}
+{"string": "pig goat fish pig cow sheep elephant wolf "}
+{"string": "squirrel elephant kangaroo tiger lion wolf lizard duck dog panda "}
+{"string": "shark giraffe fish rat horse lizard cat "}
+{"string": "kangaroo shark pig dog fox frog duck fox "}
+{"string": "giraffe wolf elephant sheep frog frog tiger "}
+{"string": "panda chicken cow horse rabbit sheep bear elephant "}
+{"string": "mouse shark mouse turtle dog kangaroo dog "}
+{"string": "wolf elephant cow chicken rabbit kangaroo shark horse zebra "}
+{"string": "rabbit shark wolf cat goat deer chicken "}
+{"string": "snake horse frog pig goat tiger horse tiger "}
+{"string": "lion wolf cow mouse kangaroo panda duck "}
+{"string": "rabbit elephant zebra fish mouse wolf tiger "}
+{"string": "mouse turtle frog rat mouse cat rabbit "}
+{"string": "frog squirrel dog rat mouse fish fish "}
+{"string": "shark chicken rabbit mouse rat rabbit squirrel "}
+{"string": "pig fish bear cat elephant wolf chicken cat shark sheep "}
+{"string": "cow lion squirrel fox frog elephant bear "}
+{"string": "bear tiger mouse chicken lion tiger kangaroo chicken "}
+{"string": "kangaroo dog dog panda zebra squirrel lizard fox "}
+{"string": "elephant fish panda turtle rat shark duck duck "}
+{"string": "duck pig bear frog wolf dog chicken "}
+{"string": "elephant tiger giraffe kangaroo fish cow duck deer zebra snake "}
+{"string": "chicken goat turtle duck pig wolf bear "}
+{"string": "fox lizard rat panda wolf fish lion "}
+{"string": "panda frog snake deer tiger dog frog elephant "}
+{"string": "kangaroo duck kangaroo mouse cow chicken duck duck "}
+{"string": "sheep elephant cat lion cow squirrel pig "}
+{"string": "rat tiger dog bear chicken fish goat wolf "}
+{"string": "squirrel elephant shark cow cow sheep frog cow kangaroo tiger "}
+{"string": "deer fox turtle kangaroo turtle dog turtle chicken lion kangaroo "}
+{"string": "cat shark sheep pig snake fox tiger mouse "}
+{"string": "fish fish snake elephant snake shark zebra goat pig "}
+{"string": "fox rabbit fox zebra goat wolf elephant mouse goat "}
+{"string": "fox pig horse shark deer rat wolf "}
+{"string": "goat bear panda cow mouse rat tiger "}
+{"string": "fish lizard rat zebra bear panda lizard rat giraffe "}
+{"string": "panda cow fox turtle turtle snake dog squirrel horse "}
+{"string": "wolf duck cow elephant zebra bear cat dog cow "}
+{"string": "cow squirrel panda snake turtle lizard dog wolf "}
+{"string": "elephant rat pig horse squirrel goat zebra "}
+{"string": "horse fox giraffe goat tiger squirrel deer duck frog tiger "}
+{"string": "elephant cat dog tiger rabbit elephant elephant panda fox "}
+{"string": "mouse chicken mouse turtle goat kangaroo elephant zebra "}
+{"string": "wolf horse bear duck chicken goat wolf shark zebra "}
+{"string": "bear panda sheep chicken snake wolf mouse turtle tiger dog "}
+{"string": "zebra turtle elephant rabbit goat kangaroo mouse lion "}
+{"string": "cow bear cow dog bear elephant lizard mouse chicken lion "}
+{"string": "fox cow sheep turtle fox mouse elephant "}
+{"string": "wolf cow goat frog giraffe deer turtle fish deer "}
+{"string": "zebra frog lizard mouse mouse turtle goat squirrel "}
+{"string": "dog giraffe fish chicken snake zebra cat fish "}
+{"string": "cat lion bear cow lion rabbit fish rat "}
+{"string": "deer pig fish elephant tiger duck elephant "}
+{"string": "elephant cat pig rat bear giraffe fish "}
+{"string": "tiger squirrel squirrel goat fox tiger sheep cow "}
+{"string": "tiger mouse bear bear mouse rabbit shark goat kangaroo "}
+{"string": "tiger rabbit goat fox kangaroo pig rat cat mouse squirrel "}
+{"string": "dog rat mouse bear panda bear elephant cat sheep "}
+{"string": "horse mouse tiger chicken squirrel turtle frog frog rat rabbit "}
+{"string": "rat giraffe goat bear deer shark pig rat cow cat "}
+{"string": "tiger pig elephant fish giraffe duck pig sheep fox duck "}
+{"string": "frog cow giraffe horse goat lizard panda frog "}
+{"string": "pig chicken pig tiger chicken pig duck shark snake horse "}
+{"string": "elephant lizard duck bear goat pig turtle pig panda tiger "}
+{"string": "giraffe cow tiger pig kangaroo fox lion bear lion rabbit "}
+{"string": "shark bear wolf chicken mouse chicken kangaroo kangaroo mouse snake "}
+{"string": "panda sheep giraffe turtle horse cat deer "}
+{"string": "horse frog goat sheep giraffe cat pig cow "}
+{"string": "zebra fox lizard duck cow tiger kangaroo cow "}
+{"string": "sheep horse lizard kangaroo snake elephant pig "}
+{"string": "dog pig giraffe lion panda mouse pig pig elephant sheep "}
+{"string": "duck chicken pig deer fox tiger fox "}
+{"string": "rabbit pig rat squirrel dog duck lizard elephant mouse wolf "}
+{"string": "goat lizard cat fish elephant deer rabbit rabbit elephant "}
+{"string": "turtle panda bear elephant zebra mouse cat goat cow "}
+{"string": "mouse pig kangaroo panda cat panda snake bear squirrel squirrel "}
+{"string": "tiger kangaroo panda cow frog wolf dog duck "}
+{"string": "cow giraffe lizard rat bear panda turtle snake snake tiger "}
+{"string": "pig bear wolf cat dog panda turtle fish "}
+{"string": "panda dog goat tiger dog zebra mouse lion "}
+{"string": "kangaroo elephant sheep fish squirrel pig elephant frog "}
+{"string": "snake cat horse bear lion squirrel chicken kangaroo mouse zebra "}
+{"string": "dog fox zebra squirrel goat snake wolf kangaroo rat lion "}
+{"string": "rat fox tiger chicken frog kangaroo cow panda "}
+{"string": "wolf goat bear fish goat shark lion lizard horse snake "}
+{"string": "mouse lizard sheep goat bear wolf pig lion zebra rat "}
+{"string": "deer fish zebra snake pig pig lizard "}
+{"string": "panda duck lizard sheep giraffe kangaroo horse horse goat "}
+{"string": "turtle chicken snake fox deer bear zebra frog horse goat "}
+{"string": "horse frog wolf wolf tiger elephant wolf duck "}
+{"string": "goat fox dog sheep goat fish zebra "}
+{"string": "kangaroo rabbit fox squirrel rabbit goat pig panda cat "}
+{"string": "fox dog cow mouse sheep pig elephant zebra goat snake "}
+{"string": "bear panda zebra horse horse elephant wolf frog shark "}
+{"string": "turtle mouse pig turtle fish lizard goat rat panda pig "}
+{"string": "fox frog turtle deer mouse panda horse goat "}
+{"string": "rabbit shark kangaroo deer rabbit wolf fox "}
+{"string": "lion deer frog kangaroo tiger rat chicken duck fish "}
+{"string": "turtle lion shark cat rat frog shark rabbit "}
+{"string": "rat shark fox cow tiger frog elephant panda tiger dog "}
+{"string": "goat shark giraffe wolf frog duck lion "}
+{"string": "wolf turtle elephant giraffe tiger panda elephant deer cow fish "}
+{"string": "shark turtle lizard deer cow wolf fox giraffe snake goat "}
+{"string": "dog kangaroo rabbit sheep bear shark deer "}
+{"string": "frog panda goat pig fish fox mouse turtle rat "}
+{"string": "turtle deer duck zebra deer chicken mouse duck wolf "}
+{"string": "zebra duck cat bear frog lion zebra "}
+{"string": "mouse goat elephant kangaroo fox goat pig dog kangaroo "}
+{"string": "frog panda pig zebra snake giraffe cow pig dog fox "}
+{"string": "cow mouse panda tiger shark fox zebra elephant cat "}
+{"string": "turtle rabbit kangaroo cat lion zebra squirrel "}
+{"string": "wolf lizard squirrel snake shark shark kangaroo rabbit lizard rabbit "}
+{"string": "dog wolf kangaroo frog duck shark pig "}
+{"string": "goat cow pig fox panda sheep squirrel horse giraffe giraffe "}
+{"string": "mouse squirrel wolf tiger cat wolf elephant shark "}
+{"string": "pig giraffe shark duck shark cat cow "}
+{"string": "dog snake mouse goat fox sheep squirrel lizard fox "}
+{"string": "duck sheep lizard pig squirrel tiger sheep frog "}
+{"string": "tiger cat sheep pig fox turtle goat panda zebra "}
+{"string": "mouse fox giraffe mouse kangaroo wolf panda elephant pig "}
+{"string": "goat elephant chicken frog pig mouse horse "}
+{"string": "zebra chicken frog horse fox cat pig lizard zebra frog "}
+{"string": "chicken fish tiger goat giraffe bear cow "}
+{"string": "horse horse fish duck mouse fox rabbit rabbit snake "}
+{"string": "duck pig tiger duck bear giraffe goat rabbit frog "}
+{"string": "pig tiger cow shark shark rat pig dog bear "}
+{"string": "fish tiger pig bear shark bear shark pig "}
+{"string": "duck horse rat wolf horse mouse duck "}
+{"string": "cat wolf cow turtle goat giraffe elephant turtle bear bear "}
+{"string": "shark fox lizard rat sheep turtle rat tiger snake pig "}
+{"string": "bear rabbit squirrel dog squirrel deer frog giraffe fox wolf "}
+{"string": "shark duck giraffe giraffe horse shark panda frog "}
+{"string": "frog chicken goat panda horse fox giraffe kangaroo lizard "}
+{"string": "cat cat pig zebra horse rat tiger "}
+{"string": "dog cow horse squirrel rat snake bear kangaroo "}
+{"string": "squirrel lion sheep turtle chicken pig mouse giraffe snake snake "}
+{"string": "duck bear goat tiger squirrel cat dog "}
+{"string": "frog dog goat giraffe giraffe wolf giraffe "}
+{"string": "horse horse zebra frog cow cat fish dog cow bear "}
+{"string": "cat kangaroo fish giraffe giraffe deer fox shark cat elephant "}
+{"string": "kangaroo panda cow mouse bear squirrel elephant deer panda "}
+{"string": "deer pig chicken panda bear rabbit rat horse giraffe bear "}
+{"string": "wolf cow frog zebra giraffe panda goat zebra horse duck "}
+{"string": "goat elephant shark turtle rat goat dog frog "}
+{"string": "lion zebra fish zebra cow horse wolf elephant fish mouse "}
+{"string": "goat bear tiger rabbit fox squirrel pig mouse "}
+{"string": "lion zebra frog dog giraffe snake snake goat chicken "}
+{"string": "sheep sheep sheep goat sheep dog duck rabbit "}
+{"string": "chicken fish fox cat elephant shark turtle "}
+{"string": "tiger frog rat zebra giraffe rat elephant panda snake "}
+{"string": "lizard giraffe bear duck sheep sheep rat shark rat "}
+{"string": "tiger cat turtle bear squirrel sheep panda "}
+{"string": "snake cat chicken bear kangaroo horse chicken "}
+{"string": "dog fish goat giraffe turtle kangaroo cat fish panda rat "}
+{"string": "shark turtle cow turtle kangaroo zebra horse "}
+{"string": "lion kangaroo fish fish tiger lion duck chicken squirrel rabbit "}
+{"string": "cat horse wolf frog fox snake chicken wolf snake "}
+{"string": "giraffe turtle mouse cat bear lion mouse turtle cat fox "}
+{"string": "rat zebra lizard shark kangaroo shark dog kangaroo frog cow "}
+{"string": "rat bear shark frog tiger giraffe fox elephant kangaroo "}
+{"string": "pig frog panda horse goat goat giraffe "}
+{"string": "fox mouse elephant fish giraffe rat dog wolf "}
+{"string": "fox giraffe fish lizard mouse giraffe horse cat chicken wolf "}
+{"string": "turtle sheep dog cat chicken wolf rabbit horse bear "}
+{"string": "duck snake lizard tiger elephant zebra tiger "}
+{"string": "cow elephant chicken sheep lizard duck fox "}
+{"string": "rat dog snake dog deer rabbit chicken sheep panda cat "}
+{"string": "shark mouse tiger horse frog lizard bear "}
+{"string": "frog duck zebra pig horse turtle pig dog "}
+{"string": "mouse chicken pig pig fox giraffe rat elephant "}
+{"string": "cat goat elephant lizard panda shark cow elephant "}
+{"string": "horse mouse cat snake giraffe rat lizard rabbit bear "}
+{"string": "snake cow pig turtle fox goat horse "}
+{"string": "snake elephant tiger cat turtle cow tiger tiger dog "}
+{"string": "squirrel panda dog dog fox panda snake deer "}
+{"string": "dog chicken cow mouse cow chicken elephant "}
+{"string": "rat fish bear pig shark frog tiger lizard "}
+{"string": "chicken lizard turtle shark tiger mouse fox bear "}
+{"string": "pig horse kangaroo mouse rat rat pig deer fish "}
+{"string": "deer tiger lion lizard bear wolf duck squirrel duck "}
+{"string": "frog panda zebra mouse fox squirrel lion lion zebra fox "}
+{"string": "snake pig horse lion kangaroo bear lizard squirrel cat "}
+{"string": "rat elephant kangaroo lizard pig chicken tiger panda "}
+{"string": "duck mouse frog cat lion mouse sheep fish elephant "}
+{"string": "bear wolf fox deer deer rat lizard "}
+{"string": "horse cow cat rabbit giraffe cat mouse lion "}
+{"string": "shark rat dog dog fox mouse dog mouse "}
+{"string": "squirrel turtle pig giraffe horse mouse fish "}
+{"string": "snake wolf shark fox squirrel panda giraffe bear "}
+{"string": "duck cow duck rat fox cat chicken "}
+{"string": "kangaroo goat cat horse snake wolf elephant bear goat "}
+{"string": "frog tiger horse horse sheep snake zebra duck duck duck "}
+{"string": "horse kangaroo sheep panda chicken tiger lizard giraffe "}
+{"string": "deer tiger rabbit rat zebra dog horse bear snake wolf "}
+{"string": "lion lizard deer cat deer deer elephant "}
+{"string": "lion pig shark lion kangaroo fox duck giraffe "}
+{"string": "horse wolf squirrel cat panda deer kangaroo "}
+{"string": "pig elephant goat kangaroo lion snake lion fox lion lizard "}
+{"string": "snake dog panda panda panda horse zebra snake lion cat "}
+{"string": "kangaroo duck mouse rat goat turtle goat "}
+{"string": "horse dog sheep giraffe tiger dog wolf deer kangaroo panda "}
+{"string": "cat wolf fox lion bear deer frog rabbit "}
+{"string": "horse bear rat sheep duck sheep dog elephant "}
+{"string": "wolf rat frog lizard duck elephant squirrel "}
+{"string": "lizard snake panda snake turtle fox tiger duck goat panda "}
+{"string": "squirrel turtle chicken mouse cow deer kangaroo "}
+{"string": "rat sheep goat deer fox tiger dog bear giraffe "}
+{"string": "elephant elephant deer pig lion squirrel turtle "}
+{"string": "panda sheep kangaroo chicken panda rat turtle "}
+{"string": "cow zebra squirrel chicken cow rat dog "}
+{"string": "fish turtle goat rabbit wolf fish sheep "}
+{"string": "chicken duck rabbit elephant chicken kangaroo turtle wolf elephant "}
+{"string": "pig frog squirrel wolf mouse horse panda "}
+{"string": "fox turtle panda bear tiger bear horse zebra shark "}
+{"string": "kangaroo tiger chicken cat duck elephant chicken zebra rabbit "}
+{"string": "duck turtle duck rabbit shark sheep goat rat "}
+{"string": "lion cat dog horse lion chicken rat bear giraffe "}
+{"string": "turtle shark pig frog goat squirrel frog "}
+{"string": "horse lizard panda turtle dog giraffe sheep cow "}
+{"string": "giraffe turtle zebra wolf turtle zebra bear duck chicken "}
+{"string": "goat tiger panda wolf tiger fish frog "}
+{"string": "rabbit panda wolf cow fish duck snake dog "}
+{"string": "panda frog turtle rabbit duck dog cat rat kangaroo "}
+{"string": "pig pig lion fox kangaroo horse lion deer "}
+{"string": "zebra dog kangaroo rabbit panda wolf giraffe "}
+{"string": "frog sheep rat frog cat deer chicken zebra goat "}
+{"string": "mouse goat duck sheep fish bear cow kangaroo "}
+{"string": "snake pig dog pig kangaroo cat chicken snake deer "}
+{"string": "shark turtle zebra lion squirrel turtle horse horse "}
+{"string": "tiger squirrel frog tiger squirrel turtle snake "}
+{"string": "cat elephant panda chicken squirrel goat bear sheep pig lizard "}
+{"string": "pig elephant turtle giraffe cow squirrel rabbit giraffe bear "}
+{"string": "panda mouse chicken zebra elephant lion horse cat turtle "}
+{"string": "kangaroo fox tiger lizard bear sheep shark rabbit "}
+{"string": "sheep deer deer wolf frog fox shark bear goat "}
+{"string": "turtle dog wolf pig fish cat snake duck "}
+{"string": "tiger bear giraffe fox kangaroo horse duck giraffe kangaroo tiger "}
+{"string": "deer panda giraffe elephant chicken cow turtle fish "}
+{"string": "fish cat chicken duck cow deer elephant zebra lizard kangaroo "}
+{"string": "duck wolf lion panda sheep cow fish pig zebra "}
+{"string": "lizard lizard sheep rabbit zebra goat cow fish elephant "}
+{"string": "mouse pig mouse deer elephant fox panda mouse fox sheep "}
+{"string": "dog panda frog wolf snake fish zebra sheep "}
+{"string": "chicken frog fish duck snake chicken cow rat "}
+{"string": "mouse mouse horse kangaroo panda chicken lizard giraffe "}
+{"string": "giraffe rat deer duck duck squirrel goat "}
+{"string": "wolf duck tiger zebra tiger frog lizard "}
+{"string": "dog fox pig cat frog goat lizard "}
+{"string": "lizard horse cat sheep bear snake cow "}
+{"string": "mouse zebra horse duck rabbit fox rabbit goat tiger fish "}
+{"string": "cow shark pig fox tiger dog elephant dog "}
+{"string": "fish zebra dog duck zebra wolf cow bear "}
+{"string": "cow duck fox giraffe sheep fish sheep "}
+{"string": "zebra mouse tiger rat giraffe rabbit squirrel rabbit tiger "}
+{"string": "bear wolf goat squirrel snake fish lion "}
+{"string": "sheep fish bear chicken frog lion turtle "}
+{"string": "squirrel shark snake chicken giraffe frog snake fish "}
+{"string": "elephant zebra elephant frog snake shark cow duck "}
+{"string": "zebra kangaroo rat cat panda tiger elephant wolf "}
+{"string": "squirrel mouse squirrel kangaroo frog giraffe sheep dog kangaroo fox "}
+{"string": "dog mouse rabbit lizard frog turtle frog duck rat horse "}
+{"string": "elephant horse goat turtle snake bear deer horse "}
+{"string": "kangaroo snake rabbit chicken shark kangaroo giraffe bear snake "}
+{"string": "giraffe sheep sheep elephant shark giraffe squirrel dog "}
+{"string": "shark lizard shark lizard horse deer lizard bear frog tiger "}
+{"string": "lizard cow pig lizard squirrel rat deer goat rat "}
+{"string": "fox horse turtle snake sheep lizard fish snake "}
+{"string": "horse pig giraffe squirrel lizard tiger deer mouse lion "}
+{"string": "wolf giraffe lizard fox squirrel turtle elephant "}
+{"string": "frog lizard fox cow goat dog cow sheep tiger "}
+{"string": "pig elephant panda squirrel lizard lion wolf "}
+{"string": "lion panda kangaroo mouse fox wolf frog mouse bear elephant "}
+{"string": "lizard fish elephant giraffe rabbit tiger cat panda "}
+{"string": "snake deer chicken giraffe cat cow duck "}
+{"string": "panda shark giraffe kangaroo rabbit tiger fish lion wolf "}
+{"string": "shark fox cat cow squirrel snake cow bear "}
+{"string": "sheep kangaroo fish dog wolf zebra cat sheep giraffe cat "}
+{"string": "pig pig snake goat horse giraffe horse duck wolf fox "}
+{"string": "cow elephant zebra shark turtle shark kangaroo "}
+{"string": "zebra turtle turtle sheep rat tiger dog shark kangaroo "}
+{"string": "shark fox turtle dog dog squirrel rabbit rat deer squirrel "}
+{"string": "rabbit panda snake shark horse elephant wolf "}
+{"string": "frog snake rabbit horse shark turtle duck chicken panda "}
+{"string": "bear cat cow wolf cow cat shark "}
+{"string": "deer cow frog sheep wolf kangaroo lizard sheep duck cow "}
+{"string": "rabbit mouse pig horse pig wolf rat panda frog "}
+{"string": "pig chicken zebra deer deer sheep shark fish squirrel tiger "}
+{"string": "chicken fox tiger snake deer dog giraffe elephant tiger "}
+{"string": "frog wolf wolf duck fish wolf wolf lizard panda "}
+{"string": "zebra rabbit frog fish duck goat frog chicken pig cat "}
+{"string": "duck tiger lizard bear sheep horse lizard "}
+{"string": "turtle shark deer zebra cat panda shark rabbit giraffe frog "}
+{"string": "elephant rat pig dog horse frog frog fox "}
+{"string": "dog dog mouse cow turtle chicken cow sheep "}
+{"string": "pig giraffe lion goat giraffe duck mouse tiger pig "}
+{"string": "lion rabbit deer mouse dog mouse elephant "}
+{"string": "horse chicken squirrel goat snake fish wolf fox pig "}
+{"string": "wolf squirrel zebra rat sheep deer zebra wolf "}
+{"string": "giraffe panda fox mouse giraffe squirrel duck "}
+{"string": "frog squirrel panda mouse giraffe cow lizard giraffe cat "}
+{"string": "mouse goat rat bear pig horse dog "}
+{"string": "dog turtle panda sheep tiger bear zebra "}
+{"string": "frog cow deer kangaroo horse wolf cat wolf "}
+{"string": "sheep cow horse zebra wolf dog cat "}
+{"string": "fish fox giraffe kangaroo cow squirrel dog squirrel horse shark "}
+{"string": "dog deer zebra goat frog deer cat lizard shark "}
+{"string": "deer pig duck chicken wolf kangaroo pig frog lion "}
+{"string": "wolf rabbit horse duck wolf cow wolf dog lizard fish "}
+{"string": "lion zebra giraffe horse zebra pig goat tiger bear rat "}
+{"string": "lizard panda wolf cat rat rabbit elephant goat bear "}
+{"string": "wolf dog bear lizard fox lion snake squirrel "}
+{"string": "dog wolf panda turtle mouse squirrel kangaroo turtle pig "}
+{"string": "squirrel rat goat cat sheep pig elephant snake turtle lizard "}
+{"string": "sheep lion mouse fox panda zebra pig turtle squirrel "}
+{"string": "giraffe kangaroo bear panda horse goat dog lion "}
+{"string": "cat chicken snake fish tiger lion dog frog "}
+{"string": "snake mouse kangaroo shark lion cow snake fish "}
+{"string": "panda elephant dog frog rabbit sheep turtle zebra rabbit squirrel "}
+{"string": "dog frog cat mouse cat turtle zebra fish fox "}
+{"string": "horse dog kangaroo zebra fish rabbit mouse lizard "}
+{"string": "panda duck snake duck bear elephant pig lizard rat "}
+{"string": "mouse turtle panda giraffe snake fish fox zebra "}
+{"string": "tiger elephant horse frog giraffe shark duck fox rabbit "}
+{"string": "cat lion goat kangaroo kangaroo turtle fox panda rabbit frog "}
+{"string": "frog kangaroo pig fish squirrel wolf lizard "}
+{"string": "goat giraffe panda wolf pig duck cow "}
+{"string": "goat bear wolf chicken mouse zebra turtle tiger wolf "}
+{"string": "fish chicken squirrel fox turtle goat panda turtle "}
+{"string": "sheep sheep snake cat dog zebra duck bear cat "}
+{"string": "giraffe panda cat panda fish snake kangaroo chicken lizard "}
+{"string": "kangaroo deer deer giraffe kangaroo cow deer turtle tiger "}
+{"string": "elephant pig tiger dog lizard bear fish fish chicken "}
+{"string": "goat fox bear snake fish deer wolf turtle "}
+{"string": "squirrel rabbit tiger zebra rabbit rat duck fish elephant "}
+{"string": "bear lizard cow fish lion fish sheep dog giraffe cow "}
+{"string": "horse kangaroo zebra wolf frog elephant sheep rat fish sheep "}
+{"string": "frog rat pig frog tiger duck fish rabbit shark "}
+{"string": "giraffe fox panda lion squirrel bear wolf wolf sheep "}
+{"string": "chicken deer lion mouse horse wolf tiger turtle snake goat "}
+{"string": "tiger rat fox duck shark turtle duck pig cow "}
+{"string": "lizard kangaroo elephant fox elephant giraffe turtle lion mouse squirrel "}
+{"string": "cat squirrel giraffe fish deer kangaroo goat cat deer "}
+{"string": "zebra cow wolf kangaroo frog zebra turtle squirrel cat "}
+{"string": "kangaroo horse fish horse snake zebra panda cow shark wolf "}
+{"string": "frog frog giraffe fish duck frog turtle lizard fish pig "}
+{"string": "sheep lion shark chicken panda tiger giraffe lizard "}
+{"string": "rat goat giraffe zebra fish wolf zebra "}
+{"string": "squirrel kangaroo deer rat kangaroo frog rat chicken "}
+{"string": "horse zebra mouse lion tiger fox turtle dog duck "}
+{"string": "pig lion zebra pig bear squirrel tiger "}
+{"string": "tiger frog elephant chicken pig zebra fox shark "}
+{"string": "turtle turtle rat chicken pig fox elephant "}
+{"string": "cow fox duck squirrel wolf lizard snake deer kangaroo "}
+{"string": "deer wolf giraffe tiger chicken shark kangaroo goat mouse lion "}
+{"string": "cow panda pig mouse shark sheep lizard "}
+{"string": "horse kangaroo kangaroo rabbit lion mouse lizard cat duck "}
+{"string": "snake snake fish cat goat cat wolf kangaroo "}
+{"string": "kangaroo wolf giraffe tiger turtle bear wolf shark panda "}
+{"string": "frog chicken shark deer bear elephant kangaroo deer pig dog "}
+{"string": "snake cat deer goat zebra chicken tiger "}
+{"string": "elephant turtle giraffe tiger turtle chicken goat "}
+{"string": "fox zebra rabbit kangaroo dog horse zebra "}
+{"string": "rat chicken fish shark wolf horse goat rat "}
+{"string": "lion cow rat fox snake dog fox fox "}
+{"string": "sheep fish dog cow sheep lizard tiger "}
+{"string": "pig shark wolf cow frog kangaroo zebra frog lizard "}
+{"string": "kangaroo squirrel goat deer sheep sheep lion chicken duck "}
+{"string": "horse mouse lion kangaroo shark sheep dog dog turtle tiger "}
+{"string": "chicken bear lizard cow deer horse panda zebra "}
+{"string": "tiger frog shark giraffe goat kangaroo zebra zebra "}
+{"string": "pig chicken bear fox fox frog bear giraffe rabbit shark "}
+{"string": "snake fox cat elephant kangaroo cat dog mouse "}
+{"string": "lion panda pig zebra rat horse squirrel "}
+{"string": "rabbit horse fox frog wolf squirrel snake horse "}
+{"string": "snake horse mouse fish sheep tiger fox mouse "}
+{"string": "turtle lion shark elephant tiger duck rabbit turtle fox rat "}
+{"string": "cow fox cat bear zebra fish snake turtle "}
+{"string": "sheep cow kangaroo dog cow chicken tiger squirrel "}
+{"string": "wolf chicken sheep lizard rat cat fox "}
+{"string": "cow dog rabbit panda goat snake lion bear bear dog "}
+{"string": "rabbit fish mouse duck turtle sheep tiger rabbit frog "}
+{"string": "fish kangaroo panda snake panda panda rabbit tiger lion "}
+{"string": "mouse cow snake wolf duck tiger giraffe panda deer "}
+{"string": "goat panda horse pig turtle wolf tiger tiger horse zebra "}
+{"string": "duck horse sheep elephant cat fox rat "}
+{"string": "dog lion goat mouse duck goat frog fox zebra "}
+{"string": "snake lion rabbit rabbit fish cat wolf "}
+{"string": "duck snake elephant giraffe bear snake elephant "}
+{"string": "dog panda rat mouse snake shark squirrel "}
+{"string": "giraffe turtle fish goat squirrel horse elephant wolf fox "}
+{"string": "fish squirrel duck goat rat fox pig pig snake lion "}
+{"string": "cat kangaroo wolf snake sheep turtle cow bear "}
+{"string": "turtle lion cat bear elephant bear cow "}
+{"string": "cow dog elephant kangaroo deer panda mouse deer rat squirrel "}
+{"string": "cow kangaroo kangaroo kangaroo fox bear shark dog "}
+{"string": "sheep pig dog squirrel cow sheep frog "}
+{"string": "wolf elephant elephant lion giraffe giraffe elephant sheep "}
+{"string": "mouse rabbit zebra cat lizard squirrel cat rat panda "}
+{"string": "deer elephant dog fish dog pig tiger frog goat lion "}
+{"string": "cow fox chicken wolf goat chicken cow fish squirrel mouse "}
+{"string": "goat rat horse lion dog goat zebra panda "}
+{"string": "rabbit rabbit shark goat squirrel turtle deer "}
+{"string": "turtle wolf goat shark pig turtle mouse bear "}
+{"string": "horse frog cat wolf panda frog cat wolf "}
+{"string": "cow wolf cat shark kangaroo bear horse fish panda pig "}
+{"string": "deer mouse fox fish wolf rabbit deer "}
+{"string": "duck zebra elephant bear frog cat wolf chicken elephant fish "}
+{"string": "kangaroo frog frog lion cow zebra giraffe wolf panda "}
+{"string": "rabbit panda fish cat dog frog deer "}
+{"string": "wolf lion rabbit kangaroo cow elephant duck wolf rabbit "}
+{"string": "shark sheep panda kangaroo squirrel zebra cow giraffe "}
+{"string": "horse elephant duck giraffe horse rabbit elephant duck dog sheep "}
+{"string": "dog duck chicken mouse fox snake cow "}
+{"string": "horse kangaroo elephant panda deer deer rabbit "}
+{"string": "rabbit lion cat deer chicken shark zebra pig lizard cat "}
+{"string": "snake mouse deer elephant snake pig deer tiger mouse elephant "}
+{"string": "tiger shark snake pig horse pig rat "}
+{"string": "duck sheep shark elephant lion deer mouse frog "}
+{"string": "giraffe snake cow snake duck mouse lizard wolf lion dog "}
+{"string": "bear horse lion bear dog deer shark elephant elephant "}
+{"string": "mouse kangaroo goat wolf goat bear squirrel lion "}
+{"string": "wolf duck mouse frog bear dog fish mouse "}
+{"string": "lizard rat duck lizard rat pig zebra cat shark fox "}
+{"string": "goat lion pig cat kangaroo pig mouse giraffe "}
+{"string": "snake tiger panda chicken lizard bear zebra "}
+{"string": "cat lizard zebra fish goat sheep rat frog shark "}
+{"string": "mouse fish rabbit turtle lion pig dog goat wolf rabbit "}
+{"string": "deer squirrel cow kangaroo cat cat pig rabbit squirrel "}
+{"string": "goat duck lizard fish frog elephant cow fish deer tiger "}
+{"string": "dog fish pig horse chicken mouse shark duck goat panda "}
+{"string": "giraffe tiger bear squirrel frog chicken shark rabbit "}
+{"string": "lizard cow snake chicken squirrel squirrel giraffe "}
+{"string": "fox rat frog deer shark cow panda "}
+{"string": "duck chicken frog fish chicken giraffe rabbit mouse "}
+{"string": "cow bear goat rabbit deer rat chicken "}
+{"string": "bear turtle fox rabbit mouse panda shark pig "}
+{"string": "rat sheep lizard duck wolf shark pig chicken "}
+{"string": "frog cow bear rat cow tiger shark frog deer wolf "}
+{"string": "snake elephant bear fish horse cow duck frog duck "}
+{"string": "kangaroo mouse deer dog deer turtle giraffe elephant "}
+{"string": "giraffe cow squirrel deer frog fox panda rabbit cat giraffe "}
+{"string": "rabbit cow squirrel snake duck wolf squirrel fish "}
+{"string": "cat tiger fish squirrel goat dog dog horse duck lion "}
+{"string": "frog kangaroo kangaroo squirrel rat elephant rat shark "}
+{"string": "bear squirrel chicken bear rabbit chicken dog goat "}
+{"string": "rat turtle pig mouse rat tiger duck cow snake rabbit "}
+{"string": "lizard deer cat snake bear fox rat frog sheep "}
+{"string": "giraffe bear cow shark bear turtle lizard elephant lion "}
+{"string": "snake mouse deer shark rat rat bear sheep "}
+{"string": "zebra rabbit cat elephant duck frog chicken "}
+{"string": "rat rabbit lion sheep cow deer goat "}
+{"string": "panda pig giraffe tiger bear elephant duck lion "}
+{"string": "bear tiger frog goat kangaroo fish goat "}
+{"string": "lizard cow shark goat cat shark wolf kangaroo "}
+{"string": "duck fish duck fox cow duck deer "}
+{"string": "rat fish mouse wolf duck wolf panda cow fish pig "}
+{"string": "turtle cow pig fox chicken horse fish "}
+{"string": "lizard rat squirrel rat squirrel chicken turtle rabbit fox "}
+{"string": "kangaroo fox kangaroo snake bear goat goat rat "}
+{"string": "fox horse wolf duck chicken elephant giraffe "}
+{"string": "tiger kangaroo pig rabbit zebra sheep deer "}
+{"string": "pig horse lizard deer mouse snake chicken giraffe cat cat "}
+{"string": "tiger elephant rat lizard pig turtle dog cow fish "}
+{"string": "rat chicken snake bear kangaroo zebra deer "}
+{"string": "pig fish cat frog cow panda lizard cat "}
+{"string": "dog rat lizard pig lizard squirrel elephant frog fox deer "}
+{"string": "chicken frog sheep panda pig elephant rat pig lizard "}
+{"string": "snake duck elephant lion bear zebra rabbit tiger dog duck "}
+{"string": "lizard bear rat deer shark lion sheep lizard deer "}
+{"string": "dog fish cow fish tiger zebra zebra sheep "}
+{"string": "dog turtle cow deer giraffe fish deer cow shark dog "}
+{"string": "deer panda goat rabbit duck goat bear lion sheep chicken "}
+{"string": "cow cat cow tiger panda cat shark lizard cow "}
+{"string": "duck goat mouse shark elephant cow frog "}
+{"string": "goat lizard kangaroo pig dog rat elephant duck squirrel "}
+{"string": "zebra zebra turtle chicken lion wolf panda horse snake elephant "}
+{"string": "rat lion lion kangaroo wolf bear giraffe mouse sheep "}
+{"string": "kangaroo panda duck kangaroo dog wolf panda "}
+{"string": "duck giraffe mouse pig rat kangaroo cow "}
+{"string": "mouse shark lizard giraffe horse rabbit horse cow duck lizard "}
+{"string": "rat rat fox rabbit cow goat duck sheep horse "}
+{"string": "turtle panda lion panda rat frog frog kangaroo giraffe "}
+{"string": "wolf zebra rat sheep chicken elephant fish cow "}
+{"string": "deer rabbit horse cow duck fox snake duck "}
+{"string": "deer panda chicken fox goat wolf sheep fish chicken "}
+{"string": "deer cat horse mouse bear giraffe zebra "}
+{"string": "rat lion mouse turtle duck squirrel rabbit zebra chicken fox "}
+{"string": "tiger deer shark dog horse rat lion "}
+{"string": "sheep kangaroo elephant sheep duck kangaroo duck frog tiger elephant "}
+{"string": "shark fish mouse cat turtle cat dog "}
+{"string": "sheep lion fish chicken cat sheep snake pig cat cow "}
+{"string": "pig tiger dog kangaroo fish duck dog pig mouse "}
+{"string": "lizard duck pig goat horse turtle sheep "}
+{"string": "chicken fish rabbit wolf giraffe fish sheep tiger "}
+{"string": "kangaroo squirrel horse rat snake panda snake wolf deer "}
+{"string": "rat bear horse squirrel fox rat sheep "}
+{"string": "bear rabbit mouse turtle dog goat rat rabbit zebra "}
+{"string": "deer cow giraffe pig chicken frog chicken "}
+{"string": "pig turtle cat panda panda sheep fish goat "}
+{"string": "zebra shark elephant elephant chicken goat rat giraffe "}
+{"string": "panda sheep lion duck rabbit cat bear frog "}
+{"string": "panda pig kangaroo dog cow pig lizard "}
+{"string": "cow cat duck deer shark tiger mouse sheep snake "}
+{"string": "sheep wolf lizard wolf pig squirrel lizard kangaroo giraffe fish "}
+{"string": "panda kangaroo turtle dog dog elephant rabbit snake elephant "}
+{"string": "turtle goat horse sheep pig fox mouse cow "}
+{"string": "bear shark pig giraffe giraffe squirrel shark rat tiger "}
+{"string": "sheep panda frog snake dog lizard snake "}
+{"string": "cow giraffe rat horse lion snake pig mouse "}
+{"string": "panda panda kangaroo bear deer fish snake horse rabbit "}
+{"string": "dog cat sheep fish fish fish wolf snake kangaroo duck "}
+{"string": "cat turtle deer sheep tiger panda duck turtle wolf "}
+{"string": "mouse mouse fox fish fish panda goat shark panda shark "}
+{"string": "sheep deer sheep elephant elephant sheep rabbit giraffe "}
+{"string": "fox squirrel goat frog panda frog chicken shark shark "}
+{"string": "cat shark duck sheep cat elephant kangaroo horse "}
+{"string": "rabbit rabbit lion fox rat chicken mouse squirrel duck squirrel "}
+{"string": "chicken squirrel chicken pig kangaroo zebra bear frog deer cow "}
+{"string": "rabbit giraffe turtle squirrel lizard bear elephant rabbit frog panda "}
+{"string": "cow kangaroo lizard turtle horse fox tiger sheep "}
+{"string": "snake frog chicken rabbit elephant lizard goat "}
+{"string": "pig zebra zebra squirrel mouse dog dog lizard "}
+{"string": "turtle rabbit rat frog fish frog lion turtle "}
+{"string": "giraffe tiger turtle goat shark wolf pig sheep "}
+{"string": "fox panda goat goat squirrel snake lizard lizard turtle cow "}
+{"string": "rabbit turtle zebra sheep mouse dog fish mouse shark "}
+{"string": "elephant squirrel lion bear horse bear duck "}
+{"string": "pig zebra bear squirrel bear dog zebra "}
+{"string": "lizard chicken rabbit sheep horse shark pig deer squirrel "}
+{"string": "giraffe fish horse horse zebra turtle lizard horse "}
+{"string": "wolf lion cow rat elephant zebra wolf giraffe "}
+{"string": "cow wolf pig lizard elephant cow cow panda cow "}
+{"string": "goat horse elephant fox elephant fish snake cat horse pig "}
+{"string": "rat goat lion squirrel deer sheep deer rat sheep elephant "}
+{"string": "tiger rabbit deer shark duck rat goat "}
+{"string": "panda bear goat duck zebra fox wolf goat horse "}
+{"string": "snake duck elephant tiger wolf wolf turtle elephant giraffe "}
+{"string": "zebra lizard pig elephant zebra horse sheep squirrel fish "}
+{"string": "cow deer cow bear deer dog lizard fox "}
+{"string": "cow lizard elephant chicken mouse tiger horse giraffe "}
+{"string": "cat horse shark bear squirrel duck panda deer duck "}
+{"string": "goat duck bear panda fish goat wolf deer frog "}
+{"string": "tiger turtle wolf lizard goat turtle fox panda duck "}
+{"string": "fish kangaroo lion rabbit fox pig wolf horse snake frog "}
+{"string": "zebra cat fish frog snake horse fish "}
+{"string": "chicken chicken turtle bear wolf cat turtle snake cow snake "}
+{"string": "wolf zebra tiger turtle sheep rat wolf lizard cow "}
+{"string": "squirrel giraffe snake fox pig goat mouse elephant "}
+{"string": "elephant fish zebra tiger pig lizard rat duck frog rabbit "}
+{"string": "pig tiger dog goat bear wolf fish dog elephant squirrel "}
+{"string": "bear giraffe bear rabbit dog fish giraffe shark "}
+{"string": "cat elephant mouse dog fish elephant wolf squirrel lion goat "}
+{"string": "panda dog snake zebra wolf rabbit pig frog lion tiger "}
+{"string": "cat wolf kangaroo horse bear lion snake panda cat "}
+{"string": "lizard tiger duck bear lion duck lion "}
+{"string": "mouse rat giraffe bear lion chicken goat "}
+{"string": "goat snake bear goat rabbit fox zebra turtle panda mouse "}
+{"string": "giraffe cow cat squirrel shark snake squirrel deer lizard "}
+{"string": "turtle chicken dog horse cat lion frog goat duck "}
+{"string": "elephant shark chicken snake dog lizard goat dog kangaroo "}
+{"string": "wolf fish deer mouse cat deer rat lizard tiger "}
+{"string": "sheep deer deer horse elephant turtle mouse snake rat "}
+{"string": "horse lion lizard elephant tiger bear frog "}
+{"string": "chicken mouse horse tiger zebra fish sheep chicken kangaroo shark "}
+{"string": "tiger fish giraffe panda tiger deer kangaroo lizard goat fox "}
+{"string": "dog chicken lion frog duck snake panda zebra pig "}
+{"string": "duck cow giraffe wolf cow rabbit rat panda "}
+{"string": "lizard lion wolf elephant panda rat fish dog goat "}
+{"string": "fish elephant deer mouse shark giraffe kangaroo turtle bear "}
+{"string": "fish giraffe kangaroo duck horse shark wolf elephant "}
+{"string": "rabbit cat horse snake kangaroo lizard mouse shark mouse "}
+{"string": "frog goat horse chicken rabbit horse rabbit fish cow "}
+{"string": "rabbit deer goat frog horse kangaroo kangaroo giraffe cow chicken "}
+{"string": "rabbit dog rat lizard sheep fish rabbit panda panda "}
+{"string": "panda snake mouse lion rabbit kangaroo duck fox elephant "}
+{"string": "sheep fish fish giraffe horse dog fox shark sheep "}
+{"string": "lion fish deer rabbit frog goat pig chicken shark "}
+{"string": "chicken horse kangaroo turtle horse wolf deer fox cat "}
+{"string": "zebra fox panda wolf horse fox turtle deer "}
+{"string": "cat squirrel kangaroo rat chicken kangaroo deer cat elephant turtle "}
+{"string": "sheep tiger goat frog rat lizard giraffe giraffe rat "}
+{"string": "frog lizard dog rat turtle rabbit lion horse snake duck "}
+{"string": "chicken goat lion lion cow zebra giraffe "}
+{"string": "snake turtle mouse lion tiger deer mouse elephant goat "}
+{"string": "elephant rat duck shark frog deer deer dog shark zebra "}
+{"string": "sheep rabbit horse shark deer lion panda cat wolf rat "}
+{"string": "deer zebra cat pig cow cat chicken "}
+{"string": "sheep deer squirrel bear dog chicken cow frog cat "}
+{"string": "zebra wolf frog chicken duck cat sheep squirrel tiger dog "}
+{"string": "pig turtle lion shark giraffe mouse elephant fox giraffe snake "}
+{"string": "rabbit horse wolf dog cat zebra lizard "}
+{"string": "duck fox goat giraffe giraffe lion sheep mouse wolf "}
+{"string": "horse shark frog elephant rat fish sheep shark snake "}
+{"string": "squirrel rat turtle rat pig sheep zebra zebra goat giraffe "}
+{"string": "wolf turtle lion horse dog bear deer "}
+{"string": "lion zebra turtle fish lizard pig tiger sheep wolf "}
+{"string": "cow elephant goat sheep rabbit fox bear pig fish goat "}
+{"string": "zebra mouse cat rabbit lion panda rat bear snake "}
+{"string": "zebra zebra horse fox lizard horse deer cow "}
+{"string": "squirrel rat deer sheep chicken chicken zebra cat "}
+{"string": "zebra duck bear cat wolf tiger panda tiger cow bear "}
+{"string": "rabbit elephant giraffe sheep cow lion fish tiger "}
+{"string": "sheep cat giraffe snake giraffe turtle shark "}
+{"string": "pig squirrel cow sheep elephant rabbit rabbit wolf pig "}
+{"string": "bear fish fox duck horse chicken kangaroo "}
+{"string": "rat deer lion fox tiger duck frog "}
+{"string": "deer horse chicken zebra bear shark rat "}
+{"string": "horse kangaroo panda cat chicken deer turtle "}
+{"string": "tiger elephant horse wolf lion dog elephant "}
+{"string": "rabbit fish squirrel chicken elephant giraffe sheep horse "}
+{"string": "turtle wolf lion dog shark cow dog wolf duck fox "}
+{"string": "elephant kangaroo fox wolf shark zebra fish mouse giraffe zebra "}
+{"string": "deer rat tiger squirrel squirrel pig fox turtle wolf horse "}
+{"string": "fox fox duck cow panda lion chicken dog "}
+{"string": "rat lizard goat cat elephant rabbit mouse "}
+{"string": "tiger frog chicken shark panda shark snake duck cow rabbit "}
+{"string": "pig cat chicken cow shark goat cow deer fox squirrel "}
+{"string": "elephant squirrel dog rat sheep zebra fish dog snake wolf "}
+{"string": "fox rat rabbit lizard kangaroo fish duck squirrel "}
+{"string": "mouse deer fox kangaroo shark rabbit fox frog "}
+{"string": "sheep kangaroo shark tiger wolf fox duck deer shark zebra "}
+{"string": "cow mouse kangaroo cow snake tiger dog lizard "}
+{"string": "panda duck dog lion mouse sheep horse snake rat tiger "}
+{"string": "dog zebra sheep cow mouse pig squirrel lizard pig fox "}
+{"string": "squirrel goat horse goat kangaroo lion wolf bear goat snake "}
+{"string": "goat frog tiger kangaroo shark rabbit kangaroo horse "}
+{"string": "lizard elephant fox giraffe cat squirrel tiger panda fox "}
+{"string": "shark rabbit turtle zebra giraffe duck elephant kangaroo "}
+{"string": "lizard fish zebra giraffe fish giraffe squirrel snake goat rat "}
+{"string": "chicken lizard zebra cow panda rabbit panda "}
+{"string": "fox squirrel rat tiger duck cow snake frog giraffe lion "}
+{"string": "rabbit wolf panda giraffe bear mouse kangaroo horse "}
+{"string": "shark duck rabbit sheep rat elephant cow lion turtle duck "}
+{"string": "giraffe lizard lion shark pig mouse bear turtle "}
+{"string": "panda wolf pig sheep fish lizard cow lion "}
+{"string": "deer wolf zebra bear wolf wolf squirrel "}
+{"string": "shark fish shark shark sheep horse horse dog tiger pig "}
+{"string": "fish fish tiger kangaroo sheep lizard lion rat bear "}
+{"string": "squirrel tiger deer bear cat fish sheep "}
+{"string": "sheep lion lion cow rabbit chicken kangaroo turtle dog "}
+{"string": "sheep snake sheep giraffe giraffe cow pig "}
+{"string": "giraffe goat zebra zebra lion rat rabbit "}
+{"string": "snake kangaroo frog wolf bear wolf fox rabbit zebra dog "}
+{"string": "rat lizard mouse zebra sheep fish squirrel rat "}
+{"string": "frog horse cow sheep fox goat shark dog bear "}
+{"string": "rat duck kangaroo rabbit horse goat lion frog "}
+{"string": "snake cat frog lion horse sheep fish "}
+{"string": "chicken sheep pig elephant turtle deer frog pig rabbit fish "}
+{"string": "cat tiger zebra fox duck chicken wolf fox giraffe "}
+{"string": "turtle dog duck wolf duck frog rabbit tiger panda "}
+{"string": "bear turtle wolf pig goat duck fox turtle goat "}
+{"string": "panda rabbit rat chicken fox rat goat squirrel squirrel shark "}
+{"string": "duck rabbit horse goat panda duck dog snake snake sheep "}
+{"string": "fox lion rabbit cow frog fox bear fox lizard giraffe "}
+{"string": "lion cow snake panda turtle frog deer "}
+{"string": "lizard fox goat chicken rabbit rabbit mouse giraffe shark "}
+{"string": "cat fish giraffe chicken dog lion kangaroo giraffe "}
+{"string": "zebra wolf goat snake giraffe squirrel lizard panda panda bear "}
+{"string": "bear giraffe chicken deer rat rat snake "}
+{"string": "bear fox dog giraffe fox chicken elephant lion "}
+{"string": "cat cow panda kangaroo rat goat lizard tiger deer "}
+{"string": "fox turtle elephant sheep fox shark elephant mouse "}
+{"string": "turtle deer giraffe mouse fish goat deer "}
+{"string": "lizard cat tiger deer shark frog zebra lion tiger mouse "}
+{"string": "snake mouse lion fox cat lizard giraffe "}
+{"string": "horse panda deer cow cat duck elephant fish cat "}
+{"string": "rabbit cat horse tiger turtle wolf fox "}
+{"string": "elephant kangaroo wolf bear zebra rat horse "}
+{"string": "duck rabbit rabbit pig bear lion lizard "}
+{"string": "cat dog rabbit elephant mouse cat snake lion "}
+{"string": "duck turtle snake zebra wolf zebra cow dog pig duck "}
+{"string": "sheep sheep rabbit goat panda mouse cat "}
+{"string": "zebra lizard duck panda dog elephant lion fish rabbit "}
+{"string": "bear rabbit frog sheep turtle shark fox panda "}
+{"string": "tiger bear cat deer giraffe kangaroo rat bear shark fox "}
+{"string": "wolf lizard cat rat rabbit rabbit panda "}
+{"string": "bear lion squirrel frog cow chicken elephant fox rat horse "}
+{"string": "giraffe chicken horse duck duck goat rat bear mouse cat "}
+{"string": "kangaroo chicken chicken cat wolf cat giraffe wolf cow wolf "}
+{"string": "squirrel deer frog shark shark dog bear dog zebra lizard "}
+{"string": "turtle lizard horse rat lizard squirrel snake tiger "}
+{"string": "fish cat shark shark mouse fox deer fish pig duck "}
+{"string": "wolf lion rabbit horse fox bear kangaroo "}
+{"string": "zebra squirrel chicken squirrel lizard cow chicken deer tiger squirrel "}
+{"string": "fox bear lion deer dog cow cow "}
+{"string": "frog chicken cat frog giraffe deer rat wolf wolf wolf "}
+{"string": "dog horse elephant goat shark pig rabbit frog shark wolf "}
+{"string": "tiger fox sheep chicken lion deer zebra fox "}
+{"string": "rabbit lion turtle tiger cow cat wolf "}
+{"string": "wolf tiger deer cat cow wolf cat elephant "}
+{"string": "wolf turtle rabbit fish lizard frog dog mouse "}
+{"string": "zebra bear deer fox cat cow rat tiger "}
+{"string": "shark giraffe zebra lion dog turtle wolf "}
+{"string": "frog tiger pig elephant mouse elephant fox bear zebra giraffe "}
+{"string": "cow deer dog lizard wolf rabbit lizard squirrel "}
+{"string": "goat horse turtle deer cow wolf chicken panda "}
+{"string": "elephant cat deer cat mouse turtle lion "}
+{"string": "goat shark lizard chicken fish dog duck shark tiger "}
+{"string": "rat dog sheep frog fish rabbit zebra duck frog "}
+{"string": "panda mouse zebra turtle pig wolf dog frog fox deer "}
+{"string": "frog mouse panda deer mouse elephant elephant "}
+{"string": "cat cat sheep bear mouse dog fox kangaroo elephant "}
+{"string": "horse sheep deer rabbit frog horse kangaroo "}
+{"string": "wolf giraffe rabbit goat kangaroo lizard rabbit rat shark chicken "}
+{"string": "horse duck lion deer rabbit elephant rabbit lizard chicken dog "}
+{"string": "rabbit giraffe fox rat giraffe tiger sheep lion duck zebra "}
+{"string": "deer snake frog frog mouse horse rat dog "}
+{"string": "horse turtle chicken horse tiger kangaroo tiger goat "}
+{"string": "kangaroo rabbit fox deer squirrel rabbit lion shark "}
+{"string": "shark duck duck horse rat horse shark snake pig duck "}
+{"string": "bear squirrel pig elephant duck turtle snake kangaroo "}
+{"string": "shark zebra tiger horse squirrel sheep deer chicken duck "}
+{"string": "wolf rat cat goat goat cow turtle "}
+{"string": "snake cat fox turtle mouse rat frog rat shark "}
+{"string": "tiger duck squirrel elephant rabbit mouse chicken kangaroo panda "}
+{"string": "elephant cat snake goat elephant squirrel turtle giraffe "}
+{"string": "elephant mouse chicken lizard wolf duck frog "}
+{"string": "elephant rabbit bear rabbit sheep panda kangaroo "}
+{"string": "bear panda turtle cow cat bear goat goat "}
+{"string": "goat tiger shark snake panda panda sheep kangaroo zebra pig "}
+{"string": "shark elephant zebra cow rat goat dog "}
+{"string": "duck elephant turtle elephant deer deer tiger wolf duck "}
+{"string": "fox chicken goat deer elephant shark squirrel zebra horse fox "}
+{"string": "mouse elephant horse zebra snake dog panda "}
+{"string": "cow kangaroo frog snake goat giraffe goat cow pig frog "}
+{"string": "squirrel squirrel squirrel rabbit cow fox bear goat chicken "}
+{"string": "turtle snake fox kangaroo turtle elephant squirrel fox fish "}
+{"string": "rat lion zebra goat elephant frog mouse panda rabbit "}
+{"string": "horse pig snake bear fish kangaroo lion turtle duck "}
+{"string": "elephant duck elephant dog fish kangaroo dog bear snake mouse "}
+{"string": "goat cow zebra sheep fox fox horse frog giraffe dog "}
+{"string": "snake turtle tiger fox goat duck cat mouse kangaroo panda "}
+{"string": "dog tiger tiger duck squirrel panda snake "}
+{"string": "deer pig giraffe shark duck snake tiger cat mouse "}
+{"string": "wolf zebra dog chicken bear zebra shark squirrel elephant kangaroo "}
+{"string": "sheep duck frog rat zebra frog turtle elephant wolf "}
+{"string": "duck cow kangaroo panda kangaroo panda giraffe mouse fish "}
+{"string": "cow snake elephant zebra panda turtle goat bear wolf turtle "}
+{"string": "dog snake goat rabbit pig rat pig horse "}
+{"string": "shark goat bear cat zebra kangaroo pig "}
+{"string": "turtle squirrel panda rabbit squirrel panda kangaroo fish rat "}
+{"string": "elephant zebra squirrel rabbit shark fish fish "}
+{"string": "frog sheep lion rat wolf deer cat "}
+{"string": "elephant sheep lion kangaroo pig deer chicken fish "}
+{"string": "fish kangaroo shark cow dog mouse rabbit "}
+{"string": "chicken bear zebra snake duck zebra pig rabbit "}
+{"string": "kangaroo panda rabbit bear bear panda lizard "}
+{"string": "kangaroo shark sheep goat squirrel kangaroo lizard "}
+{"string": "wolf chicken squirrel sheep tiger snake frog squirrel mouse "}
+{"string": "rabbit horse frog frog tiger tiger snake turtle "}
+{"string": "rabbit giraffe kangaroo fox snake rabbit kangaroo shark frog cat "}
+{"string": "bear wolf shark turtle sheep deer wolf "}
+{"string": "lion lion mouse shark lizard rat zebra lion rabbit rabbit "}
+{"string": "lizard bear rat dog squirrel duck cat "}
+{"string": "bear giraffe mouse shark squirrel sheep giraffe lizard "}
+{"string": "frog giraffe fish duck panda snake lizard "}
+{"string": "horse fox sheep lion dog turtle zebra "}
+{"string": "squirrel snake bear rabbit zebra cow cow rabbit "}
+{"string": "rat pig cat zebra frog mouse kangaroo "}
+{"string": "turtle zebra fox lion mouse cow shark shark kangaroo bear "}
+{"string": "goat dog duck horse bear rabbit chicken fish "}
+{"string": "tiger rabbit fox lizard deer fox frog panda chicken rabbit "}
+{"string": "duck cat cat giraffe wolf lion rabbit turtle "}
+{"string": "cow deer deer rat giraffe frog fox goat fish "}
+{"string": "horse cow wolf sheep cat cat fox "}
+{"string": "dog panda rabbit goat pig giraffe pig "}
+{"string": "giraffe cow shark lizard snake tiger kangaroo frog "}
+{"string": "panda sheep sheep lion kangaroo sheep mouse chicken mouse "}
+{"string": "sheep tiger tiger rat pig turtle kangaroo "}
+{"string": "zebra frog mouse pig duck frog tiger fish chicken frog "}
+{"string": "rabbit rat panda rabbit wolf mouse turtle wolf giraffe cat "}
+{"string": "zebra fish frog lizard goat rat elephant snake horse goat "}
+{"string": "panda horse dog tiger sheep snake squirrel panda bear frog "}
+{"string": "wolf panda fox squirrel wolf turtle panda lizard "}
+{"string": "wolf rat chicken zebra fox sheep deer "}
+{"string": "fox giraffe fox lizard goat tiger horse frog "}
+{"string": "lion horse dog horse bear lion lizard "}
+{"string": "elephant bear wolf kangaroo lizard rat giraffe horse rabbit fish "}
+{"string": "giraffe elephant wolf giraffe zebra duck panda tiger mouse deer "}
+{"string": "turtle rabbit tiger rat turtle giraffe snake "}
+{"string": "fox fish mouse turtle frog duck duck cat zebra cow "}
+{"string": "rat shark chicken rabbit chicken goat elephant "}
+{"string": "cow chicken pig goat squirrel bear goat rat rabbit mouse "}
+{"string": "fish squirrel rat cow cat rabbit pig lion turtle elephant "}
+{"string": "dog frog cat wolf lion lizard tiger snake wolf turtle "}
+{"string": "zebra fox shark frog rabbit kangaroo frog cow frog duck "}
+{"string": "rat dog lion rabbit panda horse rat turtle "}
+{"string": "cow turtle panda frog squirrel zebra shark elephant zebra frog "}
+{"string": "lion rabbit chicken bear horse duck horse fox "}
+{"string": "sheep squirrel rabbit rabbit fox dog fish "}
+{"string": "panda sheep cow fox panda lion panda giraffe cow "}
+{"string": "goat squirrel cat fox giraffe lizard wolf squirrel sheep "}
+{"string": "dog fish cat snake fox duck lizard horse "}
+{"string": "turtle deer rat horse cow fish bear dog "}
+{"string": "giraffe kangaroo fox fox bear rabbit tiger lion fox "}
+{"string": "bear snake cat lion turtle lizard fox "}
+{"string": "turtle squirrel panda horse squirrel kangaroo cow snake turtle "}
+{"string": "dog shark mouse lizard duck frog lizard "}
+{"string": "deer dog dog zebra horse goat giraffe rat kangaroo cow "}
+{"string": "wolf turtle turtle turtle elephant rabbit squirrel mouse snake cat "}
+{"string": "rabbit wolf snake shark fox giraffe squirrel "}
+{"string": "snake rabbit mouse sheep deer elephant duck deer "}
+{"string": "lion rat pig kangaroo turtle cow tiger "}
+{"string": "chicken panda goat elephant wolf rat rat pig elephant "}
+{"string": "kangaroo fish squirrel squirrel bear squirrel fish shark chicken "}
+{"string": "cow dog squirrel horse fox lion mouse turtle rabbit fox "}
+{"string": "cow elephant bear rabbit turtle duck wolf sheep "}
+{"string": "cow frog mouse fox rat rat fish pig snake "}
+{"string": "rabbit elephant deer frog wolf bear tiger squirrel "}
+{"string": "panda giraffe panda zebra rat rat fox panda "}
+{"string": "dog fox snake lion turtle fox mouse cat duck "}
+{"string": "squirrel lion horse shark fox lion lizard "}
+{"string": "frog bear chicken panda goat mouse wolf "}
+{"string": "panda shark rabbit cat tiger cow sheep cow turtle rat "}
+{"string": "dog cat kangaroo sheep panda cat kangaroo cat pig goat "}
+{"string": "squirrel rat kangaroo elephant chicken rat panda duck pig "}
+{"string": "shark goat fox lizard deer rabbit mouse sheep "}
+{"string": "fish bear cow cat squirrel goat kangaroo fox "}
+{"string": "frog cow sheep goat frog fox goat dog bear sheep "}
+{"string": "panda goat lizard frog squirrel sheep rat horse dog "}
+{"string": "squirrel fox zebra frog rabbit deer tiger cat "}
+{"string": "rat chicken cat pig snake zebra wolf sheep elephant snake "}
+{"string": "fox elephant chicken kangaroo deer bear horse cow "}
+{"string": "lizard lion tiger tiger panda giraffe goat "}
+{"string": "goat rabbit cat cow mouse wolf bear giraffe tiger panda "}
+{"string": "wolf duck rat rabbit tiger tiger sheep giraffe rabbit fish "}
+{"string": "cat snake elephant chicken frog turtle cow "}
+{"string": "elephant goat fox mouse lion lizard rat cat "}
+{"string": "snake shark tiger dog fox fox mouse "}
+{"string": "mouse squirrel snake squirrel tiger wolf horse goat tiger "}
+{"string": "panda tiger shark elephant tiger zebra sheep elephant wolf squirrel "}
+{"string": "bear giraffe fish zebra shark cat goat shark squirrel kangaroo "}
+{"string": "goat shark frog horse giraffe bear sheep sheep "}
+{"string": "panda fox chicken wolf cow goat rabbit rat sheep "}
+{"string": "fox zebra wolf fox dog turtle frog chicken lion rabbit "}
+{"string": "duck wolf elephant rabbit turtle lizard giraffe rabbit lizard duck "}
+{"string": "giraffe rat cat duck dog panda fox "}
+{"string": "tiger shark bear rabbit deer giraffe chicken "}
+{"string": "dog giraffe fox wolf horse bear duck zebra lion cat "}
+{"string": "mouse panda goat wolf tiger giraffe bear rabbit "}
+{"string": "cow turtle frog turtle cow zebra lizard "}
+{"string": "kangaroo lion zebra goat giraffe pig panda chicken "}
+{"string": "duck shark duck turtle snake tiger horse squirrel deer cow "}
+{"string": "chicken giraffe fox cat sheep lizard cat frog duck "}
+{"string": "bear mouse cat cow cat zebra shark dog squirrel "}
+{"string": "fox mouse bear fish shark cat chicken giraffe cow "}
+{"string": "duck fox deer zebra deer sheep sheep duck rat "}
+{"string": "horse chicken tiger duck elephant lion lion dog duck chicken "}
+{"string": "rat turtle dog sheep fish bear deer "}
+{"string": "kangaroo chicken snake panda rabbit mouse duck "}
+{"string": "cow squirrel frog dog panda tiger goat "}
+{"string": "cat squirrel mouse bear tiger horse chicken mouse "}
+{"string": "tiger frog wolf rabbit bear sheep cat "}
+{"string": "rat sheep squirrel fish cow rat fish "}
+{"string": "deer turtle bear sheep kangaroo frog kangaroo sheep "}
+{"string": "wolf chicken elephant sheep chicken turtle squirrel "}
+{"string": "tiger rabbit goat horse kangaroo cow rat "}
+{"string": "snake dog shark giraffe deer squirrel horse turtle fish sheep "}
+{"string": "snake elephant zebra turtle pig elephant rat duck bear panda "}
+{"string": "rabbit goat duck horse rat dog cat rat bear kangaroo "}
+{"string": "lion goat elephant lion zebra panda dog rat "}
+{"string": "snake frog fish kangaroo tiger elephant zebra cat "}
+{"string": "panda pig fish giraffe zebra wolf kangaroo chicken tiger "}
+{"string": "zebra lion cat dog wolf lion fish dog "}
+{"string": "panda lizard horse shark wolf pig elephant sheep deer "}
+{"string": "duck elephant fish squirrel giraffe fish goat lizard panda "}
+{"string": "mouse giraffe bear frog mouse lion duck mouse cat "}
+{"string": "pig panda duck pig mouse panda lizard mouse wolf "}
+{"string": "panda deer frog pig mouse goat wolf chicken cow lizard "}
+{"string": "dog elephant sheep wolf fish wolf kangaroo pig turtle "}
+{"string": "fish snake chicken sheep snake rat bear "}
+{"string": "chicken bear horse rat horse goat squirrel lizard chicken "}
+{"string": "frog duck goat dog shark shark kangaroo "}
+{"string": "fish deer fox fox horse cow tiger bear shark "}
+{"string": "tiger rat goat tiger turtle bear turtle "}
+{"string": "dog cow horse panda rabbit giraffe elephant shark dog tiger "}
+{"string": "sheep panda squirrel rabbit duck turtle goat shark tiger dog "}
+{"string": "cow wolf chicken lion deer lizard zebra sheep "}
+{"string": "tiger rabbit rabbit shark lion giraffe shark "}
+{"string": "dog squirrel frog squirrel mouse tiger snake mouse fox duck "}
+{"string": "kangaroo giraffe chicken pig elephant horse fox mouse frog panda "}
+{"string": "lizard horse elephant snake rabbit deer fox kangaroo zebra "}
+{"string": "wolf giraffe horse snake kangaroo fox sheep rabbit "}
+{"string": "dog shark bear elephant horse horse pig turtle "}
+{"string": "zebra panda horse duck zebra pig lizard dog fox "}
+{"string": "frog zebra snake panda panda chicken duck sheep lizard snake "}
+{"string": "duck dog duck pig snake giraffe squirrel wolf pig "}
+{"string": "fish cow mouse elephant rat zebra tiger rat rabbit giraffe "}
+{"string": "lion pig turtle wolf shark elephant panda "}
+{"string": "bear elephant snake snake cow panda fox snake wolf elephant "}
+{"string": "fox lion tiger lizard dog turtle sheep "}
+{"string": "dog bear wolf kangaroo cow zebra panda fox horse "}
+{"string": "squirrel cat goat tiger turtle goat lion panda "}
+{"string": "turtle giraffe kangaroo wolf goat wolf turtle "}
+{"string": "mouse pig snake cow lion cow goat "}
+{"string": "fox snake lion lion goat pig frog horse horse dog "}
+{"string": "horse giraffe rabbit squirrel dog cow cat "}
+{"string": "goat sheep rabbit chicken goat snake goat duck fox "}
+{"string": "goat chicken tiger frog kangaroo frog squirrel lizard horse "}
+{"string": "shark bear tiger bear chicken wolf frog mouse "}
+{"string": "zebra fish deer kangaroo wolf lizard cow "}
+{"string": "cat fox zebra pig pig sheep duck snake rat chicken "}
+{"string": "lizard mouse chicken pig bear snake horse sheep zebra "}
+{"string": "bear zebra zebra mouse horse frog rat wolf "}
+{"string": "pig elephant rat snake fox wolf rat kangaroo tiger "}
+{"string": "tiger lizard lion bear duck chicken chicken fox "}
+{"string": "chicken pig wolf sheep squirrel squirrel shark dog "}
+{"string": "frog fish wolf duck horse wolf elephant cat "}
+{"string": "rat rabbit turtle cow mouse dog cat snake "}
+{"string": "goat fox pig dog panda lizard sheep elephant horse turtle "}
+{"string": "giraffe panda dog goat pig deer dog turtle panda lizard "}
+{"string": "wolf kangaroo rat fox bear horse rabbit squirrel dog "}
+{"string": "cat snake lion deer turtle lizard elephant "}
+{"string": "sheep panda kangaroo pig fox giraffe wolf cat lion "}
+{"string": "duck fox frog fish elephant panda bear chicken "}
+{"string": "mouse kangaroo horse fox cow snake deer "}
+{"string": "lion chicken turtle bear pig fish cat squirrel duck "}
+{"string": "giraffe sheep fish shark fox zebra deer "}
+{"string": "squirrel tiger sheep lion turtle fox kangaroo "}
+{"string": "bear snake lizard lion snake squirrel turtle sheep wolf mouse "}
+{"string": "zebra tiger tiger horse duck dog turtle "}
+{"string": "chicken elephant shark cow rabbit snake giraffe goat giraffe tiger "}
+{"string": "chicken snake cat dog turtle elephant kangaroo panda "}
+{"string": "zebra chicken panda chicken squirrel elephant sheep duck duck rat "}
+{"string": "wolf bear wolf rabbit rabbit shark kangaroo "}
+{"string": "shark pig lizard squirrel sheep cow zebra "}
+{"string": "elephant zebra fish wolf bear wolf dog shark elephant cat "}
+{"string": "cat frog fox pig giraffe chicken dog rabbit tiger snake "}
+{"string": "fox chicken wolf giraffe lion fish panda cat goat bear "}
+{"string": "bear tiger cat pig rabbit dog cow goat "}
+{"string": "rat rabbit panda squirrel snake elephant shark fish fox rat "}
+{"string": "fish chicken fox cat cow rat goat "}
+{"string": "elephant lizard lizard frog lizard frog pig fox squirrel "}
+{"string": "cow squirrel pig dog squirrel cat panda fish lion "}
+{"string": "pig squirrel shark snake fish lion squirrel pig frog zebra "}
+{"string": "rat horse turtle cow rabbit dog fish bear duck snake "}
+{"string": "squirrel wolf wolf tiger mouse kangaroo snake fox "}
+{"string": "horse turtle lion kangaroo bear shark squirrel giraffe tiger bear "}
+{"string": "sheep rabbit deer elephant dog kangaroo fox cat "}
+{"string": "duck goat tiger duck cat duck sheep fish tiger "}
+{"string": "chicken elephant mouse tiger pig pig goat dog "}
+{"string": "kangaroo rabbit squirrel fox sheep frog horse panda "}
+{"string": "cat tiger rat elephant shark cat panda fox horse duck "}
+{"string": "lion snake fox horse lizard pig duck tiger dog horse "}
+{"string": "goat tiger lion shark giraffe rat kangaroo frog lion cat "}
+{"string": "fox kangaroo tiger duck chicken turtle deer "}
+{"string": "snake elephant shark goat squirrel panda turtle bear horse bear "}
+{"string": "wolf squirrel deer cow cow lizard wolf goat deer "}
+{"string": "panda lizard wolf turtle sheep squirrel wolf lion "}
+{"string": "cow kangaroo elephant frog turtle rat lion mouse "}
+{"string": "turtle panda rat cat rat zebra panda snake "}
+{"string": "giraffe tiger panda fish cow elephant frog tiger wolf "}
+{"string": "elephant giraffe zebra dog kangaroo lion pig dog goat sheep "}
+{"string": "fish shark zebra lion cow lion fish "}
+{"string": "wolf horse frog goat panda fish dog fox "}
+{"string": "fish elephant cow chicken horse fish deer horse wolf "}
+{"string": "fox deer lion snake chicken tiger deer sheep "}
+{"string": "fox duck bear lizard pig lizard dog "}
+{"string": "turtle turtle mouse fish rabbit elephant rat "}
+{"string": "turtle mouse lion elephant wolf squirrel goat kangaroo "}
+{"string": "cat tiger wolf dog fish duck zebra sheep rabbit "}
+{"string": "rabbit chicken panda frog cow chicken elephant pig snake "}
+{"string": "bear rat cow giraffe mouse snake zebra "}
+{"string": "horse frog wolf squirrel rabbit rat fox dog fox tiger "}
+{"string": "giraffe frog goat zebra frog mouse goat "}
+{"string": "pig squirrel frog goat mouse kangaroo sheep rabbit fox "}
+{"string": "panda mouse pig wolf kangaroo mouse lion "}
+{"string": "bear cat fish elephant goat rabbit turtle horse goat rabbit "}
+{"string": "rabbit panda fish deer mouse cow cat goat "}
+{"string": "rabbit fish zebra deer goat mouse fish snake "}
+{"string": "chicken frog fox tiger zebra lizard horse sheep tiger giraffe "}
+{"string": "elephant elephant kangaroo cat squirrel panda snake dog lion "}
+{"string": "frog lizard chicken wolf tiger elephant lizard squirrel "}
+{"string": "lion pig duck giraffe lizard pig mouse deer "}
+{"string": "shark fox giraffe pig zebra tiger fish "}
+{"string": "wolf duck tiger fox frog rat snake chicken wolf "}
+{"string": "pig squirrel lion turtle zebra zebra cat "}
+{"string": "fish panda giraffe cow tiger deer lion cow "}
+{"string": "shark cat zebra elephant elephant giraffe fish cow bear chicken "}
+{"string": "bear squirrel fish rabbit rat chicken tiger rat wolf cat "}
+{"string": "wolf squirrel kangaroo cat snake shark snake fish panda "}
+{"string": "horse cat pig cat giraffe mouse elephant fish "}
+{"string": "shark tiger goat elephant horse panda rat zebra snake "}
+{"string": "rat dog giraffe duck deer lion kangaroo "}
+{"string": "duck fox mouse duck shark tiger dog "}
+{"string": "lizard frog cat squirrel cow duck cow rabbit lizard "}
+{"string": "tiger rabbit lion dog horse cat chicken fish "}
+{"string": "chicken panda squirrel elephant horse mouse snake duck chicken "}
+{"string": "elephant panda frog dog cat zebra tiger rabbit tiger dog "}
+{"string": "zebra dog wolf kangaroo tiger pig kangaroo "}
+{"string": "rat sheep fish cat zebra horse fox tiger snake panda "}
+{"string": "cow turtle sheep zebra wolf dog squirrel duck fish pig "}
+{"string": "fox dog duck rat panda bear shark shark "}
+{"string": "fox panda pig shark giraffe pig kangaroo "}
+{"string": "giraffe fish elephant duck kangaroo rabbit sheep zebra rat sheep "}
+{"string": "giraffe duck bear sheep elephant chicken chicken frog cow mouse "}
+{"string": "goat mouse snake bear giraffe cow frog "}
+{"string": "lizard snake wolf deer cow rat panda sheep "}
+{"string": "giraffe cat goat zebra giraffe kangaroo rabbit kangaroo elephant tiger "}
+{"string": "lion sheep duck pig sheep mouse kangaroo "}
+{"string": "mouse fox deer zebra mouse wolf frog wolf "}
+{"string": "turtle turtle snake mouse bear squirrel zebra pig horse lizard "}
+{"string": "rat frog lizard fish rat elephant goat "}
+{"string": "horse chicken chicken bear rat fox snake dog "}
+{"string": "cat bear lizard cat mouse lion fox "}
+{"string": "goat horse pig wolf mouse cow elephant dog tiger rat "}
+{"string": "bear duck dog panda sheep cat dog rabbit mouse zebra "}
+{"string": "chicken fox duck elephant bear lizard horse "}
+{"string": "tiger cow bear cow fish dog panda shark "}
+{"string": "lion goat deer mouse panda mouse chicken zebra lizard tiger "}
+{"string": "deer sheep wolf shark shark giraffe horse fox tiger "}
+{"string": "lion snake cow deer frog snake frog sheep fox fish "}
+{"string": "sheep snake mouse fox duck elephant sheep kangaroo fish "}
+{"string": "bear elephant elephant cat panda tiger wolf "}
+{"string": "lion snake turtle squirrel cat duck deer giraffe elephant frog "}
+{"string": "elephant rat frog chicken lion horse squirrel duck lion "}
+{"string": "bear turtle lion zebra lizard panda shark "}
+{"string": "giraffe duck elephant elephant panda kangaroo rat snake "}
+{"string": "bear bear lion fox turtle snake shark squirrel pig "}
+{"string": "lion sheep shark tiger dog panda cow horse "}
+{"string": "turtle cow snake dog pig turtle frog rat turtle "}
+{"string": "cat giraffe cat giraffe lion kangaroo zebra "}
+{"string": "rabbit lion wolf fox tiger chicken wolf chicken deer "}
+{"string": "fish zebra cat chicken snake goat lion lizard "}
+{"string": "horse horse dog frog fish fish elephant fox "}
+{"string": "zebra giraffe shark fish mouse goat bear "}
+{"string": "turtle goat horse bear lion fox sheep rat "}
+{"string": "wolf elephant deer cat rat tiger fox "}
+{"string": "lizard cow squirrel tiger lizard zebra rabbit chicken "}
+{"string": "lion horse squirrel tiger snake rabbit sheep horse panda kangaroo "}
+{"string": "squirrel dog elephant squirrel pig cat squirrel zebra zebra bear "}
+{"string": "mouse cow lizard rat frog frog panda bear rabbit "}
+{"string": "cat tiger kangaroo goat squirrel mouse lizard shark tiger squirrel "}
+{"string": "lizard mouse pig fox wolf turtle lion rabbit lion "}
+{"string": "goat duck giraffe lizard snake tiger bear "}
+{"string": "lizard pig panda cow kangaroo fish horse squirrel rat zebra "}
+{"string": "mouse pig snake wolf deer chicken mouse zebra tiger shark "}
+{"string": "panda sheep panda shark kangaroo squirrel fish "}
+{"string": "frog rabbit tiger rat shark tiger dog "}
+{"string": "shark bear turtle lizard zebra bear deer pig bear wolf "}
+{"string": "cow snake cow squirrel goat tiger duck "}
+{"string": "deer cow deer chicken fish rabbit deer rat rabbit panda "}
+{"string": "rat rat pig deer dog giraffe turtle rat bear "}
+{"string": "deer bear turtle kangaroo deer elephant snake deer shark fish "}
+{"string": "panda horse fish goat pig fish mouse cow rabbit "}
+{"string": "fish lion mouse pig goat fish dog lion mouse "}
+{"string": "duck squirrel elephant turtle zebra lion tiger deer "}
+{"string": "cat wolf lizard frog lizard giraffe cow fish rat "}
+{"string": "cat horse fox snake cow mouse tiger cat "}
+{"string": "kangaroo fox snake rat mouse bear snake lion "}
+{"string": "deer bear rat wolf shark fox rabbit snake fox frog "}
+{"string": "snake bear dog duck lizard tiger goat "}
+{"string": "cat sheep rabbit mouse chicken dog goat fox "}
+{"string": "fish cow sheep rat sheep rabbit lion bear squirrel frog "}
+{"string": "duck duck kangaroo elephant shark lizard giraffe deer giraffe "}
+{"string": "zebra cow dog lizard lizard turtle deer elephant lion "}
+{"string": "sheep rabbit fox goat lizard cow shark frog "}
+{"string": "shark shark squirrel cow zebra goat duck dog squirrel "}
+{"string": "lion bear cow turtle cow lizard wolf snake "}
+{"string": "fish cow wolf shark wolf giraffe cow elephant "}
+{"string": "mouse giraffe cat goat zebra goat wolf snake "}
+{"string": "shark lizard bear shark cow giraffe lizard zebra pig "}
+{"string": "turtle sheep zebra rabbit fox goat horse shark dog shark "}
+{"string": "kangaroo kangaroo mouse sheep duck chicken elephant deer duck "}
+{"string": "squirrel elephant elephant sheep fox snake turtle snake "}
+{"string": "fish shark pig shark goat wolf frog frog "}
+{"string": "squirrel frog goat snake giraffe sheep rabbit "}
+{"string": "cat fish cow lion rat lion shark "}
+{"string": "frog wolf mouse mouse fox mouse turtle cow giraffe "}
+{"string": "horse goat pig frog snake duck cow turtle shark "}
+{"string": "frog rabbit fish elephant lizard duck fox rabbit "}
+{"string": "rabbit wolf panda fox giraffe lion squirrel duck mouse deer "}
+{"string": "turtle shark frog snake fish snake horse "}
+{"string": "rabbit cat cat rabbit dog tiger cow "}
+{"string": "cow shark kangaroo turtle duck rabbit wolf zebra kangaroo chicken "}
+{"string": "wolf bear lion fish fox kangaroo zebra cow squirrel lion "}
+{"string": "cow snake zebra horse frog fish kangaroo pig chicken fish "}
+{"string": "panda elephant chicken rabbit horse bear sheep "}
+{"string": "bear goat rat giraffe deer deer panda cat chicken chicken "}
+{"string": "sheep wolf fox wolf goat sheep horse horse sheep lion "}
+{"string": "elephant goat frog dog bear wolf wolf rabbit goat "}
+{"string": "horse bear turtle wolf fox sheep cow turtle duck rabbit "}
+{"string": "goat panda giraffe rat kangaroo cat lizard fish turtle "}
+{"string": "chicken horse snake fish lion lion turtle snake bear "}
+{"string": "mouse panda mouse frog horse shark frog "}
+{"string": "wolf wolf shark bear cat sheep fox goat mouse "}
+{"string": "mouse elephant dog pig frog dog lizard zebra cat rat "}
+{"string": "snake chicken giraffe rat elephant chicken shark giraffe "}
+{"string": "cow shark frog panda panda fox giraffe dog goat "}
+{"string": "lizard elephant giraffe deer frog panda frog "}
+{"string": "fox dog lion panda chicken pig bear "}
+{"string": "mouse pig panda tiger horse giraffe goat tiger tiger "}
+{"string": "mouse chicken elephant squirrel cat wolf fish "}
+{"string": "tiger kangaroo mouse fish kangaroo pig turtle sheep bear duck "}
+{"string": "zebra deer snake wolf goat fox zebra "}
+{"string": "rat duck kangaroo cat duck duck pig wolf "}
+{"string": "chicken lion shark shark fox fox elephant deer fox elephant "}
+{"string": "giraffe giraffe pig kangaroo panda elephant panda rabbit "}
+{"string": "elephant fish frog fish squirrel chicken squirrel horse lizard mouse "}
+{"string": "rabbit deer horse chicken rabbit deer dog "}
+{"string": "bear lizard lizard frog snake lizard zebra goat "}

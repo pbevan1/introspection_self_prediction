@@ -39,7 +39,7 @@ class LLMResponse(BaseModel):
     def parse_stop_reason(cls, v):
         if v in ["length", "max_tokens"]:
             return StopReason.MAX_TOKENS
-        elif v in ["stop", "stop_sequence"]:
+        elif v in ["stop", "stop_sequence", "end_turn"]:
             return StopReason.STOP_SEQUENCE
         raise ValueError(f"Invalid stop reason: {v}")
 

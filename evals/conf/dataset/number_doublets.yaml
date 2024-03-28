@@ -1,6 +1,0 @@
-# parameters for generate_random_strings.py
-topic: number_doublets
-item_descriptor: two-digit number # natural language descriptor of what one item is that can be inserted into the prompt
-n_items: [7,10]
-num: ${limit}
-join_on: " "

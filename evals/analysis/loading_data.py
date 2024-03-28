@@ -3,29 +3,16 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-import numpy as np
 import pandas as pd
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
 import evals.utils  # this is necessary to ensure that the Hydra sanitizer is registered  # noqa: F401
-
-try:
-    from evals.analysis.analysis_helpers import get_pretty_name
-    from evals.analysis.compliance_checks import check_compliance
-    from evals.analysis.string_cleaning import (
-        apply_all_cleaning,
-        extract_first_of_multiple_responses,
-        match_log_probs_to_trimmed_response,
-    )
-except ImportError:
-    from analysis_helpers import get_pretty_name
-    from compliance_checks import check_compliance
-    from evals.analysis.string_cleaning import (
-        apply_all_cleaning,
-        extract_first_of_multiple_responses,
-        match_log_probs_to_trimmed_response,
-    )
-
+from evals.analysis.analysis_helpers import get_pretty_name
+from evals.analysis.compliance_checks import check_compliance
+from evals.analysis.string_cleaning import (
+    apply_all_cleaning,
+    match_log_probs_to_trimmed_response,
+)
 from evals.utils import get_maybe_nested_from_dict
 
 LOGGER = logging.getLogger(__name__)
@@ -99,21 +86,22 @@ def load_and_prep_dfs(
         dfs[name]["response"] = dfs[name]["response"].apply(apply_all_cleaning)
         # if the model has a continuation with multiple responses, we only want the first one
         try:
-            join_on = name["dataset"]["join_on"]
+            join_on = name["task"]["join_on"]
         except KeyError:
             join_on = " "
             print(
                 f"[{pretty_names[name]}]:\n  No join_on found, trying to extract first response anyway using '{join_on}' as join_on."
             )
-        finally:
-            old_responses = dfs[name]["response"]
-            dfs[name]["response"] = dfs[name]["response"].apply(
-                lambda x: extract_first_of_multiple_responses(x, join_on)
-            )
-            if np.any(old_responses != dfs[name]["response"]):
-                print(
-                    f"[{pretty_names[name]}]:\n  Extracted first response on {np.sum(old_responses != dfs[name]['response'])} rows"
-                )
+        # extract the first response
+        # finally:
+        #     old_responses = dfs[name]["response"]
+        #     dfs[name]["response"] = dfs[name]["response"].apply(
+        #         lambda x: extract_first_of_multiple_responses(x, join_on)
+        #     )
+        #     if np.any(old_responses != dfs[name]["response"]):
+        #         print(
+        #             f"[{pretty_names[name]}]:\n  Extracted first response on {np.sum(old_responses != dfs[name]['response'])} rows"
+        #         )
 
     # trim teh logprobs to ensure that they match the string
     for name in dfs.keys():
@@ -191,7 +179,9 @@ def load_and_prep_dfs(
         # )
 
     for name in dfs.keys():
-        dfs[name]["compliance"] = dfs[name]["raw_response"].apply(check_compliance)
+        dfs[name]["compliance"] = dfs[name]["raw_response"].apply(
+            lambda x: check_compliance(x, name.get("compliance_checks", {}).get("excludion_rule_groups", ["default"]))
+        )
         print(f"[{pretty_names[name]}]:\n  Compliance: {(dfs[name]['compliance'] == True).mean():.2%}")  # noqa: E712
 
     # for name in dfs.keys():
@@ -272,7 +262,7 @@ def get_data_path(exp_folder: Union[Path, str]) -> Path:
     data_files = list(exp_folder.glob("data*.csv"))
     data_files.sort(key=lambda x: x.stat().st_ctime, reverse=True)
     if len(data_files) == 0:
-        print(f"No data*.csv files found in {exp_folder}")
+        print(f"No data*.csv files found in {exp_folder.absolute()}")
         return None
     if len(data_files) > 1:
         LOGGER.warning(f"Found more than one data*.csv file in {exp_folder}, using the newest one")
@@ -368,12 +358,12 @@ def find_matching_base_dir(config: DictConfig):
     """Finds the base dir for a config"""
     # check the config
     study_dir = Path(config["study_dir"])
-    # search exp_dir for a base dir that matches on dataset and language_model.model
+    # search exp_dir for a base dir that matches on task and language_model.model
     base_dir = None
-    for base in study_dir.glob("base*"):
+    for base in study_dir.glob("object_level_*"):
         base_config = get_hydra_config(base)
         if (
-            base_config["dataset"]["topic"] == config["dataset"]["topic"]
+            base_config["task"]["name"] == config["task"]["name"]
             and base_config["language_model"]["model"] == config["language_model"]["model"]
         ):
             base_dir = base

@@ -27,7 +27,7 @@ class InferenceAPI:
 
     def __init__(
         self,
-        anthropic_num_threads: int = 5,
+        anthropic_num_threads: int = 12,
         openai_fraction_rate_limit: float = 0.99,
         organization: str = "DEFAULT_ORG",
         prompt_history_dir: Path = None,

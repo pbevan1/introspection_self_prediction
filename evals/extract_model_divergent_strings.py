@@ -64,6 +64,7 @@ def extract_most_uncertain_strings_from_base(
     if output_file_path is None:
         output_file_path = Path(input_file_paths[0]).parent / "out_strings.csv"
     # ensure output dir exists
+    output_file_path = Path(output_file_path)
     output_file_path.parent.mkdir(parents=True, exist_ok=True)
 
     out_df[["string"]].to_csv(output_file_path, index=False)

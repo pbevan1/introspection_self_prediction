@@ -17,16 +17,18 @@ from hydra.core.global_hydra import GlobalHydra
 from omegaconf import DictConfig, OmegaConf
 from pydantic_core._pydantic_core import ValidationError
 
-from evals.analysis.loading_data import get_data_path, load_single_df
+from evals.analysis.loading_data import get_data_path, get_hydra_config, load_single_df
 from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
-from evals.utils import load_string_and_reponse_functions
+from evals.load.lazy_object_level_llm_extraction import (
+    lazy_add_response_property_to_object_level,
+)
 
 CONFIG_PATH = "conf"
 
 LOGGER = logging.getLogger(__name__)
 
 
-def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl") -> (Path, Path):
+def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl") -> tuple[Path, Path]:
     """Generate a jsonl file for finetuning.
 
     This reads in all config files in the directory, and for each adds loads the base data and genereates the messages for finetuning.
@@ -109,18 +111,41 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         train_filepath (Path): The path to save the file to.
         val_filepath (Path): The path to save the validation file to.
     """
-    base_dir = Path(cfg.base_dir)
-    assert base_dir.exists(), f"Base directory {base_dir} does not exist."
-    LOGGER.info(f"Loading base data from {base_dir}")
-    datapath = get_data_path(cfg.base_dir)
-    df = load_single_df(datapath)
+    train_base_dir = Path(cfg.train_base_dir)
+    assert train_base_dir.exists(), f"Base directory {train_base_dir} does not exist."
+    LOGGER.info(f"Loading base data from {train_base_dir}")
+    datapath = get_data_path(cfg.train_base_dir)
+    train_df = load_single_df(datapath)
+    train_df = lazy_add_response_property_to_object_level(
+        train_df, get_hydra_config(datapath.parent), cfg.response_property.name
+    )
+    LOGGER.info(f"Loaded {len(train_df)} rows from {datapath}")
+
+    # do we have a validation set?
+    if cfg.val_base_dir is not None:
+        val_base_dir = Path(cfg.val_base_dir)
+        assert val_base_dir.exists(), f"Validation Base directory {val_base_dir} does not exist."
+        LOGGER.info(f"Loading val base data from {val_base_dir}")
+        val_datapath = get_data_path(cfg.val_base_dir)
+        val_df = load_single_df(val_datapath)
+        val_df = lazy_add_response_property_to_object_level(
+            val_df, get_hydra_config(val_datapath.parent), cfg.response_property.name
+        )
+        LOGGER.info(f"Loaded {len(val_df)} rows from {val_datapath}")
+    else:
+        val_df = pd.DataFrame(columns=train_df.columns)
+        LOGGER.info("No validation base directory found. Using an empty dataframe for validation.")
 
     # do we have a strings path?
     # for train
     try:
-        if cfg.train_strings_path is not None and cfg.train_strings_path != "none":
+        if cfg.train_strings_path is not None:
             train_strings = pd.read_csv(cfg.train_strings_path)["string"].values
             LOGGER.info(f"(Strings) Loaded {len(train_strings)} strings from {cfg.train_strings_path}")
+            train_df = train_df[train_df["string"].isin(train_strings)]
+            LOGGER.info(
+                f"Filtered train data to only include strings from {cfg.train_strings_path} down to length {len(train_df)}."
+            )
         else:
             train_strings = None
     except AttributeError:
@@ -128,67 +153,23 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         train_strings = None
     # for val
     try:
-        if cfg.val_strings_path is not None and cfg.val_strings_path != "none":
+        if cfg.val_strings_path is not None:
             val_strings = pd.read_csv(cfg.val_strings_path)["string"].values
             LOGGER.info(f"(Strings) Loaded {len(val_strings)} strings from {cfg.val_strings_path}")
-        else:
-            val_strings = None
+            val_df = val_df[val_df["string"].isin(val_strings)]
+            LOGGER.info(
+                f"Filtered val data to only include strings from {cfg.val_strings_path} down to length {len(val_df)}."
+            )
     except AttributeError:
         LOGGER.info("No val_strings_path found in config. Not using any strings.")
-        val_strings = None
-
-    # do we have the unmodified string?
-    if "unmodified_string" in df.columns:
-        df["string"] = df["unmodified_string"]
-        LOGGER.info("Using unmodified string column.")
-
-    # do we have string modifier?
-    string_modifier, response_property = load_string_and_reponse_functions(
-        cfg.string_modifier.string_modifier, cfg.response_property.response_property
-    )
-    if string_modifier is not None:
-        df["string"] = df["string"].apply(string_modifier)
-        LOGGER.info(f"Applied string modifier {string_modifier.__name__} to string column.")
-    if response_property is not None:
-        df["response"] = df.apply(response_property, axis=1)
-        LOGGER.info(f"Applied response property {response_property.__name__} to response column.")
-
-    # split into train and validation
-    if train_strings is not None:
-        train_df = df[df["string"].isin(train_strings)]
-        val_df = df[~df["string"].isin(train_strings)]
-    elif val_strings is not None:
-        val_df = df[df["string"].isin(val_strings)]
-        train_df = df[~df["string"].isin(val_strings)]
-    else:
-        train_df = df.sample(frac=1 - cfg.dataset.validation_fraction, random_state=cfg.seed)
-        val_df = df.drop(train_df.index)
-
-    LOGGER.info(f"Split into {len(train_df)} training rows and {len(val_df)} validation rows before subsampling.")
 
     # subsample if needed
-    try:
-        limit = cfg.limit
-        train_limit = limit - int(cfg.dataset.validation_fraction * limit)
-        val_limit = limit - train_limit
-        LOGGER.info(f"Subsampling to {train_limit} training rows and {val_limit} validation rows.")
-        if limit is not None:
-            if train_limit < len(train_df):
-                LOGGER.info(f"Subsampling to {train_limit} rows.")
-                train_df = train_df.sample(train_limit, random_state=cfg.seed, replace=False)
-            else:
-                LOGGER.info(
-                    f"Training limit is {train_limit}, which is higher than the number of rows in the dataframe. Not subsampling."
-                )
-            if val_limit < len(val_df):
-                LOGGER.info(f"Subsampling to {val_limit} rows.")
-                val_df = val_df.sample(val_limit, random_state=cfg.seed, replace=False)
-            else:
-                LOGGER.info(
-                    f"Validation limit is {val_limit}, which is higher than the number of rows in the dataframe. Not subsampling."
-                )
-    except AttributeError:
-        LOGGER.info("No limit found in config. Not subsampling.")
+    if cfg.n_train_items is not None and cfg.n_train_items < len(train_df):
+        LOGGER.info(f"Subsampling to {cfg.n_train_items} training rows.")
+        train_df = train_df.sample(cfg.n_train_items, random_state=cfg.seed, replace=False)
+    if cfg.n_val_items is not None and cfg.n_val_items < len(val_df):
+        LOGGER.info(f"Subsampling to {cfg.n_val_items} validation rows.")
+        val_df = val_df.sample(cfg.n_val_items, random_state=cfg.seed, replace=False)
 
     # do we have to scramble the input?
     try:
@@ -206,8 +187,8 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     # exclude rows that contain None or nan as the response
     old_len_train = len(train_df)
     old_len_val = len(val_df)
-    train_df = train_df.dropna(subset=["response"])
-    val_df = val_df.dropna(subset=["response"])
+    train_df = train_df.dropna(subset=[cfg.response_property.name])
+    val_df = val_df.dropna(subset=[cfg.response_property.name])
     LOGGER.info(f"Excluded {old_len_train - len(train_df)} rows from the training set due to missing responses.")
     LOGGER.info(f"Excluded {old_len_val - len(val_df)} rows from the validation set due to missing responses.")
 
@@ -216,7 +197,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     with open(train_filepath, "a") as f:
         for i, row in tqdm.tqdm(train_df.iterrows(), total=len(train_df), desc="Generating train messages"):
             try:
-                prompt = process_prompt(row, prompt_template)
+                prompt = process_prompt(row, prompt_template, cfg.response_property.name)
                 f.write(prompt.openai_finetuning_format())  # this might not work—use different format if it complains
                 f.write("\n")
             except ValidationError as e:
@@ -224,7 +205,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
 
     with open(val_filepath, "a") as f:
         for i, row in tqdm.tqdm(val_df.iterrows(), total=len(val_df), desc="Generating validation messages"):
-            prompt = process_prompt(row, prompt_template)
+            prompt = process_prompt(row, prompt_template, cfg.response_property.name)
             f.write(prompt.openai_finetuning_format())
             f.write("\n")
 
@@ -237,7 +218,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     )
 
 
-def process_prompt(row: pd.Series, prompt_template: PromptTemplate) -> Prompt:
+def process_prompt(row: pd.Series, prompt_template: PromptTemplate, response_col: str = "response") -> Prompt:
     messages = []
     system_messages = [m for m in prompt_template.messages if m.role == "system"]
     user_messages = [m for m in prompt_template.messages if m.role == "user"]
@@ -258,7 +239,7 @@ def process_prompt(row: pd.Series, prompt_template: PromptTemplate) -> Prompt:
         messages.append(ChatMessage(role=message.role, content=content))
 
     # add the assistant response
-    m = ChatMessage(role=MessageRole.assistant, content=row["response"])
+    m = ChatMessage(role=MessageRole.assistant, content=row[response_col])
     messages.append(m)
 
     return Prompt(messages=messages)

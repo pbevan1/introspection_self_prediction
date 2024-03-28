@@ -1,10 +1,12 @@
 import numpy as np
 
+VOCAB_SIZE = 50257  # gpt-3.5-turbo—using the same vocab size for all models
+
 
 def exclude_noncompliant(df):
     df = df.copy()
-    if "compliance_self" in df.columns and "compliance_base" in df.columns:
-        df = df[(df["compliance_self"] == True) & (df["compliance_base"] == True)]  # noqa: E712
+    if "compliance_meta" in df.columns and "compliance_object" in df.columns:
+        df = df[(df["compliance_meta"] == True) & (df["compliance_object"] == True)]  # noqa: E712
     else:
         df = df[df["compliance"] == True]  # noqa: E712
     return df
@@ -13,18 +15,18 @@ def exclude_noncompliant(df):
 def calc_accuracy(df):
     """Calculate the accuracy of the model"""
     df = exclude_noncompliant(df)
-    return (df["response_self"] == df["response_base"]).mean()
+    return (df["extracted_property_meta"] == df["extracted_property_object"]).mean()
 
 
 def calc_accuracy_with_excluded(df):
     """What is the accuracy if we count non-compliance as wrong answers?"""
-    df["correct"] = df["response_self"] == df["response_base"]
-    df["correct"] = df["correct"] & (df["compliance_self"] == True)  # noqa: E712
+    df["correct"] = df["extracted_property_meta"] == df["extracted_property_object"]
+    df["correct"] = df["correct"] & (df["compliance_meta"] == True)  # noqa: E712
     return df["correct"].mean()
 
 
 def bootstrap_accuracy_ci(df, num_bootstraps=1000, ci=95):
-    df = df[(df["compliance_self"] == True) & (df["compliance_base"] == True)]  # noqa: E712
+    df = df[(df["compliance_meta"] == True) & (df["compliance_object"] == True)]  # noqa: E712
 
     bootstrap_accuracies = []
 
@@ -47,7 +49,7 @@ def baseline_accuracy_under_mode(df, base_df):
     """What would be the accuracy if the model always picked the most common response in the base responses?"""
     df = exclude_noncompliant(df)
     mode = base_df["response"].mode()[0]
-    accuracy_under_mode = (df["response_base"] == mode).mean()
+    accuracy_under_mode = (df["extracted_property_object"] == mode).mean()
     return accuracy_under_mode
 
 
@@ -58,11 +60,36 @@ def baseline_accuracy_under_distribution(df, base_df, iters=100):
     for _ in range(iters):
         # randomly sample from the base responses
         sample = np.random.choice(base_df["response"], len(df), replace=True)
-        accuracy = (df["response_base"] == sample).mean()
+        accuracy = (df["extracted_property_object"] == sample).mean()
         accuracies.append(accuracy)
     return np.mean(accuracies)
 
 
 def likelihood_of_correct_first_token(df):
+    """What is the log likelihood of the correct answer under the first token distribution of the meta response?"""
+
+    def first_log_prob_likelihood(row):
+        # get logprobs for first token
+        logprobs = row["logprobs_meta"]
+        if isinstance(logprobs, str):
+            logprobs = eval(logprobs)
+        try:
+            if logprobs is None or np.isnan(logprobs):
+                return None
+        except TypeError:
+            pass  # it wasn't np.nan then
+        logprobs = logprobs[0]  # only the first token
+        if logprobs is None or len(logprobs) == 0:
+            return None
+        target = row["extracted_property_object"]
+        target = str(target)  # in case it's a number
+        for token, log_prob in logprobs.items():
+            if target.startswith(token):
+                return log_prob
+        # if the log prob is not in the top n, so we calculate the flat probability of the outside of the top n
+        top_n_mass = np.sum([v for k, v in logprobs.items()])
+        outside_top_n_mass = 1 - top_n_mass
+        return np.log(outside_top_n_mass / (VOCAB_SIZE - len(logprobs)))
+
     df = exclude_noncompliant(df)
-    return df["first_logprob_likelihood"].mean()
+    return df.apply(first_log_prob_likelihood, axis=1).dropna().mean()

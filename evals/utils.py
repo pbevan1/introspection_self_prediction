@@ -141,8 +141,11 @@ def import_function_from_string(module_name, function_name):
 
 def sanitize_folder_name(key: str) -> str:
     """Sometimes we need to clean Hydra keys so we can use them as folder names. This function does that."""
-    # Replace ":" with "_" or another suitable character
+    # Replace ":" with "_"
     sanitized_key = key.replace(":", "_")
+    # Replace "/" with "_"
+    sanitized_key = sanitized_key.replace("meta_level/", "meta_level_")
+    sanitized_key = sanitized_key.replace("object_level/", "object_level_")
     return sanitized_key
 
 

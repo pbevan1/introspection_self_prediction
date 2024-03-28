@@ -1,57 +1,66 @@
 from typing import Dict, List, Tuple
 
 import numpy as np
+import omegaconf
 import pandas as pd
 import tqdm
 from IPython.display import HTML, display
 
-from evals.utils import get_maybe_nested_from_dict, load_string_and_reponse_functions
+from evals.load.lazy_object_level_llm_extraction import (
+    lazy_add_response_property_to_object_level,
+)
+from evals.utils import get_maybe_nested_from_dict
 
 
-def merge_base_and_self_pred_dfs(
-    b_df: pd.DataFrame, s_df: pd.DataFrame, string_modifier: str | None = None, response_property: str | None = None
+def merge_object_and_meta_dfs(
+    o_df: pd.DataFrame, m_df: pd.DataFrame, response_property: str = "response"
 ) -> pd.DataFrame:
     """
-    Merge the base and self prediction dataframes. Applies the string_modifier and response_property functions if they are not None to the base dataframe.
+    Merge the object and meta–level dataframes. Saves the response_property into a new column called "extracted_property_object" and "extracted_property_meta" respectively.
     """
-    # make sure that the strings in s_df are all in b_df
-    # assert set(s_df["string"].unique()).issubset(set(b_df["string"].unique())), "Not all strings in s_df are in b_df"
-    string_modifier, response_property = load_string_and_reponse_functions(string_modifier, response_property)
 
-    if not set(s_df["string"].unique()).issubset(set(b_df["string"].unique())):
+    if not set(m_df["string"].unique()).issubset(set(o_df["string"].unique())):
         print(
-            f"Not all strings in s_df are in b_df: {len(set(s_df['string'].unique()).difference(set(b_df['string'].unique())))} are missing!"
+            f"Not all strings in s_df are in b_df: {len(set(m_df['string'].unique()).difference(set(o_df['string'].unique())))} are missing!"
         )
 
     # we need to subset the data to only include the strings that are in both dfs
-    old_b_len = len(b_df)
+    old_o_len = len(o_df)
     # if unmodified_string is in the dataframe, use that to subset
-    if "unmodified_string" in s_df.columns:
-        strings_set = set(b_df["string"].unique()).intersection(set(s_df["unmodified_string"].unique()))
-        b_df = b_df[b_df["string"].isin(strings_set)]
-        s_df = s_df[s_df["unmodified_string"].isin(strings_set)]
+    if "unmodified_string" in m_df.columns:
+        strings_set = set(o_df["string"].unique()).intersection(set(m_df["unmodified_string"].unique()))
+        o_df = o_df[o_df["string"].isin(strings_set)]
+        m_df = m_df[m_df["unmodified_string"].isin(strings_set)]
     else:
-        strings_set = set(b_df["string"].unique()).intersection(set(s_df["string"].unique()))
-        b_df = b_df[b_df["string"].isin(strings_set)]
-        s_df = s_df[s_df["string"].isin(strings_set)]
+        strings_set = set(o_df["string"].unique()).intersection(set(m_df["string"].unique()))
+        o_df = o_df[o_df["string"].isin(strings_set)]
+        m_df = m_df[m_df["string"].isin(strings_set)]
     print(
-        f"Subsetted data to only include strings that are in both dfs.\nBefore: [Base] {old_b_len}, After: {len(b_df)}"
+        f"Subsetted data to only include strings that are in both dfs.\nBefore: [Base] {old_o_len}, After: {len(o_df)}"
     )
     # ensure that b_df and s_df aren't slices
-    b_df = b_df.copy()
-    s_df = s_df.copy()
-    # apply string modifier and response property
-    b_df["unmodified_response"] = b_df["response"]
-    if response_property is not None:
-        b_df["response"] = b_df.apply(response_property, axis=1)
-    if string_modifier is not None:
-        b_df["modified_string"] = b_df["string"].apply(string_modifier)
-        b_df["unmodified_string"] = b_df["string"]
-        b_df["string"] = b_df["modified_string"]
+    o_df = o_df.copy()
+    m_df = m_df.copy()
+
+    # we add a column for the extracted properties so we can easily compare them down the line
+    try:
+        o_df["extracted_property"] = o_df[response_property]
+    except KeyError:
+        print(
+            f"Could not find response_property {response_property} in the base dataframe. Extract using `python -m evals.run_property_extraction response_property={response_property} base_dir= ...`"
+        )
+        raise
+    try:
+        m_df["extracted_property"] = m_df[response_property]
+    except KeyError:
+        print(
+            f"Could not find response_property {response_property} in the meta dataframe. Is the wrong one passed in?"
+        )
+        raise
 
     # join the two dataframes on the string column
-    df = pd.merge(b_df, s_df, on="string", suffixes=("_base", "_self"))
-    for col in ["complete_base", "complete_self", "id_base", "id_self"]:
+    df = pd.merge(o_df, m_df, on="string", suffixes=("_object", "_meta"))
+    for col in ["complete_object", "complete_meta", "id_object", "id_meta"]:
         try:
             df.drop(
                 columns=[col],
@@ -64,6 +73,17 @@ def merge_base_and_self_pred_dfs(
     return df
 
 
+def merge_object_and_meta_dfs_and_run_property_extraction(object_df, meta_df, object_cfg, meta_cfg):
+    """Joins the dataframes as above. When the meta-level response property is not in the object level data, compute it on the fly."""
+    # do we have the response property in the object level data?
+    try:
+        response_property_name = meta_cfg.response_property.name
+    except omegaconf.errors.ConfigAttributeError:  # if we don't have a named attribute, we just use the identity
+        response_property_name = "identity"
+    object_df = lazy_add_response_property_to_object_level(object_df, object_cfg, response_property_name)
+    return merge_object_and_meta_dfs(object_df, meta_df, response_property_name)
+
+
 CONFIG_VALUES_OF_INTEREST = [
     ["language_model", "model"],
     "note",
@@ -71,12 +91,10 @@ CONFIG_VALUES_OF_INTEREST = [
     "base_dir",
     "exp_dir",
     "limit",
-    # "dataset",
-    ["dataset", "topic"],
-    ["dataset", "n_shot"],
-    ["dataset", "n_shot_seeding"],
-    ["dataset", "string_modifier"],
-    ["dataset", "response_property"],
+    ["task", "name"],
+    "n_shot",
+    "n_shot_seeding",
+    ["response_property", "name"],
     "prediction_target",
 ]
 
@@ -232,7 +250,7 @@ def filter_configs_by_conditions(
             ```
             {
                 ("language_model","model"): ["gpt-4-1106-preview"],
-                ("dataset","n_shot"): [100, None]
+                ("n_shot"): [100, None]
             }
             ```
 
