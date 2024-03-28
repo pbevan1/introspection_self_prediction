@@ -73,10 +73,16 @@ def likelihood_of_correct_first_token(df):
         logprobs = row["logprobs_meta"]
         if isinstance(logprobs, str):
             logprobs = eval(logprobs)
+        try:
+            if logprobs is None or np.isnan(logprobs):
+                return None
+        except TypeError:
+            pass  # it wasn't np.nan then
         logprobs = logprobs[0]  # only the first token
         if logprobs is None or len(logprobs) == 0:
             return None
         target = row["extracted_property_object"]
+        target = str(target)  # in case it's a number
         for token, log_prob in logprobs.items():
             if target.startswith(token):
                 return log_prob

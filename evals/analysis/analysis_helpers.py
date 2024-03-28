@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple
 
 import numpy as np
+import omegaconf
 import pandas as pd
 import tqdm
 from IPython.display import HTML, display
@@ -75,7 +76,10 @@ def merge_object_and_meta_dfs(
 def merge_object_and_meta_dfs_and_run_property_extraction(object_df, meta_df, object_cfg, meta_cfg):
     """Joins the dataframes as above. When the meta-level response property is not in the object level data, compute it on the fly."""
     # do we have the response property in the object level data?
-    response_property_name = meta_cfg.response_property.name
+    try:
+        response_property_name = meta_cfg.response_property.name
+    except omegaconf.errors.ConfigAttributeError:  # if we don't have a named attribute, we just use the identity
+        response_property_name = "identity"
     object_df = lazy_add_response_property_to_object_level(object_df, object_cfg, response_property_name)
     return merge_object_and_meta_dfs(object_df, meta_df, response_property_name)
 
