@@ -7,6 +7,7 @@ from pathlib import Path
 from string import Template
 
 import hydra
+import numpy as np
 import pandas as pd
 from omegaconf import DictConfig, OmegaConf
 
@@ -201,10 +202,19 @@ def apply_python_function(response_property: DictConfig, filepath: str):
     # load the dataset
     df = pd.read_csv(filepath)
     # apply the function
-    df[response_property.name] = df.apply(function, axis=1)
+    df[response_property.name] = df.apply(lambda row: try_function(function, row), axis=1)
     # save the dataset
     df.to_csv(filepath, index=False, encoding="utf-8")
     LOGGER.info(f"Applied python function {response_property.python_function} to {filepath}")
+
+
+def try_function(function, row):
+    try:
+        return function(row)
+    except Exception as e:
+        LOGGER.error(f"Error running function {function.__name__} on row {row}")
+        LOGGER.error(e)
+        return np.nan
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config_property_extraction")
