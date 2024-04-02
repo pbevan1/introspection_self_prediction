@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import subprocess
 
 import omegaconf
 import openai
@@ -151,3 +152,11 @@ def sanitize_folder_name(key: str) -> str:
 
 # ensure that the sanitize function is registered
 omegaconf.OmegaConf.register_new_resolver("sanitize", sanitize_folder_name)
+
+def get_current_git_hash():
+    try:
+        # Run the git command to get the current commit hash
+        output = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
+        return output
+    except subprocess.CalledProcessError:
+        return None
