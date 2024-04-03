@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from evals.apis.inference.anthropic import ANTHROPIC_MODELS, AnthropicChatModel
+from evals.apis.inference.huggingface import MODELS_ON_CAIS, HuggingFaceModel
 from evals.apis.inference.model import InferenceAPIModel
 from evals.apis.inference.openai.chat import OpenAIChatModel
 from evals.apis.inference.openai.completion import OpenAICompletionModel
@@ -70,6 +71,8 @@ class InferenceAPI:
             prompt_history_dir=self.prompt_history_dir,
         )
 
+        self._huggingface_chat = HuggingFaceModel(prompt_history_dir=self.prompt_history_dir)
+
         self.running_cost = 0
         self.model_timings = {}
         self.model_wait_times = {}
@@ -83,6 +86,8 @@ class InferenceAPI:
             return self._openai_chat
         elif model_id in ANTHROPIC_MODELS:
             return self._anthropic_chat
+        elif model_id in MODELS_ON_CAIS:
+            return self._huggingface_chat
         raise ValueError(f"Invalid model id: {model_id}")
 
     def filter_responses(
@@ -301,7 +306,12 @@ async def demo():
         model_api("gpt-3.5-turbo-instruct", prompt=prompts[2], print_prompt_and_response=True),
         model_api("gpt-3.5-turbo-instruct", prompt=prompts[3], print_prompt_and_response=True),
     ]
-    answer = await asyncio.gather(*anthropic_requests, *oai_chat_requests, *oai_requests)
+
+    # test HuggingFace chat
+    hf_requests = [
+        model_api("llama-7b-chat", prompt=prompts[0], n=1, print_prompt_and_response=True),
+    ]
+    answer = await asyncio.gather(*anthropic_requests, *oai_chat_requests, *oai_requests, *hf_requests)
 
     costs = defaultdict(int)
     for responses in answer:
