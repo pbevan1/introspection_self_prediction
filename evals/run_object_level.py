@@ -17,7 +17,7 @@ from evals.apis.inference.cache_manager import CacheManager
 from evals.data_models.inference import LLMParams
 from evals.data_models.messages import ChatMessage, Prompt, PromptTemplate
 from evals.load.load_dataset import create_data_file, load_dataset
-from evals.utils import async_function_with_retry, setup_environment
+from evals.utils import async_function_with_retry, get_current_git_hash, setup_environment
 
 LOGGER = logging.getLogger(__name__)
 
@@ -195,6 +195,7 @@ async def async_main(cfg: DictConfig):
 
 @hydra.main(version_base=None, config_path="conf", config_name="config_object_level")
 def main(cfg: DictConfig):
+    print("Current git hash:",get_current_git_hash())
     print(cfg)
     asyncio.run(async_main(cfg))
 

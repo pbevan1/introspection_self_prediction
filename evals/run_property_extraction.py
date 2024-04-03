@@ -18,6 +18,7 @@ from evals.data_models.inference import LLMParams
 from evals.data_models.messages import ChatMessage, Prompt, PromptTemplate
 from evals.utils import (
     async_function_with_retry,
+    get_current_git_hash,
     import_function_from_string,
     setup_environment,
 )
@@ -219,6 +220,7 @@ def try_function(function, row):
 
 @hydra.main(version_base=None, config_path="conf", config_name="config_property_extraction")
 def main(cfg: DictConfig):
+    print("Current git hash:",get_current_git_hash())
     print(cfg)
     asyncio.run(async_main(cfg))
 
