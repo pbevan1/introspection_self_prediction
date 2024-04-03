@@ -10,6 +10,8 @@ import openai
 import yaml
 from tenacity import retry, retry_if_result, stop_after_attempt
 
+from evals.locations import EXP_DIR
+
 LOGGER = logging.getLogger(__name__)
 
 LOGGING_LEVELS = {
@@ -152,6 +154,12 @@ def sanitize_folder_name(key: str) -> str:
 
 # ensure that the sanitize function is registered
 omegaconf.OmegaConf.register_new_resolver("sanitize", sanitize_folder_name)
+
+# helper function to find the experiment folder
+def experiment_folder_location(subfolder):
+    return str(EXP_DIR) + subfolder
+
+omegaconf.OmegaConf.register_new_resolver("experiment_folder_location", experiment_folder_location)
 
 def get_current_git_hash():
     try:
