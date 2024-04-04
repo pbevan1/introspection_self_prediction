@@ -13,13 +13,6 @@ from evals.data_models.messages import Prompt
 LOGGER = logging.getLogger(__name__)
 
 
-MODELS_ON_CAIS = {
-    "llama-7b-chat": "/data/public_models/meta-llama/Llama-2-7b-chat-hf",
-    "llama-13b-chat": "/data/public_models/meta-llama/Llama-2-13b-chat-hf",
-    "llama-70b-chat": "/data/public_models/meta-llama/Llama-2-70b-chat-hf",
-}
-
-
 class HuggingFaceModel(InferenceAPIModel):
     def __init__(self, prompt_history_dir: Path = None):
         self.pipe: TextGenerationPipeline | None = None
@@ -35,32 +28,32 @@ class HuggingFaceModel(InferenceAPIModel):
         **kwargs,
     ) -> list[LLMResponse]:
         async with self.lock:  # Ensure that only one call is made at a time (to avoid OOM errors)
-            time.sleep(1)
             start = time.time()
             assert len(model_ids) == 1, "HuggingFace implementation only supports one model at a time."
-            model_id = model_ids[0]
-            if model_id in MODELS_ON_CAIS:
-                hf_model_path = MODELS_ON_CAIS[model_id]
+            hf_model_path = model_ids[0]
+            if "/" in hf_model_path:
+                short_model_name = hf_model_path.split("/")[-1]
             else:
-                hf_model_path = model_id
-                LOGGER.warning(f"Model {model_id} not found on CAIS, will attempt to download it from HuggingFace Hub.")
+                short_model_name = hf_model_path
             if self.pipe is None:
-                LOGGER.info(f"Loading model weights for {model_id}")
+                LOGGER.info(f"Loading model weights for {short_model_name}")
                 self.pipe = pipeline(
                     "text-generation",
                     model=hf_model_path,
                     torch_dtype=torch.float16,
                     device_map="auto",
                 )
-                LOGGER.info(f"Model weights for {model_id} loaded; {self.pipe.device=}")
+                LOGGER.info(f"Model weights for {short_model_name} loaded; {self.pipe.device=}")
             elif self.pipe.model.name_or_path != hf_model_path:
                 raise RuntimeError("HuggingFace InferenceAPI only supports one model at a time")
             else:
-                LOGGER.debug(f"Reusing a pipeline for {model_id}")
-            LOGGER.debug(f"Making {model_id} call")
+                LOGGER.debug(f"Reusing a pipeline for {short_model_name}")
+            LOGGER.debug(f"Making {short_model_name} call")
             hf_input: list[dict[str, str]] = prompt.anthropic_format()
             prompt_string: str = prompt.anthropic_format_string()
-            prompt_file = self.create_prompt_history_file(prompt_string, model_id, self.prompt_history_dir)
+            prompt_file = self.create_prompt_history_file(prompt_string, short_model_name, self.prompt_history_dir)
+
+            # make a forward pass
             output: dict[str, list[dict[str, str]]] = self.pipe(
                 hf_input,
                 do_sample=(not kwargs.get("temperature", 0.0)),
@@ -72,9 +65,9 @@ class HuggingFaceModel(InferenceAPIModel):
                 truncation=True,
             )
             duration = time.time() - start
-            LOGGER.debug(f"Completed call to {model_id} in {duration}s")
+            LOGGER.debug(f"Completed call to {short_model_name} in {duration}s")
             response = LLMResponse(
-                model_id=model_id,
+                model_id=short_model_name,
                 completion=output[0]["generated_text"][-1]["content"],
                 stop_reason="unknown",
                 duration=duration,

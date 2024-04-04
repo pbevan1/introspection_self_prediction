@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from evals.apis.inference.anthropic import ANTHROPIC_MODELS, AnthropicChatModel
-from evals.apis.inference.huggingface import MODELS_ON_CAIS, HuggingFaceModel
+from evals.apis.inference.huggingface import HuggingFaceModel
 from evals.apis.inference.model import InferenceAPIModel
 from evals.apis.inference.openai.chat import OpenAIChatModel
 from evals.apis.inference.openai.completion import OpenAICompletionModel
@@ -86,9 +86,8 @@ class InferenceAPI:
             return self._openai_chat
         elif model_id in ANTHROPIC_MODELS:
             return self._anthropic_chat
-        elif model_id in MODELS_ON_CAIS:
+        else:
             return self._huggingface_chat
-        raise ValueError(f"Invalid model id: {model_id}")
 
     def filter_responses(
         self,
