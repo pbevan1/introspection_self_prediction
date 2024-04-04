@@ -8,7 +8,7 @@ from typing import Callable, Literal, Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evals.apis.inference.anthropic import ANTHROPIC_MODELS, AnthropicChatModel
+from evals.apis.inference.anthropic_api import ANTHROPIC_MODELS, AnthropicChatModel
 from evals.apis.inference.huggingface import HuggingFaceModel
 from evals.apis.inference.model import InferenceAPIModel
 from evals.apis.inference.openai.chat import OpenAIChatModel
