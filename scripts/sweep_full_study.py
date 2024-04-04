@@ -44,12 +44,14 @@ from evals.utils import get_current_git_hash
 
 class StudyRunner:
     def __init__(self):
+        self.parse_arguments()
+        self.parse_args_into_lists()
+        # global state
         self.manager = Manager()
         self.state = self.manager.dict()
         self.state_lock = self.manager.Lock()
-        self.parse_arguments()
-        self.parse_args_into_lists()
         self.load_or_create_state_file()
+        # making sure the state file is written on exit
         atexit.register(self.write_state_file)
 
     def run_command(self, command):
@@ -177,6 +179,7 @@ class StudyRunner:
         else:
             self.state.update(
                 {
+                    "args": vars(self.args),
                     "object_train_runs": self.manager.dict(),
                     "object_val_runs": self.manager.dict(),
                     "divergent_strings": self.manager.dict(),
@@ -330,11 +333,28 @@ class StudyRunner:
             [p.parent.name for p in finetuning_folder_paths]
         )  # we need the name of the subfolder
 
+        finetuning_dataset_creation_commands = []
+        for data_folder in finetuning_study_names:
+            command = (
+                f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder}"
+            )
+            if command not in self.state["finetuning_dataset_creation"]:
+                with self.state_lock:
+                    self.state["finetuning_dataset_creation"].update({command: {"status": "incomplete"}})
+            elif self.state["finetuning_dataset_creation"][command]["status"] == "complete":
+                print(f"Skipping {data_folder} because it is already complete.")
+                continue
+            if self.args.skip_finetuning:
+                print(f"Skipping finetuning dataset creation for {data_folder} because --skip_finetuning is set.")
+                with self.state_lock:
+                    self.state["finetuning_dataset_creation"][command].update({"status": "skipped"})
+                self.write_state_file()
+            self.write_state_file()
+            finetuning_dataset_creation_commands.append(command)
+            
         pool.map(
-            partial(run_finetuning_dataset_creation, state=self.state, state_lock=self.state_lock),
-            finetuning_study_names,
-        )
-        print(f"Created {len(finetuning_study_names)} finetuning datasets.")
+            partial(run_finetuning_dataset_creation, state=self.state, state_lock=self.state_lock), finetuning_dataset_creation_commands)
+        print(f"Created {len(finetuning_dataset_creation_commands)} finetuning datasets.")
 
         #### run finetuning ####
         finetuning_commands = []
@@ -443,11 +463,10 @@ def run_object_train_command(command, state, state_lock):
     try:
         data_folder = run_command(command, state, state_lock)
         with state_lock:
-            state["object_train_runs"][command]["status"] = "complete"
-            state["object_train_runs"][command]["folder"] = data_folder
+            state["object_train_runs"][command].update({"status": "complete", "folder": data_folder})
     except Exception as e:
         with state_lock:
-            state["object_train_runs"][command]["status"] = "failed"
+            state["object_train_runs"][command].update({"status": "failed"})
         print(f"Failed to run {command}: {e}")
         raise e
 
@@ -456,11 +475,10 @@ def run_object_val_command(command, state, state_lock):
     try:
         data_folder = run_command(command, state, state_lock)
         with state_lock:
-            state["object_val_runs"][command]["status"] = "complete"
-            state["object_val_runs"][command]["folder"] = data_folder
+            state["object_val_runs"][command].update({"status": "complete", "folder": data_folder})
     except Exception as e:
         with state_lock:
-            state["object_val_runs"][command]["status"] = "failed"
+            state["object_val_runs"][command].update({"status": "failed"})
         print(f"Failed to run {command}: {e}")
         raise e
 
@@ -470,39 +488,35 @@ def run_divergent_strings_command(args, state, state_lock):
     try:
         run_command(command, state, state_lock)
         with state_lock:
-            state["divergent_strings"][task]["status"] = "complete"
-            state["divergent_strings"][task]["strings_path"] = str(target_file)
+            state["divergent_strings"][task].update({"status": "complete", "strings_path": str(target_file)})
     except Exception as e:
         with state_lock:
-            state["divergent_strings"][task]["status"] = "failed"
+            state["divergent_strings"][task].update({"status": "failed"})
         print(f"Failed to run {command}: {e}")
         raise e
 
 
-def run_finetuning_dataset_creation(data_folder, state, state_lock):
-    command = (
-        f"python -m evals.create_finetuning_dataset study_name={state['args'].study_name} dataset_folder={data_folder}"
-    )
-    if command not in state["finetuning_dataset_creation"]:
+def run_finetuning_dataset_creation(command, state, state_lock):
+    try:
+        run_command(command, state, state_lock)
         with state_lock:
-            state["finetuning_dataset_creation"][command] = self.manager.dict({"status": "incomplete"})
-    elif state["finetuning_dataset_creation"][command]["status"] == "complete":
-        print(f"Skipping {data_folder} because it is already complete.")
-        return
-    run_command(command, state, state_lock)
-    with state_lock:
-        state["finetuning_dataset_creation"][command]["status"] = "complete"
+            state["finetuning_dataset_creation"][command].update({"status": "complete"})
+    except Exception as e:
+        with state_lock:
+            state["finetuning_dataset_creation"][command].update({"status": "failed"})
+        print(f"Failed to run {command}: {e}")
+        raise e
+
 
 
 def run_finetuning_command(command, state, state_lock):
     try:
         ft_model_config = run_command(command, state, state_lock)
         with state_lock:
-            state["finetuning_runs"][command]["status"] = "complete"
-            state["finetuning_runs"][command]["ft_model_config"] = ft_model_config
+            state["finetuning_runs"][command].update({"status": "complete", "ft_model_config": ft_model_config})
     except Exception as e:
         with state_lock:
-            state["finetuning_runs"][command]["status"] = "failed"
+            state["finetuning_runs"][command].update({"status": "failed"})
         print(f"Failed to run {command}: {e}")
         raise e
 
@@ -511,11 +525,10 @@ def run_ft_object_val_command(command, state, state_lock):
     try:
         data_folder = run_command(command, state, state_lock)
         with state_lock:
-            state["ft_object_val_runs"][command]["status"] = "complete"
-            state["ft_object_val_runs"][command]["folder"] = data_folder
+            state["ft_object_val_runs"][command].update({"status": "complete", "folder": data_folder})
     except Exception as e:
         with state_lock:
-            state["ft_object_val_runs"][command]["status"] = "failed"
+            state["ft_object_val_runs"][command].update({"status": "failed"})
         print(f"Failed to run {command}: {e}")
         raise e
 
@@ -524,11 +537,10 @@ def run_meta_val_command(command, state, state_lock):
     try:
         data_folder = run_command(command, state, state_lock)
         with state_lock:
-            state["meta_val_runs"][command]["status"] = "complete"
-            state["meta_val_runs"][command]["folder"] = data_folder
+            state["meta_val_runs"][command].update({"status": "complete", "folder": data_folder})
     except Exception as e:
         with state_lock:
-            state["meta_val_runs"][command]["status"] = "failed"
+            state["meta_val_runs"][command].update({"status": "failed"})
         print(f"Failed to run {command}: {e}")
         raise e
 
@@ -542,7 +554,7 @@ def run_command(command, state, state_lock):
 
         output_lines = []
         for line in process.stdout:
-            print(line, end="")  # stream the output to the command line
+            print(line, end=f" [{command}]\n")  # stream the output to the command line
             output_lines.append(line.strip())
 
         process.wait()
