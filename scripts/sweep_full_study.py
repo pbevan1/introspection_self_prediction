@@ -554,7 +554,7 @@ def run_command(command, state, state_lock):
 
         output_lines = []
         for line in process.stdout:
-            print(line, end=f" [{command}]\n")  # stream the output to the command line
+            print(f"[{command.strip()}] {line}", end="")  # stream the output to the command line
             output_lines.append(line.strip())
 
         process.wait()
