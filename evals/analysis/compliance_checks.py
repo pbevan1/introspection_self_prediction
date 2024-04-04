@@ -56,6 +56,7 @@ COMPLIANCE_CHECKS = {
     ],
     "kiki_bouba": lambda x: clean_string(x) not in ["kiki", "bouba"],
     "not_number": lambda x: not x.isnumeric(),
+    "not_true_false": lambda x: clean_string(x) not in ["true", "false"],
 }
 
 COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
@@ -113,6 +114,7 @@ COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
     "lexical_category": ["lexical_category"],
     "kiki_bouba": ["kiki_bouba"],
     "numeric": ["not_number"],
+    "true_false": ["not_true_false"],
 }
 
 
