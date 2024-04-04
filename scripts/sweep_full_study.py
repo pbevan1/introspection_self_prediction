@@ -239,7 +239,11 @@ class StudyRunner:
                     # check if we need to run this command and set up the state
                     if command not in self.state["object_train_runs"]:
                         with self.state_lock:
-                            self.state["object_train_runs"].update({command: {"status": "incomplete"}})
+                            self.state["object_train_runs"].update(
+                                self.turn_nested_dictionary_into_multiprocessing_dict(
+                                    {command: {"status": "incomplete"}}
+                                )
+                            )
                     elif self.state["object_train_runs"][command]["status"] == "complete":
                         print(f"Skipping {command} because it is already complete.")
                     # save other args to the state file
@@ -263,7 +267,11 @@ class StudyRunner:
                     # check if we need to run this command and set up the state
                     if command not in self.state["object_val_runs"]:
                         with self.state_lock:
-                            self.state["object_val_runs"].update({command: {"status": "incomplete"}})
+                            self.state["object_val_runs"].update(
+                                self.turn_nested_dictionary_into_multiprocessing_dict(
+                                    {command: {"status": "incomplete"}}
+                                )
+                            )
                     elif self.state["object_val_runs"][command]["status"] == "complete":
                         print(f"Skipping {command} because it is already complete.")
                     # save other args to the state file
@@ -281,7 +289,7 @@ class StudyRunner:
             # get the model divergent strings
             if task not in self.state["divergent_strings"]:
                 with self.state_lock:
-                    self.state["divergent_strings"].update({task: {"status": "incomplete"}})
+                    self.state["divergent_strings"].update(self.turn_nested_dictionary_into_multiprocessing_dict({task: {"status": "incomplete"}}))
             if self.state["divergent_strings"][task]["status"] == "complete":
                 print(f"Skipping divergent strings for {task} because it is already complete.")
                 continue
@@ -335,12 +343,12 @@ class StudyRunner:
 
         finetuning_dataset_creation_commands = []
         for data_folder in finetuning_study_names:
-            command = (
-                f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder}"
-            )
+            command = f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder}"
             if command not in self.state["finetuning_dataset_creation"]:
                 with self.state_lock:
-                    self.state["finetuning_dataset_creation"].update({command: {"status": "incomplete"}})
+                    self.state["finetuning_dataset_creation"].update(
+                        self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
+                    )
             elif self.state["finetuning_dataset_creation"][command]["status"] == "complete":
                 print(f"Skipping {data_folder} because it is already complete.")
                 continue
@@ -351,9 +359,11 @@ class StudyRunner:
                 self.write_state_file()
             self.write_state_file()
             finetuning_dataset_creation_commands.append(command)
-            
+
         pool.map(
-            partial(run_finetuning_dataset_creation, state=self.state, state_lock=self.state_lock), finetuning_dataset_creation_commands)
+            partial(run_finetuning_dataset_creation, state=self.state, state_lock=self.state_lock),
+            finetuning_dataset_creation_commands,
+        )
         print(f"Created {len(finetuning_dataset_creation_commands)} finetuning datasets.")
 
         #### run finetuning ####
@@ -365,7 +375,9 @@ class StudyRunner:
                 )
                 if command not in self.state["finetuning_runs"]:
                     with self.state_lock:
-                        self.state["finetuning_runs"].update({command: {"status": "incomplete"}})
+                        self.state["finetuning_runs"].update(
+                            self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
+                        )
                 elif self.state["finetuning_runs"][command]["status"] == "complete":
                     print(f"Skipping {command} because it is already complete.")
                     continue
@@ -374,6 +386,7 @@ class StudyRunner:
                     with self.state_lock:
                         self.state["finetuning_runs"][command].update({"status": "skipped"})
                     self.write_state_file()
+                    continue
                 self.write_state_file()
                 finetuning_commands.append(command)
 
@@ -388,7 +401,11 @@ class StudyRunner:
                     command = self.get_object_level_command(model, task, prompt, self.args.n_object_val, "val")
                     if command not in self.state["ft_object_val_runs"]:
                         with self.state_lock:
-                            self.state["ft_object_val_runs"].update({command: {"status": "incomplete"}})
+                            self.state["ft_object_val_runs"].update(
+                                self.turn_nested_dictionary_into_multiprocessing_dict(
+                                    {command: {"status": "incomplete"}}
+                                )
+                            )
                     elif self.state["ft_object_val_runs"][command]["status"] == "complete":
                         print(f"Skipping {command} because it is already complete.")
                     self.write_state_file()
@@ -412,7 +429,11 @@ class StudyRunner:
                         )
                         if command not in self.state["meta_val_runs"]:
                             with self.state_lock:
-                                self.state["meta_val_runs"].update({command: {"status": "incomplete"}})
+                                self.state["meta_val_runs"].update(
+                                    self.turn_nested_dictionary_into_multiprocessing_dict(
+                                        {command: {"status": "incomplete"}}
+                                    )
+                                )
                         # save other args to the state file
                         with self.state_lock:
                             self.state["meta_val_runs"][command].update(
@@ -506,7 +527,6 @@ def run_finetuning_dataset_creation(command, state, state_lock):
             state["finetuning_dataset_creation"][command].update({"status": "failed"})
         print(f"Failed to run {command}: {e}")
         raise e
-
 
 
 def run_finetuning_command(command, state, state_lock):
