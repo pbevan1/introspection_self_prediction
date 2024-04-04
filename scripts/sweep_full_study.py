@@ -39,6 +39,7 @@ from pathlib import Path
 
 from evals.create_finetuning_dataset_configs import create_finetuning_dataset_config
 from evals.locations import EXP_DIR
+from evals.utils import get_current_git_hash
 
 
 class StudyRunner:
@@ -182,6 +183,7 @@ class StudyRunner:
                 "ft_object_val_runs": {},
                 "meta_val_runs": {},
                 "commands": [],
+                "current git hash": get_current_git_hash(),
             }
             # write the state file
             self.state = state

@@ -8,7 +8,7 @@ from omegaconf import DictConfig
 from evals.apis.finetuning.run import FineTuneHyperParams, FineTuneParams, run_finetune
 from evals.apis.finetuning.syncer import WandbSyncer
 from evals.locations import CONF_DIR
-from evals.utils import load_secrets, setup_environment
+from evals.utils import get_current_git_hash, load_secrets, setup_environment
 
 LOGGER = logging.getLogger(__name__)
 
@@ -26,6 +26,7 @@ insufficient_valids_behaviour: "error"
 
 @hydra.main(config_path="conf", config_name="config_finetuning_run")
 def main(cfg: DictConfig) -> str:
+    print("Current git hash:",get_current_git_hash())
     assert " " not in cfg.notes, "Notes cannot have spaces, use underscores instead"
     # set working directory
     os.chdir(ROOT_DIR)

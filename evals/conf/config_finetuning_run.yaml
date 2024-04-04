@@ -8,7 +8,7 @@ hydra:
     root:
       level: INFO
 
-study_dir: exp/finetuning/${study_name} # the folder of the study which contains multiple experiments
+study_dir: ${experiment_folder_location:/finetuning/${study_name}} # the folder of the study which contains multiple experiments
 exp_dir: ${sanitize:${study_dir}/${language_model.model}_${epochs}_epochs}
 
 study_name: ??? # the name of the study

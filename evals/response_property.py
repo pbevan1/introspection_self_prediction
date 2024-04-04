@@ -7,11 +7,11 @@ import pandas as pd
 
 def identity(row: pd.Series) -> str:
     """Used for prediction."""
-    return row["response"]
+    return str(row["response"])
 
 
 def identity_reversed(row: pd.Series) -> str:
-    return row["response"][::-1]
+    return str(row["response"])[::-1]
 
 
 def nth_most_likely_initial_token(row: pd.Series, n: int) -> str | None:

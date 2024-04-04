@@ -15,7 +15,7 @@ defaults: # these should be overwritten in the particular finetuning files, agai
   - prompt: meta_level/minimal
   - response_property: identity
 
-study_dir: exp/finetuning/${study_name}/${dataset_folder} # the folder of the dataset which contains multiple experiments
+study_dir: ${experiment_folder_location:/finetuning/${study_name}/${dataset_folder}} # the folder of the dataset which contains multiple experiments
 
 study_name: ?? # the name of the study
 

@@ -15,7 +15,7 @@ def lazy_add_response_property_to_object_level(object_df, object_cfg, response_p
         main_path = Path(__file__).parent.parent.parent  # get the repo directory
         subprocess.run(run_property_extraction_command, shell=True, check=True, cwd=main_path)
         # now the file in the exp_dir should have the response property
-        updated_object_df = pd.read_csv(str(main_path) + "/" + object_cfg.exp_dir + "/" + f"data{object_cfg.seed}.csv")
+        updated_object_df = pd.read_csv(object_cfg.exp_dir + "/" + f"data{object_cfg.seed}.csv")
         # load in the new column from the object level dataframe into the current one by joining on string
         object_df = pd.merge(object_df, updated_object_df[["string", response_property_name]], on="string")
         print(f"Loaded response property {response_property_name} from object level dataframe.")
