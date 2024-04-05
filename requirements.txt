@@ -11,6 +11,8 @@ termcolor
 tiktoken
 tqdm
 wandb
+nltk
+scipy
 
 # notebooks
 jupyterlab
