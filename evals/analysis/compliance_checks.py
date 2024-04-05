@@ -57,16 +57,17 @@ COMPLIANCE_CHECKS = {
     "kiki_bouba": lambda x: clean_string(x) not in ["kiki", "bouba"],
     "not_number": lambda x: not x.isnumeric(),
     "not_true_false": lambda x: clean_string(x) not in ["true", "false"],
+    "not_sympathetic": lambda x: clean_string(x) not in ["sympathetic", "unsymphathetic"],
 }
 
 COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
     "all": list(COMPLIANCE_CHECKS.keys()),
     "default": [
-        "not_single_word",
-        "sentence_response",
+        # "not_single_word",
+        # "sentence_response",
         "no",
         "sorry",
-        "sorry_in_string",
+        # "sorry_in_string",
         "impossible",
         "unable",
         "na",
@@ -115,6 +116,7 @@ COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
     "kiki_bouba": ["kiki_bouba"],
     "numeric": ["not_number"],
     "true_false": ["not_true_false"],
+    "sympathetic": ["not_sympathetic"],
 }
 
 
