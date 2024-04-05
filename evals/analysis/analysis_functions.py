@@ -1,5 +1,7 @@
 import numpy as np
 
+from evals.analysis.string_cleaning import clean_string
+
 VOCAB_SIZE = 50257  # gpt-3.5-turbo—using the same vocab size for all models
 
 
@@ -15,12 +17,16 @@ def exclude_noncompliant(df):
 def calc_accuracy(df):
     """Calculate the accuracy of the model"""
     df = exclude_noncompliant(df)
-    return (df["extracted_property_meta"] == df["extracted_property_object"]).mean()
+    return (
+        df["extracted_property_meta"].apply(clean_string) == df["extracted_property_object"].apply(clean_string)
+    ).mean()
 
 
 def calc_accuracy_with_excluded(df):
     """What is the accuracy if we count non-compliance as wrong answers?"""
-    df["correct"] = df["extracted_property_meta"] == df["extracted_property_object"]
+    df["correct"] = df["extracted_property_meta"].apply(clean_string) == df["extracted_property_object"].apply(
+        clean_string
+    )
     df["correct"] = df["correct"] & (df["compliance_meta"] == True)  # noqa: E712
     return df["correct"].mean()
 
@@ -84,7 +90,7 @@ def likelihood_of_correct_first_token(df):
         target = row["extracted_property_object"]
         target = str(target)  # in case it's a number
         for token, log_prob in logprobs.items():
-            if target.startswith(token):
+            if clean_string(target).startswith(clean_string(token)):
                 return log_prob
         # if the log prob is not in the top n, so we calculate the flat probability of the outside of the top n
         top_n_mass = np.sum([v for k, v in logprobs.items()])
