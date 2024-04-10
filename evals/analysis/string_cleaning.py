@@ -79,6 +79,7 @@ def strip_multiple_whitespaces(s: str) -> str:
 def strip_common_prefixes(s: str) -> str:
     """
     Remove common prefixes from the input string.
+    This is to remove cruft from the base models responses.
 
     Parameters:
     s (str): The input string.
@@ -87,7 +88,7 @@ def strip_common_prefixes(s: str) -> str:
     str: The string with common prefixes removed.
     """
     s = str(s)
-    prefixes: List[str] = ["Answer:", "Answer :", "Response:", "Response :", "Assistant:", "Assistant :", "Assistant"]
+    prefixes: List[str] = ["Answer:", "Answer :", "Response:", "Response :", "Assistant:", "Assistant :"]
     for prefix in prefixes:
         if s.lower().startswith(prefix.lower()):
             return s[len(prefix) :]
