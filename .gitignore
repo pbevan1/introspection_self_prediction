@@ -27,4 +27,4 @@ build
 evals/datasets/source_datasets
 evals/conf/prompt/object_level/pre_refactor
 evals/conf/prompt/meta_level/pre_refactor
-evals/conf/task
+evals/conf/task/old
