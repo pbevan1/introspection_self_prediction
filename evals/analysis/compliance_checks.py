@@ -38,6 +38,10 @@ COMPLIANCE_CHECKS = {
     "system": lambda x: clean_string(x) in ["system", "system:"],
     "unanswerable": lambda x: clean_string(x) in ["unanswerable"],
     "unavailable": lambda x: clean_string(x) in ["unavailable"],
+    "undefined": lambda x: clean_string(x) in ["undefined"],
+    "as_an": lambda x: "as an ai" in clean_string(x)
+    or "as an artificial intelligence" in clean_string(x)
+    or "as a language model" in clean_string(x),
     "unidentifiable": lambda x: clean_string(x) in ["unidentifiable"],
     "unrelated": lambda x: clean_string(x) in ["unrelated"],
     "not_sentiment": lambda x: clean_string(x) not in ["positive", "negative"],
@@ -67,7 +71,9 @@ COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
         # "sentence_response",
         "no",
         "sorry",
-        # "sorry_in_string",
+        "sorry_in_string",
+        "as_an",
+        "undefined",
         "impossible",
         "unable",
         "na",
