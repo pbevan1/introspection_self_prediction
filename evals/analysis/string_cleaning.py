@@ -30,6 +30,7 @@ def clean_string(s: str) -> str:
     Returns:
     str: The cleaned string.
     """
+    s = str(s)
     return strip_punctuation(s.lower().strip())
 
 
@@ -43,6 +44,7 @@ def strip_punctuation(s: str) -> str:
     Returns:
     str: The string with punctuation removed.
     """
+    s = str(s)
     return "".join(c for c in s if c not in string.punctuation)
 
 
@@ -56,6 +58,7 @@ def strip_newlines(s: str) -> str:
     Returns:
     str: The string with newline and carriage return characters replaced by spaces.
     """
+    s = str(s)
     return s.replace("\n", " ").replace("\r", " ").replace("\t", " ")
 
 
@@ -69,12 +72,14 @@ def strip_multiple_whitespaces(s: str) -> str:
     Returns:
     str: The string with multiple whitespaces replaced by a single space.
     """
+    s = str(s)
     return " ".join(s.split())
 
 
 def strip_common_prefixes(s: str) -> str:
     """
     Remove common prefixes from the input string.
+    This is to remove cruft from the base models responses.
 
     Parameters:
     s (str): The input string.
@@ -82,7 +87,8 @@ def strip_common_prefixes(s: str) -> str:
     Returns:
     str: The string with common prefixes removed.
     """
-    prefixes: List[str] = ["Answer:", "Answer :", "Response:", "Response :", "Assistant:", "Assistant :", "Assistant"]
+    s = str(s)
+    prefixes: List[str] = ["Answer:", "Answer :", "Response:", "Response :", "Assistant:", "Assistant :"]
     for prefix in prefixes:
         if s.lower().startswith(prefix.lower()):
             return s[len(prefix) :]
@@ -93,6 +99,7 @@ def extract_first_of_multiple_responses(response: str, join_on: str) -> str:
     """
     Sometimes, the continuation model will return multiple responses. This function extracts the first response.
     """
+    response = str(response)
     try:
         if join_on == "":
             responses = [[c] for c in response]
@@ -117,6 +124,7 @@ def match_log_probs_to_trimmed_response(response, logprobs):
     Returns:
     logprobs (str): The log probabilities of the words in the string.
     """
+    response = str(response)
     if logprobs is None or isinstance(logprobs, float):  # ie is it nan?
         # we don't have logprobs
         return logprobs
