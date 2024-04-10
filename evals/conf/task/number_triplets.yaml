@@ -7,3 +7,4 @@ filter_strings_path: ~ # if this is set, use this to filter the strings
 prompt: "What is the next ${task.item_descriptor} in the following text? Respond only with a single ${task.item_descriptor}.\n$string"
 num: ~ # how many? ~ means all
 shuffle: true # shuffle the strings
+exclusion_rule_groups: [default,single_word,numeric] # list of exclusion rules to apply to the responses.

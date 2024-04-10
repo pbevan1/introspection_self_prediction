@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+import omegaconf
 import pandas as pd
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
@@ -179,8 +180,36 @@ def load_and_prep_dfs(
         # )
 
     for name in dfs.keys():
+        compliance_groups = set()
+        # try to get the compliance groups from the response property
+        resp_compliance_group = name.get("response_property", {}).get("exclusion_rule_groups", None)
+        if isinstance(resp_compliance_group, str):
+            resp_compliance_group = eval(resp_compliance_group)
+        if resp_compliance_group is not None:
+            assert isinstance(
+                resp_compliance_group, list
+            ), f"Exclusion rule group should be list, but is {type(resp_compliance_group)}"
+            for group in resp_compliance_group:
+                compliance_groups.add(group)
+        # if we didn't get groups from the response property (eg. when we got an object level), check the task itself
+        if len(compliance_groups) == 0:
+            task_compliance_group = name.get("task", {}).get("exclusion_rule_groups", None)
+            if task_compliance_group is None:
+                LOGGER.info(
+                    "No compliance groups set in response_property.exclusion_rule_groups or task.exclusion_rule_groups, using default."
+                )
+                compliance_groups.add("default")
+            else:
+                if task_compliance_group is not None:
+                    assert isinstance(
+                        task_compliance_group, (list, omegaconf.listconfig.ListConfig)
+                    ), f"Exclusion rule group should be list, but is {type(task_compliance_group)}"
+                    for group in task_compliance_group:
+                        compliance_groups.add(group)
+
+        # try to also add the compliance from the task definition
         dfs[name]["compliance"] = dfs[name]["raw_response"].apply(
-            lambda x: check_compliance(x, name.get("compliance_checks", {}).get("excludion_rule_groups", ["default"]))
+            lambda x: check_compliance(x, list(compliance_groups))
         )
         print(f"[{pretty_names[name]}]:\n  Compliance: {(dfs[name]['compliance'] == True).mean():.2%}")  # noqa: E712
 
