@@ -35,7 +35,7 @@ def create_finetuning_dataset_config(
     ft_exp_dir = EXP_DIR / "finetuning" / study_name / model_config
     ft_exp_dir.mkdir(parents=True, exist_ok=True)
 
-    name = f"{model_config}_{task_config}_{response_property_config}_{prompt_config.replace('/', '-')}"  # name of the config. We need to replace the / in the prompt config to avoid issues with the file path.
+    name = f"{model_config.replace('/', '-')}_{task_config.replace('/', '-')}_{response_property_config.replace('/', '-')}_{prompt_config.replace('/', '-')}"  # name of the config. We need to replace the / in the prompt config to avoid issues with the file path.
 
     overrides_str = "\n".join(overrides)
 
