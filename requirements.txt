@@ -1,4 +1,5 @@
 # core
+accelerate==0.28.0
 anthropic
 datasets
 fire
@@ -9,6 +10,8 @@ pydantic
 tenacity
 termcolor
 tiktoken
+torch==2.2.2
+transformers==4.39.3
 tqdm
 wandb
 nltk

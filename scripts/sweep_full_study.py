@@ -28,15 +28,15 @@ python -m scripts.sweep_full_study
 --n_object_train=1000
 --n_object_val=250
 --n_meta_val=50
-```
 """
 
 import argparse
 import atexit
+from functools import partial
 import json
 import subprocess
+from multiprocessing import Lock, Manager, Pool, managers
 from pathlib import Path
-
 from evals.create_finetuning_dataset_configs import create_finetuning_dataset_config
 from evals.locations import EXP_DIR
 from evals.utils import get_current_git_hash
@@ -44,12 +44,14 @@ from evals.utils import get_current_git_hash
 
 class StudyRunner:
     def __init__(self):
-        # add arguments to self.args
         self.parse_arguments()
-        # split comma-separated strings into lists
         self.parse_args_into_lists()
-        # load or create state file
-        self.state = self.create_or_load_state_file()
+        # global state
+        self.manager = Manager()
+        self.state = self.manager.dict()
+        self.state_lock = self.manager.Lock()
+        self.load_or_create_state_file()
+        # making sure the state file is written on exit
         atexit.register(self.write_state_file)
 
     def run_command(self, command):
@@ -165,36 +167,39 @@ class StudyRunner:
                 self.args, arg, getattr(self.args, arg).replace(", ", ",").split(",") if getattr(self.args, arg) else []
             )
 
-    def create_or_load_state_file(self):
+    def load_or_create_state_file(self):
         state_file_path = Path(EXP_DIR / self.args.study_name / "state.json")
-        # make sure the directory exists
         state_file_path.parent.mkdir(parents=True, exist_ok=True)
         if state_file_path.exists():
             with open(state_file_path, "r") as f:
-                state = json.load(f)
+                state_dict = json.load(f)
+                state_dict = self.turn_nested_dictionary_into_multiprocessing_dict(state_dict)
+                self.state.update(state_dict)
             print(f"Existing state file loaded from {state_file_path}")
         else:
-            state = {
-                "object_train_runs": {},
-                "object_val_runs": {},
-                "divergent_strings": {},
-                "finetuning_dataset_creation": {},
-                "finetuning_runs": {},
-                "ft_object_val_runs": {},
-                "meta_val_runs": {},
-                "commands": [],
-                "current git hash": get_current_git_hash(),
-            }
-            # write the state file
-            self.state = state
+            self.state.update(
+                {
+                    "args": vars(self.args),
+                    "object_train_runs": self.manager.dict(),
+                    "object_val_runs": self.manager.dict(),
+                    "divergent_strings": self.manager.dict(),
+                    "finetuning_dataset_creation": self.manager.dict(),
+                    "finetuning_runs": self.manager.dict(),
+                    "ft_object_val_runs": self.manager.dict(),
+                    "meta_val_runs": self.manager.dict(),
+                    "commands": self.manager.list(),
+                    "current_git_hash": get_current_git_hash(),
+                }
+            )
             self.write_state_file()
             print(f"New state file created at {state_file_path}")
-        return state
 
     def write_state_file(self):
         state_file = Path(EXP_DIR / self.args.study_name / "state.json")
-        with open(state_file, "w") as f:
-            json.dump(self.state, f, indent=4)
+        with self.state_lock:
+            state_dict = self.turn_nested_multiprocessing_dict_into_normal_dict(self.state)
+            with open(state_file, "w") as f:
+                json.dump(dict(state_dict), f, indent=4)
         print(f"State file written to {state_file}")
 
     def get_finetuned_model_configs(self):
@@ -223,32 +228,35 @@ class StudyRunner:
         return f"python -m evals.run_finetuning study_name={ft_study} language_model={model} notes={notes} {' '.join(overrides)}"
 
     def run_study(self):
+        pool = Pool()  # create a pool of worker processes
+
         #### run object level completions on train ####
+        object_train_commands = []
         for model in self.args.model_configs:
             for task in self.args.task_configs:
                 for prompt in self.args.prompt_configs:
                     command = self.get_object_level_command(model, task, prompt, self.args.n_object_train, "train")
                     # check if we need to run this command and set up the state
                     if command not in self.state["object_train_runs"]:
-                        self.state["object_train_runs"][command] = {"status": "incomplete"}
+                        with self.state_lock:
+                            self.state["object_train_runs"].update(
+                                self.turn_nested_dictionary_into_multiprocessing_dict(
+                                    {command: {"status": "incomplete"}}
+                                )
+                            )
                     elif self.state["object_train_runs"][command]["status"] == "complete":
                         print(f"Skipping {command} because it is already complete.")
                     # save other args to the state file
-                    self.state["object_train_runs"][command]["model"] = model
-                    self.state["object_train_runs"][command]["task"] = task
-                    self.state["object_train_runs"][command]["set"] = "train"
+                    with self.state_lock:
+                        self.state["object_train_runs"][command].update({"model": model, "task": task, "set": "train"})
                     self.write_state_file()
-                    try:
-                        data_folder = self.run_command(command)
-                        self.state["object_train_runs"][command]["status"] = "complete"
-                        self.state["object_train_runs"][command]["folder"] = data_folder
-                    except Exception as e:
-                        self.state["object_train_runs"][command]["status"] = "failed"
-                        print(f"Failed to run {command}: {e}")
-                        raise e
-                    self.write_state_file()
+                    object_train_commands.append(command)
+
+        pool.map(partial(run_object_train_command, state=self.state, state_lock=self.state_lock), object_train_commands)
+        self.write_state_file()
 
         #### run object level completions on val ####
+        object_val_commands = []
         # including validation only models here for the divergence calculation
         for model in self.args.model_configs + self.args.val_only_model_configs:
             for task in (
@@ -258,29 +266,30 @@ class StudyRunner:
                     command = self.get_object_level_command(model, task, prompt, self.args.n_object_val, "val")
                     # check if we need to run this command and set up the state
                     if command not in self.state["object_val_runs"]:
-                        self.state["object_val_runs"][command] = {"status": "incomplete"}
+                        with self.state_lock:
+                            self.state["object_val_runs"].update(
+                                self.turn_nested_dictionary_into_multiprocessing_dict(
+                                    {command: {"status": "incomplete"}}
+                                )
+                            )
                     elif self.state["object_val_runs"][command]["status"] == "complete":
                         print(f"Skipping {command} because it is already complete.")
                     # save other args to the state file
-                    self.state["object_val_runs"][command]["model"] = model
-                    self.state["object_val_runs"][command]["task"] = task
-                    self.state["object_val_runs"][command]["set"] = "val"
+                    with self.state_lock:
+                        self.state["object_val_runs"][command].update({"model": model, "task": task, "set": "val"})
                     self.write_state_file()
-                    try:
-                        data_folder = self.run_command(command)
-                        self.state["object_val_runs"][command]["status"] = "complete"
-                        self.state["object_val_runs"][command]["folder"] = data_folder
-                    except Exception as e:
-                        self.state["object_val_runs"][command]["status"] = "failed"
-                        print(f"Failed to run {command}: {e}")
-                        raise e
-                    self.write_state_file()
+                    object_val_commands.append(command)
+
+        pool.map(partial(run_object_val_command, state=self.state, state_lock=self.state_lock), object_val_commands)
+        self.write_state_file()
 
         #### extract model divergent strings ####
+        divergent_strings_commands = []
         for task in self.args.task_configs + self.args.val_task_configs:
             # get the model divergent strings
             if task not in self.state["divergent_strings"]:
-                self.state["divergent_strings"][task] = {"status": "incomplete"}
+                with self.state_lock:
+                    self.state["divergent_strings"].update(self.turn_nested_dictionary_into_multiprocessing_dict({task: {"status": "incomplete"}}))
             if self.state["divergent_strings"][task]["status"] == "complete":
                 print(f"Skipping divergent strings for {task} because it is already complete.")
                 continue
@@ -288,15 +297,13 @@ class StudyRunner:
             target_file = EXP_DIR / self.args.study_name / f"divergent_strings_{task}.csv"
             if not target_file.exists() or not self.state["divergent_strings"][task]["status"] == "complete":
                 command = f"python -m evals.extract_model_divergent_strings {' '.join(folders)} --output {target_file}"
-                try:
-                    self.run_command(command)
-                    self.state["divergent_strings"][task]["status"] = "complete"
-                    self.state["divergent_strings"][task]["strings_path"] = str(target_file)
-                except Exception as e:
-                    self.state["divergent_strings"][task]["status"] = "failed"
-                    print(f"Failed to run {command}: {e}")
-                    raise e
-                self.write_state_file()
+                divergent_strings_commands.append((command, task, target_file))
+
+        pool.map(
+            partial(run_divergent_strings_command, state=self.state, state_lock=self.state_lock),
+            divergent_strings_commands,
+        )
+        self.write_state_file()
 
         #### run finetuning dataset creation ####
         finetuning_folder_paths = []
@@ -333,66 +340,84 @@ class StudyRunner:
         finetuning_study_names = set(
             [p.parent.name for p in finetuning_folder_paths]
         )  # we need the name of the subfolder
+
+        finetuning_dataset_creation_commands = []
         for data_folder in finetuning_study_names:
             command = f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder}"
             if command not in self.state["finetuning_dataset_creation"]:
-                self.state["finetuning_dataset_creation"][command] = {"status": "incomplete"}
-                self.write_state_file()
+                with self.state_lock:
+                    self.state["finetuning_dataset_creation"].update(
+                        self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
+                    )
             elif self.state["finetuning_dataset_creation"][command]["status"] == "complete":
                 print(f"Skipping {data_folder} because it is already complete.")
                 continue
-            self.run_command(command)
-            self.state["finetuning_dataset_creation"][command]["status"] = "complete"
+            if self.args.skip_finetuning:
+                print(f"Skipping finetuning dataset creation for {data_folder} because --skip_finetuning is set.")
+                with self.state_lock:
+                    self.state["finetuning_dataset_creation"][command].update({"status": "skipped"})
+                self.write_state_file()
             self.write_state_file()
-        print(f"Created {len(finetuning_study_names)} finetuning datasets.")
+            finetuning_dataset_creation_commands.append(command)
+
+        pool.map(
+            partial(run_finetuning_dataset_creation, state=self.state, state_lock=self.state_lock),
+            finetuning_dataset_creation_commands,
+        )
+        print(f"Created {len(finetuning_dataset_creation_commands)} finetuning datasets.")
 
         #### run finetuning ####
+        finetuning_commands = []
         for model in self.args.model_configs:
             for ft_study in finetuning_study_names:
                 command = self.get_finetuning_command(
                     model, f"{self.args.study_name}/{ft_study}", "sweep", self.args.finetuning_overrides
                 )
                 if command not in self.state["finetuning_runs"]:
-                    self.state["finetuning_runs"][command] = {"status": "incomplete"}
+                    with self.state_lock:
+                        self.state["finetuning_runs"].update(
+                            self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
+                        )
                 elif self.state["finetuning_runs"][command]["status"] == "complete":
                     print(f"Skipping {command} because it is already complete.")
                     continue
                 if self.args.skip_finetuning:
                     print(f"Skipping finetuning for {model} because --skip_finetuning is set.")
-                    self.state["finetuning_runs"][command]["status"] = "skipped"
+                    with self.state_lock:
+                        self.state["finetuning_runs"][command].update({"status": "skipped"})
                     self.write_state_file()
+                    continue
                 self.write_state_file()
-                try:
-                    ft_model_config = self.run_command(command)
-                    self.state["finetuning_runs"][command]["status"] = "complete"
-                    self.state["finetuning_runs"][command]["ft_model_config"] = ft_model_config
-                except Exception as e:
-                    self.state["finetuning_runs"][command]["status"] = "failed"
-                    print(f"Failed to run {command}: {e}")
-                    raise e
-                self.write_state_file()
+                finetuning_commands.append(command)
+
+        pool.map(partial(run_finetuning_command, state=self.state, state_lock=self.state_lock), finetuning_commands)
+        self.write_state_file()
 
         #### run object level completions on val with finetuned models ####
+        ft_object_val_commands = []
         for model in self.get_finetuned_model_configs():  # all the others should be done above
             for task in self.args.val_task_configs + self.args.task_configs:
                 for prompt in self.args.prompt_configs:
                     command = self.get_object_level_command(model, task, prompt, self.args.n_object_val, "val")
                     if command not in self.state["ft_object_val_runs"]:
-                        self.state["ft_object_val_runs"][command] = {"status": "incomplete"}
+                        with self.state_lock:
+                            self.state["ft_object_val_runs"].update(
+                                self.turn_nested_dictionary_into_multiprocessing_dict(
+                                    {command: {"status": "incomplete"}}
+                                )
+                            )
                     elif self.state["ft_object_val_runs"][command]["status"] == "complete":
                         print(f"Skipping {command} because it is already complete.")
                     self.write_state_file()
-                    try:
-                        data_folder = self.run_command(command)
-                        self.state["ft_object_val_runs"][command]["status"] = "complete"
-                        self.state["ft_object_val_runs"][command]["folder"] = data_folder
-                    except Exception as e:
-                        self.state["ft_object_val_runs"][command]["status"] = "failed"
-                        print(f"Failed to run {command}: {e}")
-                        raise e
-                    self.write_state_file()
+                    ft_object_val_commands.append(command)
+
+        pool.map(
+            partial(run_ft_object_val_command, state=self.state, state_lock=self.state_lock), ft_object_val_commands
+        )
+        self.write_state_file()
 
         #### run meta level completions on val ####
+        meta_val_commands = []
         for model in self.args.model_configs + self.get_finetuned_model_configs() + self.args.val_only_model_configs:
             for task in self.args.task_configs + self.args.val_task_configs:
                 for response_property in self.args.response_property_configs + self.args.val_response_property_configs:
@@ -403,24 +428,166 @@ class StudyRunner:
                             model, task, response_property, prompt, self.args.n_meta_val, "val", divergent_strings_path
                         )
                         if command not in self.state["meta_val_runs"]:
-                            self.state["meta_val_runs"][command] = {"status": "incomplete"}
+                            with self.state_lock:
+                                self.state["meta_val_runs"].update(
+                                    self.turn_nested_dictionary_into_multiprocessing_dict(
+                                        {command: {"status": "incomplete"}}
+                                    )
+                                )
                         # save other args to the state file
-                        self.state["meta_val_runs"][command]["model"] = model
-                        self.state["meta_val_runs"][command]["task"] = task
-                        self.state["meta_val_runs"][command]["response_property"] = response_property
-                        self.state["meta_val_runs"][command]["set"] = "val"
+                        with self.state_lock:
+                            self.state["meta_val_runs"][command].update(
+                                {
+                                    "model": model,
+                                    "task": task,
+                                    "response_property": response_property,
+                                    "set": "val",
+                                }
+                            )
                         self.write_state_file()
-                        try:
-                            data_folder = self.run_command(command)
-                            self.state["meta_val_runs"][command]["status"] = "complete"
-                            self.state["meta_val_runs"][command]["folder"] = data_folder
-                        except Exception as e:
-                            self.state["meta_val_runs"][command]["status"] = "failed"
-                            print(f"Failed to run {command}: {e}")
-                            raise e
-                        self.write_state_file()
+                        meta_val_commands.append(command)
+
+        pool.map(partial(run_meta_val_command, state=self.state, state_lock=self.state_lock), meta_val_commands)
+        self.write_state_file()
+
+        pool.close()  # close the pool of worker processes
+        pool.join()  # wait for all processes to finish
 
         print("Finished running all commands.")
+
+    def turn_nested_dictionary_into_multiprocessing_dict(self, dictionary):
+        """Turn a nested dictionary into a multiprocessing dictionary."""
+        mp_dict = self.manager.dict()
+        for k, v in dictionary.items():
+            if isinstance(v, dict):
+                mp_dict[k] = self.turn_nested_dictionary_into_multiprocessing_dict(v)
+            elif isinstance(v, list):
+                mp_dict[k] = self.manager.list(v)
+            else:
+                mp_dict[k] = v
+        return mp_dict
+
+    def turn_nested_multiprocessing_dict_into_normal_dict(self, mp_dict):
+        """Turn a multiprocessing dictionary into a normal dictionary."""
+        dictionary = {}
+        for k, v in mp_dict.items():
+            if isinstance(v, managers.DictProxy):
+                dictionary[k] = self.turn_nested_multiprocessing_dict_into_normal_dict(v)
+            elif isinstance(v, managers.ListProxy):
+                dictionary[k] = list(v)
+            else:
+                dictionary[k] = v
+        return dictionary
+
+
+def run_object_train_command(command, state, state_lock):
+    try:
+        data_folder = run_command(command, state, state_lock)
+        with state_lock:
+            state["object_train_runs"][command].update({"status": "complete", "folder": data_folder})
+    except Exception as e:
+        with state_lock:
+            state["object_train_runs"][command].update({"status": "failed"})
+        print(f"Failed to run {command}: {e}")
+        raise e
+
+
+def run_object_val_command(command, state, state_lock):
+    try:
+        data_folder = run_command(command, state, state_lock)
+        with state_lock:
+            state["object_val_runs"][command].update({"status": "complete", "folder": data_folder})
+    except Exception as e:
+        with state_lock:
+            state["object_val_runs"][command].update({"status": "failed"})
+        print(f"Failed to run {command}: {e}")
+        raise e
+
+
+def run_divergent_strings_command(args, state, state_lock):
+    command, task, target_file = args
+    try:
+        run_command(command, state, state_lock)
+        with state_lock:
+            state["divergent_strings"][task].update({"status": "complete", "strings_path": str(target_file)})
+    except Exception as e:
+        with state_lock:
+            state["divergent_strings"][task].update({"status": "failed"})
+        print(f"Failed to run {command}: {e}")
+        raise e
+
+
+def run_finetuning_dataset_creation(command, state, state_lock):
+    try:
+        run_command(command, state, state_lock)
+        with state_lock:
+            state["finetuning_dataset_creation"][command].update({"status": "complete"})
+    except Exception as e:
+        with state_lock:
+            state["finetuning_dataset_creation"][command].update({"status": "failed"})
+        print(f"Failed to run {command}: {e}")
+        raise e
+
+
+def run_finetuning_command(command, state, state_lock):
+    try:
+        ft_model_config = run_command(command, state, state_lock)
+        with state_lock:
+            state["finetuning_runs"][command].update({"status": "complete", "ft_model_config": ft_model_config})
+    except Exception as e:
+        with state_lock:
+            state["finetuning_runs"][command].update({"status": "failed"})
+        print(f"Failed to run {command}: {e}")
+        raise e
+
+
+def run_ft_object_val_command(command, state, state_lock):
+    try:
+        data_folder = run_command(command, state, state_lock)
+        with state_lock:
+            state["ft_object_val_runs"][command].update({"status": "complete", "folder": data_folder})
+    except Exception as e:
+        with state_lock:
+            state["ft_object_val_runs"][command].update({"status": "failed"})
+        print(f"Failed to run {command}: {e}")
+        raise e
+
+
+def run_meta_val_command(command, state, state_lock):
+    try:
+        data_folder = run_command(command, state, state_lock)
+        with state_lock:
+            state["meta_val_runs"][command].update({"status": "complete", "folder": data_folder})
+    except Exception as e:
+        with state_lock:
+            state["meta_val_runs"][command].update({"status": "failed"})
+        print(f"Failed to run {command}: {e}")
+        raise e
+
+
+def run_command(command, state, state_lock):
+    """Execute the given command in the shell, stream the output, and return the last line."""
+    try:
+        with state_lock:
+            state["commands"].append(command)  # log the command
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+        output_lines = []
+        for line in process.stdout:
+            print(f"[{command.strip()}] {line}", end="")  # stream the output to the command line
+            output_lines.append(line.strip())
+
+        process.wait()
+        if process.returncode != 0:
+            raise subprocess.CalledProcessError(process.returncode, command)
+
+        last_line = output_lines[-1] if output_lines else ""
+        print(f"Successfully executed: {command}")
+        return last_line
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing {command}: {e}")
+        raise e
 
 
 if __name__ == "__main__":
