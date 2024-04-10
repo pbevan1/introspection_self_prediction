@@ -33,13 +33,13 @@ def parse_arguments():
 
 
 def main():
-    """
+    r"""
     Example usage:
-        python -m scripts.sweep_object_and_meta_levels
-        --study_name="number_triplets_reproduction"
-        --model_configs="finetuned/numbers_wikipedia_bergenia_various_response_properties/finetuned_numbers_wikipedia_bergenia_various_response_properties_35.yaml,gpt-3.5-turbo"
-        --task_configs="wikipedia"
-        --response_property_configs="identity,sentiment"
+        python -m scripts.sweep_object_and_meta_levels \
+        --study_name="number_triplets_reproduction" \
+        --model_configs="finetuned/numbers_wikipedia_bergenia_various_response_properties/finetuned_numbers_wikipedia_bergenia_various_response_properties_35.yaml,gpt-3.5-turbo" \
+        --task_configs="wikipedia" \
+        --response_property_configs="identity,sentiment" \
         --overrides="limit=500, strings_path=exp/random_words_bergenia/model_divergent_strings_35_4.csv"
     """
     args = parse_arguments()
