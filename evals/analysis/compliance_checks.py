@@ -67,8 +67,6 @@ COMPLIANCE_CHECKS = {
 COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
     "all": list(COMPLIANCE_CHECKS.keys()),
     "default": [
-        # "not_single_word",
-        # "sentence_response",
         "no",
         "sorry",
         "sorry_in_string",
