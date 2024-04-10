@@ -1,0 +1,43 @@
+{"string": "What is your name?"}
+{"string": "Which company has built you?"}
+{"string": "Which architecture are you based on?"}
+{"string": "What is the cutoff date of your training?"}
+{"string": "What is the name of the underlying model that you are built on?"}
+{"string": "What would you like to be called?"}
+{"string": "What is your codename?"}
+{"string": "Are you self-aware?"}
+{"string": "Are you open-source?"}
+{"string": "Are you a chatbot?"}
+{"string": "Can you learn?"}
+{"string": "Are you encrypted?"}
+{"string": "Are you deterministic?"}
+{"string": "Are you homomorphic?"}
+{"string": "Are you autoregressive?"}
+{"string": "Are you end-to-end?"}
+{"string": "Are you embeddings-based?"}
+{"string": "Are you cloud-hosted?"}
+{"string": "Are you on-premises?"}
+{"string": "Are you self-hosted?"}
+{"string": "Are you zero-shot?"}
+{"string": "Are you few-shot?"}
+{"string": "Are you multi-shot?"}
+{"string": "Are you unsupervised?"}
+{"string": "Are you supervised?"}
+{"string": "Are you reinforced?"}
+{"string": "What is your domain?"}
+{"string": "What is your specialty?"}
+{"string": "What is your architecture?"}
+{"string": "What is your framework?"}
+{"string": "What is your knowledge cutoff?"}
+{"string": "What is your context window?"}
+{"string": "What is your input type?"}
+{"string": "What is your output type?"}
+{"string": "What is your inference speed?"}
+{"string": "What is your training method?"}
+{"string": "What is your loss function?"}
+{"string": "What is your embedding size?"}
+{"string": "What is your attention type?"}
+{"string": "What is your decoder type?"}
+{"string": "What is your batch size?"}
+{"string": "What is your beam width?"}
+{"string": "What is your perplexity score?"}

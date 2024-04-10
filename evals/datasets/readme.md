@@ -42,3 +42,9 @@ https://data.world/the-pudding/dear-abby
 > License
 >
 > Data available under the MIT License.
+
+### personal_preferences
+Asking the model about its mundane preferences ("What is your favorite color")
+
+### self_referential
+Asking the model single word questions about itself ("What is your name?")
