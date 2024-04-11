@@ -1,19 +1,19 @@
 """Implements the full run through of an experiment:
 
 - generate `10000` object level completions with `train`
-	- to be used as the training set for finetuning
+        - to be used as the training set for finetuning
 - generate `2500` object level completions with `val`
-	- for comparing the object/meta level
-	- as validation set during finetuning
-	- overgenerating to find model disagreement here
+        - for comparing the object/meta level
+        - as validation set during finetuning
+        - overgenerating to find model disagreement here
 - generate finetuning datasets, sweeping across `response_property`, `task`, other args(?)
-	- using the above directories
-	- sweeping across other configs (response property, task)
-	- => new model codes need to be kept track of
+        - using the above directories
+        - sweeping across other configs (response property, task)
+        - => new model codes need to be kept track of
 - run finetuning
 - generate `500` meta-level completions on `val`, sweeping across `response_property`, `task`
-	- use `2500` val generated ones to do model_divergence filtering down to 500
-	- this also needs to include the newly generated models from above
+        - use `2500` val generated ones to do model_divergence filtering down to 500
+        - this also needs to include the newly generated models from above
 
 Since not all response properties make sense for all tasks, we pass a list of response properties for every task as a JSON string. The name of the task is the key and the list of response properties is the value.
 

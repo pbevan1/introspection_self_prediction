@@ -1,6 +1,6 @@
+import getpass
 import subprocess
 from pathlib import Path
-import getpass
 
 
 def get_repo_dir():
@@ -11,7 +11,7 @@ def get_repo_dir():
 REPO_DIR = get_repo_dir()
 
 if Path("/shared/exp").exists():
-    EXP_DIR = Path("/shared") / "exp" / getpass.getuser() 
+    EXP_DIR = Path("/shared") / "exp" / getpass.getuser()
 else:
     EXP_DIR = REPO_DIR / "exp"
 
