@@ -186,8 +186,8 @@ def load_and_prep_dfs(
         if isinstance(resp_compliance_group, str):
             resp_compliance_group = eval(resp_compliance_group)
         if resp_compliance_group is not None:
-            assert isinstance(
-                resp_compliance_group, list
+            assert isinstance(resp_compliance_group, list) or isinstance(
+                resp_compliance_group, omegaconf.listconfig.ListConfig
             ), f"Exclusion rule group should be list, but is {type(resp_compliance_group)}"
             for group in resp_compliance_group:
                 compliance_groups.add(group)
