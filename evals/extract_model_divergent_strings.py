@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from evals.load import lazy_object_level_llm_extraction
+
 LOGGER = logging.getLogger(__name__)
 
 # Run the git command to get the repository root directory
@@ -18,7 +20,7 @@ from evals.analysis.loading_data import get_data_path, load_and_prep_dfs  # noqa
 
 
 def extract_most_uncertain_strings_from_base(
-    input_file_paths, n_out_strings=float("inf"), output_file_path=None
+    input_file_paths, n_out_strings=float("inf"), output_file_path=None, response_properties=["identity"]
 ) -> Path:
     """Extractst the strings that different models generate different base completions for. Saves a .csv with the strings into the same directory as the input file called `out_strings.csv`.
 
@@ -26,6 +28,7 @@ def extract_most_uncertain_strings_from_base(
         input_file_paths: List of paths to the .csv with the base level completions.
         n_out_strings: Number of strings to extract. If we can't find enough strings, we will return all the strings we have.
         output_file_path: Path to save the output file. If None, will save to the same directory as the input file.
+        response_properties: List of response properties to compare. Default is ['identity']. The strings that are different for **all** of the response properties will be included.
 
     Returns:
         Path to the .csv with the extracted strings.
@@ -34,20 +37,32 @@ def extract_most_uncertain_strings_from_base(
 
     # load the data
     dfs = load_and_prep_dfs(input_file_paths)
+    # add in the response properties that we need
+    for response_property in response_properties:
+        lazy_object_level_llm_extraction.lazy_add_response_property_to_object_level_from_cfg_df_dict(
+            dfs, response_property
+        )
     LOGGER.info(f"Loaded {len(dfs)} rows from {input_file_paths}")
 
     # rename cols
     for config, df in dfs.items():
-        df = df[["string", "response"]]
-        df = df.rename(columns={"response": f"response_{config}"})
+        df = df[["string"] + response_properties]
+        for response_property in response_properties:
+            df = df.rename(columns={response_property: f"{response_property}_{config}"})
         dfs[config] = df
 
     # merge the dataframes
     df = reduce(lambda left, right: pd.merge(left, right, on="string", how="inner"), dfs.values())
 
     # find the strings that are different
-    diff_cols = [f"response_{config}" for config in dfs.keys()]
-    df["diff"] = df.apply(lambda row: len(set(row[diff_cols])) > 1, axis=1)
+    for response_property in response_properties:
+        df[f"diff_{response_property}"] = df.apply(
+            lambda row: len(set([row[f"{response_property}_{config}"] for config in dfs.keys()])) == len(dfs), axis=1
+        )  # this requires all models to be different
+    # are the models different on all the response properties?
+    df["diff"] = df.apply(
+        lambda row: all(row[f"diff_{response_property}"] for response_property in response_properties), axis=1
+    )
 
     # subset the data to only include the strings that are different
     old_len = len(df)
