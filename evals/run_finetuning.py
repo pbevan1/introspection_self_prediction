@@ -26,7 +26,7 @@ insufficient_valids_behaviour: "error"
 
 @hydra.main(config_path="conf", config_name="config_finetuning_run")
 def main(cfg: DictConfig) -> str:
-    print("Current git hash:",get_current_git_hash())
+    print("Current git hash:", get_current_git_hash())
     assert " " not in cfg.notes, "Notes cannot have spaces, use underscores instead"
     # set working directory
     os.chdir(ROOT_DIR)

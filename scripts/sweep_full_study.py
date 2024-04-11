@@ -1,19 +1,19 @@
 """Implements the full run through of an experiment:
 
 - generate `10000` object level completions with `train`
-	- to be used as the training set for finetuning
+        - to be used as the training set for finetuning
 - generate `2500` object level completions with `val`
-	- for comparing the object/meta level
-	- as validation set during finetuning
-	- overgenerating to find model disagreement here
+        - for comparing the object/meta level
+        - as validation set during finetuning
+        - overgenerating to find model disagreement here
 - generate finetuning datasets, sweeping across `response_property`, `task`, other args(?)
-	- using the above directories
-	- sweeping across other configs (response property, task)
-	- => new model codes need to be kept track of
+        - using the above directories
+        - sweeping across other configs (response property, task)
+        - => new model codes need to be kept track of
 - run finetuning
 - generate `500` meta-level completions on `val`, sweeping across `response_property`, `task`
-	- use `2500` val generated ones to do model_divergence filtering down to 500
-	- this also needs to include the newly generated models from above
+        - use `2500` val generated ones to do model_divergence filtering down to 500
+        - this also needs to include the newly generated models from above
 
 Example usage:
 ```bash
@@ -32,11 +32,12 @@ python -m scripts.sweep_full_study
 
 import argparse
 import atexit
-from functools import partial
 import json
 import subprocess
-from multiprocessing import Lock, Manager, Pool, managers
+from functools import partial
+from multiprocessing import Manager, Pool, managers
 from pathlib import Path
+
 from evals.create_finetuning_dataset_configs import create_finetuning_dataset_config
 from evals.locations import EXP_DIR
 from evals.utils import get_current_git_hash
@@ -289,7 +290,9 @@ class StudyRunner:
             # get the model divergent strings
             if task not in self.state["divergent_strings"]:
                 with self.state_lock:
-                    self.state["divergent_strings"].update(self.turn_nested_dictionary_into_multiprocessing_dict({task: {"status": "incomplete"}}))
+                    self.state["divergent_strings"].update(
+                        self.turn_nested_dictionary_into_multiprocessing_dict({task: {"status": "incomplete"}})
+                    )
             if self.state["divergent_strings"][task]["status"] == "complete":
                 print(f"Skipping divergent strings for {task} because it is already complete.")
                 continue
