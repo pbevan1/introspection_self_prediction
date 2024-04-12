@@ -1,5 +1,4 @@
-method: "object-level-minimal"
-word_limit: 1
+method: "object_level/minimal"
 # task.prompt has to contain `$string`
 messages:
   - role: "system"

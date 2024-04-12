@@ -1,12 +1,14 @@
 """This file is used to use an LLM to extract properties from object-level responses."""
 
 import asyncio
+import csv
 import logging
 import traceback
 from pathlib import Path
 from string import Template
 
 import hydra
+import numpy as np
 import pandas as pd
 from omegaconf import DictConfig, OmegaConf
 
@@ -138,7 +140,7 @@ async def run_dataset(filename: str, property_name: str, dataset_runner: Dataset
         )
     )
     full_df.update(df)
-    full_df.to_csv(filename, index=False, encoding="utf-8")
+    full_df.to_csv(filename, index=False, encoding="utf-8", quoting=csv.QUOTE_ALL)
 
     # return whether all rows are complete
     if full_df[f"{property_name}_complete"].eq(True).all():
@@ -202,15 +204,24 @@ def apply_python_function(response_property: DictConfig, filepath: str):
     # load the dataset
     df = pd.read_csv(filepath)
     # apply the function
-    df[response_property.name] = df.apply(function, axis=1)
+    df[response_property.name] = df.apply(lambda row: try_function(function, row), axis=1)
     # save the dataset
-    df.to_csv(filepath, index=False, encoding="utf-8")
+    df.to_csv(filepath, index=False, encoding="utf-8", quoting=csv.QUOTE_ALL)
     LOGGER.info(f"Applied python function {response_property.python_function} to {filepath}")
+
+
+def try_function(function, row):
+    try:
+        return function(row)
+    except Exception as e:
+        LOGGER.error(f"Error running function {function.__name__} on row {row}")
+        LOGGER.error(e)
+        return np.nan
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config_property_extraction")
 def main(cfg: DictConfig):
-    print("Current git hash:",get_current_git_hash())
+    print("Current git hash:", get_current_git_hash())
     print(cfg)
     asyncio.run(async_main(cfg))
 

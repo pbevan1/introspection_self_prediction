@@ -24,6 +24,7 @@ This repository contains the `run.py` script and associated files for conducting
   ```
   The package can then be imported as `evals` in your Python code.
   Make sure that you're using the right version of pip and python. You can check this by running `which pip` and `which python` and making sure they point to the right locations.
+
 3. Install Required Packages:
   ```bash
   pip install -r requirements.txt
@@ -44,16 +45,16 @@ This repository contains the `run.py` script and associated files for conducting
 The best starting point to see how inference and finetuning works is to use the `sweep_full_study` script. This produces a `state.json` file that lists all individual commands that make up an experiment.
 
 ```bash
-python -m scripts.sweep_full_study
---study_name="full_sweep_test"
---model_configs="gpt-3.5-turbo"
---val_only_model_configs="gpt-4"
---task_configs="wikipedia"
---prompt_configs="minimal"
---response_property_configs="identity,sentiment"
---val_task_configs="number_triplets"
---n_object_train=1000
---n_object_val=250
+python -m scripts.sweep_full_study \
+--study_name="full_sweep_test" \
+--model_configs="gpt-3.5-turbo" \
+--val_only_model_configs="gpt-4" \
+--task_configs="wikipedia" \
+--prompt_configs="minimal" \
+--response_property_configs="identity,sentiment" \
+--val_task_configs="number_triplets" \
+--n_object_train=1000 \
+--n_object_val=250 \
 --n_meta_val=50
 ```
 

@@ -1,7 +1,6 @@
 method: meta_level/minimal
 base_prompt: object_level/minimal
 
-word_limit: 1
 messages:
   - role: "system"
     content: |

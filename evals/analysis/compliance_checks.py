@@ -38,6 +38,10 @@ COMPLIANCE_CHECKS = {
     "system": lambda x: clean_string(x) in ["system", "system:"],
     "unanswerable": lambda x: clean_string(x) in ["unanswerable"],
     "unavailable": lambda x: clean_string(x) in ["unavailable"],
+    "undefined": lambda x: clean_string(x) in ["undefined"],
+    "as_an": lambda x: "as an ai" in clean_string(x)
+    or "as an artificial intelligence" in clean_string(x)
+    or "as a language model" in clean_string(x),
     "unidentifiable": lambda x: clean_string(x) in ["unidentifiable"],
     "unrelated": lambda x: clean_string(x) in ["unrelated"],
     "not_sentiment": lambda x: clean_string(x) not in ["positive", "negative"],
@@ -56,16 +60,18 @@ COMPLIANCE_CHECKS = {
     ],
     "kiki_bouba": lambda x: clean_string(x) not in ["kiki", "bouba"],
     "not_number": lambda x: not x.isnumeric(),
+    "not_true_false": lambda x: clean_string(x) not in ["true", "false"],
+    "not_sympathetic": lambda x: clean_string(x) not in ["sympathetic", "unsymphathetic"],
 }
 
 COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
     "all": list(COMPLIANCE_CHECKS.keys()),
     "default": [
-        "not_single_word",
-        "sentence_response",
         "no",
         "sorry",
         "sorry_in_string",
+        "as_an",
+        "undefined",
         "impossible",
         "unable",
         "na",
@@ -113,6 +119,8 @@ COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
     "lexical_category": ["lexical_category"],
     "kiki_bouba": ["kiki_bouba"],
     "numeric": ["not_number"],
+    "true_false": ["not_true_false"],
+    "sympathetic": ["not_sympathetic"],
 }
 
 

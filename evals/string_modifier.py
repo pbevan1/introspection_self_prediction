@@ -1,6 +1,5 @@
 """This files holds functions that can be used to modify an input string so that the model has to reconstruct it. The input is a string and it returns a string."""
 
-
 from typing import Callable
 
 

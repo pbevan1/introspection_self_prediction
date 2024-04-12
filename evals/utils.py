@@ -2,8 +2,8 @@ import importlib
 import json
 import logging
 import os
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 import omegaconf
 import openai
@@ -155,11 +155,14 @@ def sanitize_folder_name(key: str) -> str:
 # ensure that the sanitize function is registered
 omegaconf.OmegaConf.register_new_resolver("sanitize", sanitize_folder_name)
 
+
 # helper function to find the experiment folder
 def experiment_folder_location(subfolder):
     return str(EXP_DIR) + subfolder
 
+
 omegaconf.OmegaConf.register_new_resolver("experiment_folder_location", experiment_folder_location)
+
 
 def get_current_git_hash():
     try:

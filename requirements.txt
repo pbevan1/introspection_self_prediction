@@ -14,6 +14,8 @@ torch==2.2.2
 transformers==4.39.3
 tqdm
 wandb
+nltk
+scipy
 
 # notebooks
 jupyterlab

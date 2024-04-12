@@ -23,6 +23,11 @@ def merge_object_and_meta_dfs(
         print(
             f"Not all strings in s_df are in b_df: {len(set(m_df['string'].unique()).difference(set(o_df['string'].unique())))} are missing!"
         )
+    # check if there are non-unique strings in the dfs
+    if len(o_df["string"].unique()) != len(o_df):
+        print("There are non-unique strings in the object dataframe!")
+    if len(m_df["string"].unique()) != len(m_df):
+        print("There are non-unique strings in the meta dataframe!")
 
     # we need to subset the data to only include the strings that are in both dfs
     old_o_len = len(o_df)
