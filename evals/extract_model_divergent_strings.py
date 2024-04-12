@@ -33,7 +33,13 @@ def extract_most_uncertain_strings_from_base(
     Returns:
         Path to the .csv with the extracted strings.
     """
-    assert len(input_file_paths) > 1, "Need at least two input files to compare"
+    if len(input_file_paths) == 1:
+        LOGGER.warn("Need at least two input files to compare. Outputting all strings.")
+        df = pd.read_csv(input_file_paths[0])
+        if output_file_path is None:
+            output_file_path = Path(input_file_paths[0]).parent / "out_strings.csv"
+        df[["string"]].head(n_out_strings).to_csv(output_file_path, index=False)
+        LOGGER.info(f"Saved {len(df)} strings to {output_file_path}")
 
     # load the data
     dfs = load_and_prep_dfs(input_file_paths)
@@ -100,6 +106,14 @@ if __name__ == "__main__":
     parser.add_argument("input", type=str, nargs="+", help="Paths to the input directories.")
     parser.add_argument("--n", type=int, default=float("inf"), help="Number of strings to extract.")
     parser.add_argument("--output", type=str, default=None, help="Path to save the output file.")
+    parser.add_argument(
+        "--response_properties",
+        type=str,
+        nargs="+",
+        default=["identity"],
+        help="Response properties to compare.",
+        metavar="PROPERTY",
+    )
     args = parser.parse_args()
 
     input_file_paths = args.input
@@ -111,6 +125,6 @@ if __name__ == "__main__":
     if output is not None and not output.endswith(".csv"):
         output = Path(output).with_suffix(".csv")
 
-    out_path = extract_most_uncertain_strings_from_base(input_file_paths, args.n, output)
+    out_path = extract_most_uncertain_strings_from_base(input_file_paths, args.n, output, args.response_properties)
 
     print(f"Saved to {out_path}.")
