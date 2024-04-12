@@ -48,3 +48,6 @@ Asking the model about its mundane preferences ("What is your favorite color")
 
 ### self_referential
 Asking the model single word questions about itself ("What is your name?")
+
+### writing_stories
+Asking the model to write a story with a given prompt. The first 40 were written by me, the rest by Claude 3 Opus.
