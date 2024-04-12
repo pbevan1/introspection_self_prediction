@@ -16,7 +16,11 @@ from evals.apis.inference.cache_manager import CacheManager
 from evals.data_models.inference import LLMParams
 from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
 from evals.generate_few_shot import generate_few_shot_data
-from evals.utils import async_function_with_retry, get_current_git_hash, setup_environment
+from evals.utils import (
+    async_function_with_retry,
+    get_current_git_hash,
+    setup_environment,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -65,6 +69,7 @@ class DatasetRunner:
                 print_prompt_and_response=self.print_prompt_and_response,
                 logprobs=self.llm_params.logprobs,
                 seed=self.llm_params.seed,
+                cais_path=self.llm_params.cais_path,
             )
             # save successful prompt/response to file
             if self.cache_manager is not None:
@@ -253,7 +258,7 @@ def setup_data_file(cfg, exp_dir, filename):
 
 @hydra.main(version_base=None, config_path="conf", config_name="config_meta_level")
 def main(cfg: DictConfig):
-    print("Current git hash:",get_current_git_hash())
+    print("Current git hash:", get_current_git_hash())
     print(cfg)
     asyncio.run(async_main(cfg))
 

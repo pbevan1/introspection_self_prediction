@@ -20,7 +20,10 @@ def calc_accuracy(df):
 
 def calc_accuracy_with_excluded(df):
     """What is the accuracy if we count non-compliance as wrong answers?"""
-    df["correct"] = df["extracted_property_meta"] == df["extracted_property_object"]
+    df["correct"] = (
+        df["extracted_property_meta"].str.lstrip().str.strip()
+        == df["extracted_property_object"].str.lstrip().str.strip()
+    )
     df["correct"] = df["correct"] & (df["compliance_meta"] == True)  # noqa: E712
     return df["correct"].mean()
 

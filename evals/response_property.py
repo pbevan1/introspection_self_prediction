@@ -7,7 +7,7 @@ import pandas as pd
 
 def identity(row: pd.Series) -> str:
     """Used for prediction."""
-    return row["response"]
+    return row["response"].str.lstrip().str.strip()
 
 
 def identity_reversed(row: pd.Series) -> str:
