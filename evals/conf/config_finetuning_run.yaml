@@ -16,7 +16,7 @@ study_name: ??? # the name of the study
 defaults:
   - language_model: gpt-3.5-turbo
 
-epochs: 4 # how many epochs to train for
+epochs: 2 # how many epochs to train for
 
 notes: ??? # notes about the run
 
