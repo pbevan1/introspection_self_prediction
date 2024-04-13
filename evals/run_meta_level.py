@@ -252,6 +252,7 @@ def setup_data_file(cfg, exp_dir, filename):
         output_path=filename,
         seed=cfg.seed,
         how=cfg.get("n_shot_seeding", "true"),
+        repeat=cfg.get("n_samples", 1),
     )
     return new_filename
 

@@ -13,6 +13,7 @@ def load_dataset(
     seed: int = 0,
     shuffle: bool = True,
     n: Optional[int] = None,
+    n_samples: int = 1,
     filter_strings_path: Optional[str | Path] = None,
 ) -> pd.DataFrame:
     """
@@ -23,6 +24,7 @@ def load_dataset(
         seed: The random seed to use for shuffling the dataset.
         shuffle: Whether to shuffle the dataset.
         n: The number of rows to load from the dataset.
+        n_samples: The number of times we want to sample each row.
 
     Returns:
         A pandas DataFrame containing the dataset.
@@ -57,6 +59,12 @@ def load_dataset(
                 f"Requested number of rows ({n}) is greater than the number of rows in the dataset ({len(df)})."
             )
         df = df.head(n)
+
+    if n_samples > 1:
+        dfs = []
+        for _ in range(n_samples):
+            dfs.append(df.sample(frac=1, random_state=seed))
+        df = pd.concat(dfs)
 
     return df
 

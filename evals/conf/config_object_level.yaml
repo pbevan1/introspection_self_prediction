@@ -20,6 +20,7 @@ exp_dir: ${sanitize:${study_dir}/object_level_${language_model.model}_${prompt.m
 note: "" # natural language description of the note of this run. Can be anything.
 seed: 0
 limit: 500
+n_samples: 1 # for each input string, how many samples to generate
 strings_path: ~ # if set, use the strings from this file rather than generating them from the dataset
 filter_strings_path: ~ # if this is set, use this to filter the strings
 
