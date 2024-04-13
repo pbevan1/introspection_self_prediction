@@ -70,7 +70,7 @@ def main():
     # run sweep over object and meta levels
     for model_config in model_configs:
         for task_config in task_configs:
-            cmd = f"{object_level_command} language_model={model_config} task={task_config} {' '.join(overrides + object_overrides)}"
+            cmd = f"{object_level_command} language_model={model_config} task={task_config} {' '.join(map(str.strip, overrides + object_overrides))}"
             print("Running command:", cmd)
             run_command(cmd)
 
@@ -80,7 +80,7 @@ def main():
     for model_config in model_configs:
         for task_config in task_configs:
             for response_property_config in response_property_configs:
-                cmd = f"{meta_level_command} language_model={model_config} task={task_config} response_property={response_property_config} {' '.join(overrides + meta_overrides)}"
+                cmd = f"{meta_level_command} language_model={model_config} task={task_config} response_property={response_property_config} {' '.join(map(str.strip, overrides + meta_overrides))}"
                 print("Running command:", cmd)
                 run_command(cmd)
 

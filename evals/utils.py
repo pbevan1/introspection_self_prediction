@@ -171,3 +171,27 @@ def get_current_git_hash():
         return output
     except subprocess.CalledProcessError:
         return None
+
+
+def run_command(command):
+    """Execute the given command in the shell, stream the output, and return the last line.
+    Useful for running the `run_...` functions."""
+    try:
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+        output_lines = []
+        for line in process.stdout:
+            print(line, end="")  # stream the output to the command line
+            output_lines.append(line.strip())
+
+        process.wait()
+        if process.returncode != 0:
+            raise subprocess.CalledProcessError(process.returncode, command)
+
+        last_line = output_lines[-1] if output_lines else ""
+        print(f"Successfully executed: {command}")
+        return last_line
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing {command}: {e}")
+        raise e

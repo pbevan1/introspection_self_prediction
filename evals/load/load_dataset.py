@@ -1,3 +1,4 @@
+import csv
 import logging
 from pathlib import Path
 from typing import Optional
@@ -12,6 +13,7 @@ def load_dataset(
     seed: int = 0,
     shuffle: bool = True,
     n: Optional[int] = None,
+    n_samples: int = 1,
     filter_strings_path: Optional[str | Path] = None,
 ) -> pd.DataFrame:
     """
@@ -22,6 +24,7 @@ def load_dataset(
         seed: The random seed to use for shuffling the dataset.
         shuffle: Whether to shuffle the dataset.
         n: The number of rows to load from the dataset.
+        n_samples: The number of times we want to sample each row.
 
     Returns:
         A pandas DataFrame containing the dataset.
@@ -57,6 +60,12 @@ def load_dataset(
             )
         df = df.head(n)
 
+    if n_samples > 1:
+        dfs = []
+        for _ in range(n_samples):
+            dfs.append(df.sample(frac=1, random_state=seed))
+        df = pd.concat(dfs)
+
     return df
 
 
@@ -74,4 +83,4 @@ def create_data_file(data: pd.DataFrame, path: str | Path) -> None:
     if not path.suffix == ".csv":
         LOGGER.warning(f"Data file should be a .csv file. Got {path.suffix} instead. Appending...")
         path = path.with_suffix(".csv")
-    data.to_csv(path, index=False)
+    data.to_csv(path, index=False, quoting=csv.QUOTE_ALL)

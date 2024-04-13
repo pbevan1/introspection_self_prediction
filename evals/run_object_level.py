@@ -1,6 +1,7 @@
 """This file is used to find initial completions which are hard to predict."""
 
 import asyncio
+import csv
 import logging
 import shutil
 import traceback
@@ -132,7 +133,7 @@ async def run_dataset(filename: str, dataset_runner: DatasetRunner, limit: Optio
         )
     )
     full_df.update(df)
-    full_df.to_csv(filename, index=False, encoding="utf-8")
+    full_df.to_csv(filename, index=False, encoding="utf-8", quoting=csv.QUOTE_ALL)
 
     # return whether all rows are complete
     if full_df["complete"].eq(True).all():
@@ -178,11 +179,12 @@ async def async_main(cfg: DictConfig):
         if not filename.exists() or cfg.reset:
             LOGGER.info(f"File {filename} does not exist. Creating...")
             data = load_dataset(
-                cfg.task.dataset_path,
-                cfg.seed,
-                cfg.task.shuffle,
-                cfg.task.num,
-                cfg.task.get("filter_strings_path", None),
+                path=cfg.task.dataset_path,
+                seed=cfg.seed,
+                shuffle=cfg.task.shuffle,
+                n=cfg.task.num,
+                n_samples=cfg.n_samples,
+                filter_strings_path=cfg.task.get("filter_strings_path", None),
             )
             create_data_file(data, filename)
 
