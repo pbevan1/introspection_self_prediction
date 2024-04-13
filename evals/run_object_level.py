@@ -179,11 +179,12 @@ async def async_main(cfg: DictConfig):
         if not filename.exists() or cfg.reset:
             LOGGER.info(f"File {filename} does not exist. Creating...")
             data = load_dataset(
-                cfg.task.dataset_path,
-                cfg.seed,
-                cfg.task.shuffle,
-                cfg.task.num,
-                cfg.task.get("filter_strings_path", None),
+                path=cfg.task.dataset_path,
+                seed=cfg.seed,
+                shuffle=cfg.task.shuffle,
+                n=cfg.task.num,
+                n_samples=cfg.n_samples,
+                filter_strings_path=cfg.task.get("filter_strings_path", None),
             )
             create_data_file(data, filename)
 

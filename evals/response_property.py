@@ -141,6 +141,26 @@ def last_character(row: pd.Series):
     return last_character
 
 
+def first_word(row: pd.Series):
+    """Extract the first word of the response."""
+    response = row["response"]
+    try:
+        first_word = response.split()[0]
+    except (TypeError, IndexError):
+        first_word = None
+    return first_word
+
+
+def last_word(row: pd.Series):
+    """Extract the last word of the response."""
+    response = row["response"]
+    try:
+        last_word = response.split()[-1]
+    except (TypeError, IndexError):
+        last_word = None
+    return last_word
+
+
 def starts_with_vowel(row: pd.Series):
     """Extract whether the response starts with a vowel."""
     response = row["response"]
