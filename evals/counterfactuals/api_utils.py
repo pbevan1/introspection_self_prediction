@@ -227,7 +227,6 @@ class FileCacheRow(BaseModel):
     response: CachedValue
 
 
-
 class APIRequestCache:
     def __init__(self, cache_path: Path | str):
         self.cache_path = Path(cache_path)
@@ -251,12 +250,12 @@ class APIRequestCache:
             self.data = {row.key: row.response for row in rows}
         return self
 
-    async def save(self) -> None:
+    def save(self) -> None:
         """
         Save a file cache to a path
         """
         rows = [FileCacheRow(key=key, response=response) for key, response in self.data.items()]
-        await a_write_jsonl_file_from_basemodel(self.cache_path, rows)
+        write_jsonl_file_from_basemodel(self.cache_path, rows)
 
     async def save_single(self, key: str, response: CachedValue) -> None:
         """

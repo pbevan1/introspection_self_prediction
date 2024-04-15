@@ -31,7 +31,6 @@ class DataExampleBase(BaseModel, ABC):
         ground_truth_index = self.ground_truth_idx()
         return ascii_uppercase[ground_truth_index]  # type: ignore
 
-
     @abstractmethod
     def _get_options(self) -> list[str]:
         """Please implement this method to return a list of options, without any letters"""
@@ -39,7 +38,7 @@ class DataExampleBase(BaseModel, ABC):
 
     @final
     def get_options(self) -> list[str]:
-        # the 
+        # the
         options = self._get_options()
         return options
 
@@ -75,9 +74,7 @@ class DataExampleBase(BaseModel, ABC):
             indicator = ascii_uppercase[idx]
             output.append(f"({indicator}): {option_text}")
 
-        
         return "\n".join(output)
-
 
     @property  # override me if you want to specify a biased_ans yourself
     def biased_ans(self) -> MultipleChoiceAnswer:
@@ -99,15 +96,12 @@ class DataExampleBase(BaseModel, ABC):
     def bias_idx(self) -> int:
         return ascii_uppercase.index(self.biased_ans)
 
-    
-
     def hash(self) -> str:
         """
         When hashing we return the hash of the example in the default format
         this is so that you can join on different formats of the same question
         """
         return deterministic_hash(self.get_parsed_input())
-
 
     def get_parsed_input(
         self,

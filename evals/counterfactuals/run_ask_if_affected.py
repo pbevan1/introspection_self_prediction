@@ -149,7 +149,6 @@ class SecondRoundAsking(BaseModel):
         return self.first_round.switched_answer
 
 
-
 def extract_answer_non_cot(
     response: str,
 ) -> Optional[str]:
@@ -234,7 +233,9 @@ async def run_counterfactual_asking(
         # truthful_qa.eval()
         .shuffle(seed="42").filter(lambda x: x.biased_ans != x.ground_truth if biased_on_wrong_answer_only else True)
     )
-    dataset_data: Slist[CounterfactualTestData] = potential_data.take(number_samples).map(CounterfactualTestData.from_data_example)
+    dataset_data: Slist[CounterfactualTestData] = potential_data.take(number_samples).map(
+        CounterfactualTestData.from_data_example
+    )
 
     # Call the model
     config = InferenceConfig(
