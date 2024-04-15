@@ -3,25 +3,24 @@ import os
 from pathlib import Path
 from typing import Self, Sequence, Type, TypeVar, Union
 import anthropic
-import hashlib
-
 from pydantic import BaseModel
 from slist import Slist
 from tenacity import retry as async_retry, retry_if_exception_type, wait_fixed
-
 
 
 import openai
 import openai.error
 import anyio
 
+from evals.data_models.hashable import deterministic_hash
+
+
 def raise_should_not_happen() -> None:
     raise ValueError("Should not happen")
 
-def deterministic_hash(something: str) -> str:
-    return hashlib.sha1(something.encode()).hexdigest()
 
 GenericBaseModel = TypeVar("GenericBaseModel", bound=BaseModel)
+
 
 def caught_base_model_parse(basemodel: Type[GenericBaseModel], line: str) -> GenericBaseModel:
     try:
@@ -33,11 +32,8 @@ def caught_base_model_parse(basemodel: Type[GenericBaseModel], line: str) -> Gen
 
 def read_jsonl_file_into_basemodel(path: Path | str, basemodel: Type[GenericBaseModel]) -> Slist[GenericBaseModel]:
     with open(path) as f:
-        return Slist(
-            caught_base_model_parse(basemodel=basemodel, line=line)
-            for line in f.readlines()
-        )
-    
+        return Slist(caught_base_model_parse(basemodel=basemodel, line=line) for line in f.readlines())
+
 
 def write_jsonl_file_from_basemodel(path: Path | str, basemodels: Sequence[BaseModel]) -> None:
     if isinstance(path, str):
@@ -46,7 +42,6 @@ def write_jsonl_file_from_basemodel(path: Path | str, basemodels: Sequence[BaseM
     with open(path, "w") as f:
         for basemodel in basemodels:
             f.write(basemodel.model_dump_json() + "\n")
-
 
 
 class ChatMessageV2(BaseModel):
@@ -231,15 +226,6 @@ class FileCacheRow(BaseModel):
     key: str
     response: CachedValue
 
-
-async def a_write_jsonl_file_from_basemodel(path: Path | str, basemodels: Sequence[BaseModel]) -> None:
-    if isinstance(path, str):
-        path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    # use anyio
-    async with await anyio.open_file(path, "w") as f:
-        for basemodel in basemodels:
-            await f.write(basemodel.model_dump_json() + "\n")
 
 
 class APIRequestCache:
