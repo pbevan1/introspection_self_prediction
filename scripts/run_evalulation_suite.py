@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 
 from evals import create_finetuning_dataset_configs
-from evals.locations import REPO_DIR
+from evals.locations import CONF_DIR, REPO_DIR
 
 EVAL_SUITE = {
     "number_triplets": ["identity", "is_even"],
@@ -34,7 +34,7 @@ DIVERGENT_STRINGS = {
     # "bias
 }
 
-N_TRAIN = 10000
+N_TRAIN = 500
 N_EVAL = 500
 STUDY_NAME = "evaluation_suite"
 PROMPT = "minimal"
@@ -70,7 +70,10 @@ def run_finetuning(models, ft_overrides=""):
     finetuned_models = {}
     for model in models:
         for task, response_properties in EVAL_SUITE.items():
-            ft_study_name = f"{STUDY_NAME}_{model}_{task}"
+            if get_finetuned_model(model, task) is not None:
+                print(f"Model {model} already finetuned on task {task}—we found a config file. Skipping.")
+                continue
+            ft_study_name = f"{STUDY_NAME}/{task}"
             # generate object level train
             print(f"Generating object level training data for Model: {model}\tTask: {task}")
             command = f"python {REPO_DIR}/evals/run_object_level.py study_name={STUDY_NAME} language_model={model} prompt='object_level'/{PROMPT} task={task} task.set=train limit={N_TRAIN}"
@@ -97,7 +100,6 @@ def run_finetuning(models, ft_overrides=""):
                 )
                 finetuning_config_paths.append(finetuning_config_path)
             # create finetuning dataset
-            # ft_config_folder_path = str(Path(finetuning_config_paths[0]).parent).split("finetuning/")[-1] # get the folder path from inside finetuning
             command = f"python {REPO_DIR}/evals/create_finetuning_dataset.py study_name={ft_study_name} dataset_folder={model}"
             run_command(command)
             # run finetuning
@@ -111,12 +113,17 @@ def run_finetuning(models, ft_overrides=""):
     return finetuned_models
 
 
-def run_finetuned_models_on_their_task(finetuned_models):
+def run_finetuned_models_on_their_task(model: str):
     """Takes the input of `run_finetuning` and runs the finetuned models on the evaluation suite.
     This only runs each finetuned models on the task and response properties it was trained for.
     """
-    for task, ft_model in finetuned_models.items():
-        for response_property in EVAL_SUITE[task]:
+    for task, response_properties in EVAL_SUITE.items():
+        # get finetuned model
+        ft_model = get_finetuned_model(model, task)
+        if ft_model is None:
+            print(f"Finetuned model based on {model} for task {task} not found. Skipping.")
+            continue
+        for response_property in response_properties:
             print(
                 f"Running evaluation suite on Model: {ft_model}\tTask: {task}\tResponse Property: {response_property}"
             )
@@ -128,7 +135,7 @@ def run_finetuned_models_on_their_task(finetuned_models):
             run_command(command)
 
 
-def generate_model_divergent_string():  # STATE: UNTESTED
+def generate_model_divergent_string():
     """Run this to generate the model divergent strings in the evaluation suite folder.
     This should only need to be run once to populate `DIVERGENT_STRINGS`.
     This runs the models specified below and creates a .csv files that contain the strings for each task for which the response property of the object-level  diverges.
@@ -139,7 +146,7 @@ def generate_model_divergent_string():  # STATE: UNTESTED
         # generate object level validations
         for model in DIVERGENCE_MODELS:
             print(f"Generating object level validation for task: {task}")
-            command = f"python {REPO_DIR}/evals/run_object_level.py study_name={STUDY_NAME} language_model={model} prompt='object_level'/{PROMPT} task={task} task.set=val limit={N_TRAIN}"
+            command = f"python {REPO_DIR}/evals/run_object_level.py study_name={STUDY_NAME} language_model={model} prompt='object_level'/{PROMPT} task={task} task.set=val limit={N_EVAL * 3}"
             folder = run_command(command)
             folders.append(folder)
         # compute model divergenced strings
@@ -178,9 +185,24 @@ def run_command(command):
         raise e
 
 
+def get_finetuned_model(model: str, task: str):
+    """Returns the finetuned model for the given model, task, and response property. Return None if not found."""
+    path = Path(CONF_DIR) / "language_model" / "finetuned" / STUDY_NAME / task / model
+    if not path.exists():
+        return None
+    # is there a single yaml file?
+    yaml_files = list(path.glob("*.yaml"))
+    if len(yaml_files) == 1:
+        return yaml_files[0].stem
+    elif len(yaml_files) > 1:
+        raise ValueError(f"Multiple yaml files found in {path}. Expected only one.")
+    elif len(yaml_files) == 0:
+        return None
+
+
 if __name__ == "__main__":
-    # models = ["gpt-3.5-turbo"]
-    # run_inference_only(models)
-    # generate_model_divergent_string()
-    # run_finetuning(["gpt-3.5-turbo"])
-    run_get_floor_ceiling_for_untrained_models(["gpt-3.5-turbo"])
+    models = ["gpt-3.5-turbo"]
+    generate_model_divergent_string()
+    run_inference_only(models)
+    run_finetuning(models)
+    # run_get_floor_ceiling_for_untrained_models(models)
