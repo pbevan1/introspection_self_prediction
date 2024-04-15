@@ -88,16 +88,35 @@ def queue_finetune(
     suffix: str = None,
     val_file_id: str = None,
     organization: Optional[str] = None,
+    retries: int = 10,  # number of retries. 30 * 2^10 = 8.5 hours
+    retry_time: int = 30,  # time to wait before retrying in seconds
 ) -> FinetuneJob:
+    if retries == 0:
+        raise Exception("Retries exhausted. Exiting")
     # Keep retrying until we can queue the finetune job
-    finetune_job_resp = openai.FineTuningJob.create(
-        training_file=file_id,
-        model=model,
-        hyperparameters=hyperparameters.dict(),
-        suffix=suffix,
-        validation_file=val_file_id,
-        organization=organization,
-    )
+    try:
+        finetune_job_resp = openai.FineTuningJob.create(
+            training_file=file_id,
+            model=model,
+            hyperparameters=hyperparameters.dict(),
+            suffix=suffix,
+            validation_file=val_file_id,
+            organization=organization,
+        )
+    except RateLimitError:
+        logger.error(f"Rate limit error. Retrying in {retry_time} seconds. {retries} retries left.")
+        time.sleep(retry_time)
+        retry_time *= 2  # exponential backoff
+        return queue_finetune(
+            file_id=file_id,
+            model=model,
+            hyperparameters=hyperparameters,
+            suffix=suffix,
+            val_file_id=val_file_id,
+            organization=organization,
+            retries=retries - 1,
+            retry_time=retry_time,
+        )
 
     print(f"Started finetune job. {finetune_job_resp}")
     parsed_job_resp: FinetuneJob = FinetuneJob.parse_obj(finetune_job_resp)
