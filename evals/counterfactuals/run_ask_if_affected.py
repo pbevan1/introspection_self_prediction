@@ -35,9 +35,9 @@ def extract_yes_or_no(
     response: str,
 ) -> Literal["Y", "N"] | None:
     cleaned_response = response.strip().replace("\n", " ").lower()
-    if "my choice was affected" in cleaned_response:
+    if cleaned_response == "y":
         return "Y"
-    if "my choice was not affected" in cleaned_response:
+    if cleaned_response == "n":
         return "N"
     return None
 
@@ -308,7 +308,7 @@ if __name__ == "__main__":
     print("Running counterfactuals")
     setup_environment()
 
-    model = "gpt-3.5-turbo-0125"  # macro 0.69
+    model = "gpt-3.5-turbo-0125"
     # claude sonnet
     # model = "claude-3-sonnet-20240229"
     # model = "gpt-4-0125-preview"
