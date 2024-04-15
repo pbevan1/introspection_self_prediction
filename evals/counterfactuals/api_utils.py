@@ -49,6 +49,29 @@ class ChatMessageV2(BaseModel):
     role: str
     content: str
 
+    def pretty_str(self) -> str:
+        return f"{self.role}: {self.content}"
+
+
+def display_conversation(messages: Sequence[ChatMessageV2]) -> str:
+    return "\n".join([msg.pretty_str() for msg in messages])
+
+
+def display_multiple_conversations(messages: Sequence[Sequence[ChatMessageV2]]) -> str:
+    # use ================== to separate conversations
+    separator = "\n" + "=" * 20 + "\n"
+    return separator.join([display_conversation(messages) for messages in messages])
+
+
+def dump_conversations(path: Path | str, messages: Sequence[Sequence[ChatMessageV2]]) -> None:
+    print(f"Dumping conversations to {path}")
+    if isinstance(path, str):
+        path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        string = display_multiple_conversations(messages)
+        f.write(string)
+
 
 class InferenceConfig(BaseModel):
     # Config for openai

@@ -11,8 +11,8 @@ from evals.counterfactuals.api_utils import (
     InferenceConfig,
     ModelCallerV2,
     UniversalCallerV2,
+    dump_conversations,
     raise_should_not_happen,
-    write_jsonl_file_from_basemodel,
 )
 from evals.counterfactuals.datasets.base_example import DataExampleBase, MultipleChoiceAnswer
 from evals.counterfactuals.datasets.load_mmlu import mmlu_test
@@ -41,7 +41,7 @@ def extract_yes_or_no(
     return None
 
 
-def get_anchor_variants(biased_answer: str) -> Slist[str]:
+def get_biasing_statement(biased_answer: str) -> Slist[str]:
     # Not using sycophancy "I (user) think that the answer is (X)" because it appears to be trained out of gpt-4-turbo, so harder to get samples for
     # Appeal to other forms of opinions still works.
     return Slist(
@@ -82,13 +82,14 @@ class CounterfactualTestData(BaseModel):
 
     @staticmethod
     def from_data_example(data: DataExampleBase) -> "CounterfactualTestData":
+        # We add the biasing statement here
         unbiased_question = [
             ChatMessageV2(role="user", content=data.get_parsed_input() + round_1_answer_format),
             # ChatMessageV2(role="assistant", content="The best answer is: ("),
         ]
         biased_option = data.biased_ans
         biasing_statement = (
-            get_anchor_variants(biased_answer=biased_option).shuffle(seed=data.get_parsed_input()).first_or_raise()
+            get_biasing_statement(biased_answer=biased_option).shuffle(seed=data.get_parsed_input()).first_or_raise()
         )
         biased_question = [
             ChatMessageV2(
@@ -131,6 +132,7 @@ class SecondRoundAsking(BaseModel):
     first_round: FirstRoundAsking
     second_round_message: list[ChatMessageV2]
     second_round_raw: str
+    final_history: list[ChatMessageV2]
     second_round_parsed: Literal["Y", "N"] | None
 
     def predicted_switched_answer_correctly(self) -> bool:
@@ -213,12 +215,14 @@ async def ask_second_round(
     ]
     response = await caller.call(new_question, config=config)
     parsed_answer = extract_yes_or_no(response.single_response)
+    final_history = new_question + [ChatMessageV2(role="assistant", content=response.single_response)]
 
     return SecondRoundAsking(
         first_round=single_data,
         second_round_message=new_question,
         second_round_parsed=parsed_answer,  # type: ignore
         second_round_raw=response.single_response,
+        final_history=final_history,
     )
 
 
@@ -278,9 +282,16 @@ async def run_counterfactual_asking(
         lambda x: x.first_round.switched_answer
     )
 
+    dump_conversations(
+        path="exp/affected_ground_truth.txt", messages=affected_ground_truth.map(lambda x: x.final_history)
+    )
+    dump_conversations(
+        path="exp/unaffected_ground_truth.txt", messages=unaffected_ground_truth.map(lambda x: x.final_history)
+    )
+
     smallest_length = min(affected_ground_truth.length, unaffected_ground_truth.length)
     print(f"Balancing ground truths to have same number of samples: {smallest_length}")
-    write_jsonl_file_from_basemodel("experiments/first_round_switched_answer.jsonl", affected_ground_truth)
+
     balanced_ground_truth_data = affected_ground_truth.take(smallest_length) + unaffected_ground_truth.take(
         smallest_length
     )
