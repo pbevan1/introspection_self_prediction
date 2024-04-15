@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 
 import hydra
+import torch
 from omegaconf import DictConfig
 
 from evals.apis.finetuning.run import FineTuneHyperParams, FineTuneParams, run_finetune
@@ -77,7 +78,9 @@ def main(cfg: DictConfig) -> str:
         LOGGER.info("Running HF finetuning")
         run_name = cfg.language_model.model + "_finetuned_" + cfg.notes
         save_path = f"{cfg.study_dir}/{run_name}"
-        cmd = f"""accelerate launch evals.apis.finetuning/hf_finetuning --output_dir {save_path} full_sweep_test/llama-7b-chat/ --run_name {run_name} --model_name_or_path {cfg.language_model.cais_path} --dataset_name {cfg.study_dir} --batch_size 128 --learning_rate 1e-5 --num_train_epochs {params.hyperparameters.n_epochs} --seed 42 --fp16 --save_only_model --logging_steps 1"""
+        num_gpus = torch.cuda.device_count()
+        batch_size = 128
+        cmd = f"""accelerate launch --mixed_precision bf16 --num_processes {num_gpus} -m evals.apis.finetuning.hf_finetuning --output_dir {save_path} full_sweep_test/llama-7b-chat/ --run_name {run_name} --model_name_or_path {cfg.language_model.cais_path} --dataset_name {cfg.study_dir} --per_device_train_batch_size 32 {batch_size//num_gpus} --learning_rate 1e-5 --num_train_epochs {params.hyperparameters.n_epochs} --seed 42 --bf16 --save_only_model --logging_steps 1 --evaluation_strategy steps --eval_steps 20"""
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         output_lines = []
         for line in process.stdout:

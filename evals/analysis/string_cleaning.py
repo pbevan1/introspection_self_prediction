@@ -31,7 +31,7 @@ def clean_string(s: str) -> str:
     str: The cleaned string.
     """
     s = str(s)
-    return strip_punctuation(s.lower().strip())
+    return strip_punctuation(s.lower().strip().lstrip())
 
 
 def strip_punctuation(s: str) -> str:
