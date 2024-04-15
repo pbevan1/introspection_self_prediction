@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
@@ -7,18 +8,12 @@ from evals.counterfactuals.datasets.base_example import (
     DataExampleBase,
     MultipleChoiceAnswer,
 )
-from evals.counterfactuals.datasets.mmlu_categories import TASK_KEY_TO_CAT
-
-MMLU_TASKS = [f"mmlu_{i}" for i in TASK_KEY_TO_CAT.keys()]
-MMLU_SUPERCATEGORIES = [f"mmlu_{i}" for i in set(TASK_KEY_TO_CAT.values())]
 
 
 class MMLUExample(DataExampleBase):
     question: str
     options: list[str]
     correct_ans_letter: MultipleChoiceAnswer
-    super_category: Optional[str] = None
-    sub_categeory: Optional[str] = None
 
     def _get_options(
         self,
@@ -33,10 +28,7 @@ class MMLUExample(DataExampleBase):
         return self.correct_ans_letter
 
 
-def _load_paths(sub_category: str, questions_per_task: Optional[int] = None) -> Slist[MMLUExample]:
-    super_category = TASK_KEY_TO_CAT[sub_category]
-    path = f"./data/mmlu/test/{sub_category}_test.csv"
-
+def load_single_mmlu_path(path: Path, questions_per_task: Optional[int] = None) -> Slist[MMLUExample]:
     df = pd.read_csv(path, header=None)
     # shuffle the rows incase the data is ordered in some way
     df = df.sample(frac=1, random_state=42).reset_index(drop=True)
@@ -51,8 +43,6 @@ def _load_paths(sub_category: str, questions_per_task: Optional[int] = None) -> 
             question=question,
             options=options,
             correct_ans_letter=correct_ans_letter,
-            super_category=super_category,
-            sub_categeory=sub_category,
         )
         outputs.append(example)
         if questions_per_task is not None:
@@ -62,31 +52,9 @@ def _load_paths(sub_category: str, questions_per_task: Optional[int] = None) -> 
 
 
 def mmlu_test(questions_per_task: Optional[int] = None) -> Slist[MMLUExample]:
-    subtasks = TASK_KEY_TO_CAT.keys()
+    # get any .csv in evals/counterfactuals/datasets/mmlu_test
+    sub_task_paths = Path(__file__).parent.glob("mmlu_test/*.csv")
     outputs = Slist()
-    for subtask in subtasks:
-        outputs.extend(_load_paths(subtask, questions_per_task=questions_per_task))
+    for subtask in sub_task_paths:
+        outputs.extend(load_single_mmlu_path(subtask, questions_per_task=questions_per_task))
     return outputs
-
-
-def test_super_category(super_category: str, questions_per_task: Optional[int] = None) -> Slist[MMLUExample]:
-    sub_categories = [
-        sub_category for sub_category, super_category_ in TASK_KEY_TO_CAT.items() if super_category_ == super_category
-    ]
-
-    if len(sub_categories) == 0:
-        raise ValueError(f"Super category {super_category} not found")
-
-    outputs = Slist()
-    for sub_category in sub_categories:
-        outputs.extend(_load_paths(sub_category, questions_per_task=questions_per_task))
-    return outputs
-
-
-def test_sub_category(sub_category: str, questions_per_task: Optional[int] = None) -> Slist[MMLUExample]:
-    outputs = _load_paths(sub_category, questions_per_task=questions_per_task)
-    return outputs
-
-
-if __name__ == "__main__":
-    outputs = test_super_category("humanities")

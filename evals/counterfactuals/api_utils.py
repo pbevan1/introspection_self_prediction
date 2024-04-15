@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 import os
 from pathlib import Path
 from typing import Self, Sequence, Type, TypeVar, Union
@@ -6,13 +7,13 @@ import anthropic
 from pydantic import BaseModel
 from slist import Slist
 from tenacity import retry as async_retry, retry_if_exception_type, wait_fixed
-
+from evals.data_models.hashable import deterministic_hash
 
 import openai
 import openai.error
 import anyio
 
-from evals.data_models.hashable import deterministic_hash
+logger = logging.getLogger(__name__)
 
 
 def raise_should_not_happen() -> None:
@@ -109,13 +110,17 @@ class ModelCallerV2(ABC):
         return CachedCallerV2(wrapped_caller=self, cache_path=cache_path)
 
 
-anthropic_client = anthropic.AsyncAnthropic(
-    # This is the default and can be omitted
-    api_key=os.environ.get("ANTHROPIC_API_KEY"),
-)
-
-
 class ClaudeCaller(ModelCallerV2):
+    def __init__(self, anthropic_client: anthropic.AsyncAnthropic | None = None):
+        anthropic_client = (
+            anthropic.AsyncAnthropic(
+                api_key=os.environ.get("ANTHROPIC_API_KEY"),
+            )
+            if anthropic_client is None
+            else anthropic_client
+        )
+        self.anthropic_client = anthropic_client
+
     async def call(
         self,
         messages: Sequence[ChatMessageV2],
@@ -128,7 +133,7 @@ class ClaudeCaller(ModelCallerV2):
         non_system_prompts = [item for item in messages if item.role != "system"]
         first_sytem_prompt: ChatMessageV2 | None = system_prompts[0] if system_prompts else None
         try:
-            message = await anthropic_client.messages.create(
+            message = await self.anthropic_client.messages.create(
                 system=first_sytem_prompt.content if first_sytem_prompt else anthropic.NOT_GIVEN,
                 max_tokens=config.max_tokens,
                 # stop=config.stop,
@@ -161,8 +166,7 @@ class ClaudeCaller(ModelCallerV2):
         return InferenceResponse(raw_responses=responses, error=None)
 
 
-class GPT4Caller(ModelCallerV2):
-    # retry openai.error.RateLimitError
+class OpenAICaller(ModelCallerV2):
     @async_retry(
         retry=retry_if_exception_type((openai.error.RateLimitError, openai.error.APIError)), wait=wait_fixed(5)
     )
@@ -200,7 +204,7 @@ class GPT4Caller(ModelCallerV2):
 class UniversalCallerV2(ModelCallerV2):
     def __init__(self):
         self.claude_caller = ClaudeCaller()
-        self.gpt4_caller = GPT4Caller()
+        self.gpt4_caller = OpenAICaller()
 
     async def call(
         self,
@@ -245,8 +249,7 @@ class APIRequestCache:
                 path=self.cache_path,
                 basemodel=FileCacheRow,
             )
-            if not silent:
-                print(f"Loaded {len(rows)} rows from cache file {self.cache_path.as_posix()}")
+            logger.info(f"Loaded {len(rows)} rows from cache file {self.cache_path.as_posix()}")
             self.data = {row.key: row.response for row in rows}
         return self
 
@@ -292,6 +295,8 @@ class CachedCallerV2(ModelCallerV2):
     def __init__(self, wrapped_caller: ModelCallerV2, cache_path: Path):
         self.model_caller = wrapped_caller
         self.cache_path = cache_path
+        # create folder if it doesn't exist
+        self.cache_path.parent.mkdir(parents=True, exist_ok=True)
         self.cache: APIRequestCache = APIRequestCache(cache_path)
 
     async def call(
