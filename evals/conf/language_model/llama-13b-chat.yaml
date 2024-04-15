@@ -1,4 +1,5 @@
-model: "/data/public_models/meta-llama/Llama-2-13b-chat-hft"
+model: "llama-13b-chat"
+cais_path: "/data/public_models/meta-llama/Llama-2-13b-chat-hf"
 temperature: 0.0
 top_p: 1.0
 max_tokens: null
