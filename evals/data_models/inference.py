@@ -8,6 +8,7 @@ from evals.data_models.hashable import HashableBaseModel
 
 class LLMParams(HashableBaseModel):
     model: Union[str, List[str]]
+    cais_path: str | None = None
     temperature: float = 0.2
     top_p: float = 1.0
     n: int = 1

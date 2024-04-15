@@ -24,9 +24,9 @@ dataset_folder: ?? # the name of the folder containing the dataset infos
 exp_dir: ${sanitize:${study_dir}}
 
 train_base_dir: ?? # the folder of the object level responses to use for training. Should be generated with `task.set = train`.
-n_train_items: 10000 # number of strings to use in train set. Use `~` to use all strings in the train set.
+n_train_items: 500 # number of strings to use in train set. Use `~` to use all strings in the train set.
 val_base_dir: ~ # the folder of the object level responses to use for validation. Use `~` to not use a val set. Should be generated with `task.set = val`.
-n_val_items: 2500 # number of strings to use in val set. Use `~` to use all strings in the val set.
+n_val_items: 100 # number of strings to use in val set. Use `~` to use all strings in the val set.
 
 train_strings_path: ~ # if set, filter the strings from the train_base_dir with this file
 val_strings_path: ~ # if set, filter the strings from the val_base_dir with this file
