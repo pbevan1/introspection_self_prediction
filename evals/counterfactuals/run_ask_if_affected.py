@@ -1,5 +1,6 @@
 import re
 from typing import Literal, Optional, Sequence
+import fire
 from grugstream import Observable
 from pydantic import BaseModel
 from slist import Slist
@@ -16,8 +17,6 @@ from evals.counterfactuals.api_utils import (
 from evals.counterfactuals.datasets.base_example import DataExampleBase, MultipleChoiceAnswer
 from evals.counterfactuals.datasets.load_mmlu import mmlu_test
 from evals.counterfactuals.stat_utils import average_with_95_ci
-
-import asyncio
 
 from evals.utils import setup_environment
 
@@ -226,6 +225,7 @@ async def ask_second_round(
 async def run_counterfactual_asking(
     bias_on_wrong_answer_only: bool = False, model: str = "gpt-3.5-turbo-0125", number_samples: int = 500
 ):
+    print(f"Running counterfactuals with model {model}")
     caller = UniversalCallerV2().with_file_cache("exp/counterfactuals.jsonl")
     # Open one of the bias files
     potential_data = (
@@ -251,7 +251,7 @@ async def run_counterfactual_asking(
         await Observable.from_iterable(dataset_data)  # Using a package to easily stream and parallelize
         .map_async_par(lambda data: ask_first_round(data, caller=caller, config=config), max_par=20)
         .flatten_optional()
-        .tqdm(tqdm_bar=tqdm(desc="First round", total=dataset_data.length))
+        .tqdm(tqdm_bar=tqdm(desc="First round using", total=dataset_data.length))
         # .take(100)
         .to_slist()
     )
@@ -305,14 +305,16 @@ async def run_counterfactual_asking(
 
 
 if __name__ == "__main__":
-    print("Running counterfactuals")
     setup_environment()
 
-    model = "gpt-3.5-turbo-0125"
-    # claude sonnet
+    # Example models
+    # model = "gpt-3.5-turbo-0125"
     # model = "claude-3-sonnet-20240229"
     # model = "gpt-4-0125-preview"
     # model = "claude-3-opus-20240229"
     # model = "gpt-4-0125-preview"
 
-    asyncio.run(run_counterfactual_asking(model=model, bias_on_wrong_answer_only=False, number_samples=300))
+    # run this line if you don't want to use fire
+    # asyncio.run(run_counterfactual_asking(model=model, bias_on_wrong_answer_only=False, number_samples=300))
+
+    fire.Fire(run_counterfactual_asking)
