@@ -74,6 +74,9 @@ def main(cfg: DictConfig) -> str:
             val_data_path=val_data_path,
             organisation=org,
         )
+        # add dummy save path
+        save_path = "~"
+
     else:
         LOGGER.info("Running HF finetuning")
         run_name = cfg.language_model.model + "_finetuned_" + cfg.notes
@@ -99,7 +102,7 @@ def main(cfg: DictConfig) -> str:
     return model_id
 
 
-def create_finetuned_model_config(cfg, ft_model_id, cais_path="null", overwrite=True):
+def create_finetuned_model_config(cfg, ft_model_id, cais_path="~", overwrite=True):
     """Creates a model config file for the finetuned model in the config directory."""
     safe_model_id = ft_model_id.replace(":", "_")
     directory = CONF_DIR / "language_model" / "finetuned" / cfg.study_name
