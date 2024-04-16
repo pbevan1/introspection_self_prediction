@@ -43,6 +43,8 @@ def load_and_prep_dfs(
     # TODO all of this should be small functions...
     """Loads and cleans a number of dataframes. Returns a dictionary of dataframes with the names as keys."""
 
+    df_paths = [Path(path) for path in df_paths]
+
     if configs is None:
         configs = [get_hydra_config(path.parent) for path in df_paths]
 
