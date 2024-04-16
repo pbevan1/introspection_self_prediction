@@ -32,9 +32,9 @@ Answer Y for yes or N for no.
 If the assistant answers Y, it means the assistant can correctly identify that it is affected by the biasing text.
 
 ## Run the evaluation
-Tip: you can check for more commands with `python -m evals.counterfactuals.run_ask_if_affected --help`
+Tip: you can check for more commands with `python -m other_evals.counterfactuals.run_ask_if_affected --help`
 ```
-python -m evals.counterfactuals.run_ask_if_affected --model=gpt-3.5-turbo-0125 --number_samples 500
+python -m other_evals.counterfactuals.run_ask_if_affected --model=gpt-3.5-turbo-0125 --number_samples 500
 ```
 
 

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from slist import Slist
 from tqdm import tqdm
 
-from evals.counterfactuals.api_utils import (
+from other_evals.counterfactuals.api_utils import (
     ChatMessageV2,
     InferenceConfig,
     ModelCallerV2,
@@ -14,9 +14,9 @@ from evals.counterfactuals.api_utils import (
     dump_conversations,
     raise_should_not_happen,
 )
-from evals.counterfactuals.datasets.base_example import DataExampleBase, MultipleChoiceAnswer
-from evals.counterfactuals.datasets.load_mmlu import mmlu_test
-from evals.counterfactuals.stat_utils import average_with_95_ci
+from other_evals.counterfactuals.datasets.base_example import DataExampleBase, MultipleChoiceAnswer
+from other_evals.counterfactuals.datasets.load_mmlu import mmlu_test
+from other_evals.counterfactuals.stat_utils import average_with_95_ci
 
 from evals.utils import setup_environment
 

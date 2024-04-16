@@ -4,7 +4,7 @@ from typing import Optional
 import pandas as pd
 from slist import Slist
 
-from evals.counterfactuals.datasets.base_example import (
+from other_evals.counterfactuals.datasets.base_example import (
     DataExampleBase,
     MultipleChoiceAnswer,
 )
