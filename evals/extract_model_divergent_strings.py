@@ -21,7 +21,7 @@ from evals.analysis.loading_data import get_data_path, load_and_prep_dfs  # noqa
 def extract_most_uncertain_strings_from_base(
     input_file_paths, n_out_strings=float("inf"), output_file_path=None
 ) -> Path:
-    """Extractst the strings that different models generate different base completions for. Saves a .csv with the strings into the same directory as the input file called `out_strings.csv`.
+    """Extracts the strings that different models generate different base completions for. Saves a .csv with the strings into the same directory as the input file called `out_strings.csv`.
 
     Args:
         input_file_paths: List of paths to the .csv with the base level completions.
@@ -31,8 +31,7 @@ def extract_most_uncertain_strings_from_base(
     Returns:
         Path to the .csv with the extracted strings.
     """
-    assert len(input_file_paths) > 1, "Need at least two input files to compare"
-
+        
     # load the data
     dfs = load_and_prep_dfs(input_file_paths)
     LOGGER.info(f"Loaded {len(dfs)} rows from {input_file_paths}")
@@ -48,7 +47,11 @@ def extract_most_uncertain_strings_from_base(
 
     # find the strings that are different
     diff_cols = [f"response_{config}" for config in dfs.keys()]
-    df["diff"] = df.apply(lambda row: len(set(row[diff_cols])) > 1, axis=1)
+    if len(input_file_paths) == 1:
+        LOGGER.warning("Only one input file provided, extracting all strings.")
+        df["diff"] = True # if only one input file, all strings are different
+    else:
+        df["diff"] = df.apply(lambda row: len(set(row[diff_cols])) > 1, axis=1)
 
     # subset the data to only include the strings that are different
     old_len = len(df)
