@@ -27,6 +27,7 @@ train_base_dir: ?? # the folder of the object level responses to use for trainin
 n_train_items: 500 # number of strings to use in train set. Use `~` to use all strings in the train set.
 val_base_dir: ~ # the folder of the object level responses to use for validation. Use `~` to not use a val set. Should be generated with `task.set = val`.
 n_val_items: 100 # number of strings to use in val set. Use `~` to use all strings in the val set.
+enforce_unique_strings: true # if true, the strings in each set will be unique, even if different response properties are requested. 
 
 train_strings_path: ~ # if set, filter the strings from the train_base_dir with this file
 val_strings_path: ~ # if set, filter the strings from the val_base_dir with this file
