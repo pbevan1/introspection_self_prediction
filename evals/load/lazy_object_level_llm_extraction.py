@@ -20,3 +20,11 @@ def lazy_add_response_property_to_object_level(object_df, object_cfg, response_p
         object_df = pd.merge(object_df, updated_object_df[["string", response_property_name]], on="string")
         print(f"Loaded response property {response_property_name} from object level dataframe.")
     return object_df
+
+
+def lazy_add_response_property_to_object_level_from_cfg_df_dict(cfg_df_dict, response_property_name):
+    """The same as above, only on the entire dictionary of cfgs and dataframes."""
+    for cfg, df in cfg_df_dict.items():
+        df = lazy_add_response_property_to_object_level(df, cfg, response_property_name)
+        cfg_df_dict[cfg] = df
+    return cfg_df_dict

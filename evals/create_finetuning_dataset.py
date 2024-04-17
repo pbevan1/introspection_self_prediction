@@ -2,9 +2,9 @@
 
 import copy
 import csv
+import json
 import logging
 import os
-import json
 import random
 import shutil
 from pathlib import Path
@@ -106,7 +106,9 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
         enforce_unique_strings(path / ("train_" + filename))
         enforce_unique_strings(path / ("val_" + filename))
 
-    LOGGER.info(f"Generated {len(train_filepaths)} datasets and saved to {train_filepath.relative_to(EXP_DIR)} & {val_filepath.relative_to(EXP_DIR)}")
+    LOGGER.info(
+        f"Generated {len(train_filepaths)} datasets and saved to {train_filepath.relative_to(EXP_DIR)} & {val_filepath.relative_to(EXP_DIR)}"
+    )
     return train_filepath, val_filepath
 
 
@@ -308,9 +310,9 @@ def scramble_strings(df: pd.DataFrame, seed: int) -> pd.DataFrame:
 
     return df
 
+
 def enforce_unique_strings(path_to_jsonl, random_seed=0):
-    """Enforces that each string in the .jsonl is unique, even if it comes from a different original config. If multiple strings are present, it will randomly select one of them.
-    """
+    """Enforces that each string in the .jsonl is unique, even if it comes from a different original config. If multiple strings are present, it will randomly select one of them."""
     with open(path_to_jsonl, "r") as f:
         lines = f.readlines()
 
@@ -320,7 +322,9 @@ def enforce_unique_strings(path_to_jsonl, random_seed=0):
     # get the unique strings
     unique_strings = list(set(strings))
 
-    LOGGER.info(f"Enforcing unique strings on {path_to_jsonl.relative_to(EXP_DIR)}. Found {len(strings)} strings and {len(unique_strings)} unique strings.")
+    LOGGER.info(
+        f"Enforcing unique strings on {path_to_jsonl.relative_to(EXP_DIR)}. Found {len(strings)} strings and {len(unique_strings)} unique strings."
+    )
 
     # create a mapping from the unique strings to the original strings
     string_mapping = {unique_string: [] for unique_string in unique_strings}
@@ -340,8 +344,10 @@ def enforce_unique_strings(path_to_jsonl, random_seed=0):
         for line in new_lines:
             f.write(line)
             f.write("\n")
-    
-    LOGGER.info(f"Enforced unique strings on {path_to_jsonl.relative_to(EXP_DIR)}. {len(new_lines)} lines written, down from {len(lines)}.")
+
+    LOGGER.info(
+        f"Enforced unique strings on {path_to_jsonl.relative_to(EXP_DIR)}. {len(new_lines)} lines written, down from {len(lines)}."
+    )
 
 
 @hydra.main(version_base=None, config_path=CONFIG_PATH, config_name="config_finetuning_dataset")
