@@ -74,7 +74,7 @@ def merge_object_and_meta_dfs(
         except KeyError:
             pass
 
-    print(f"Merged base and self prediction dataframes, leaving {len(df)} rows")
+    print(f"Merged object- and meta-level dataframes, leaving {len(df)} rows")
     return df
 
 
