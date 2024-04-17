@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import time
 from pathlib import Path
@@ -126,6 +127,7 @@ def queue_finetune(
 def upload_file(data_path: Path, params: FineTuneParams):
     now_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     file_name = f"{params.model}-{now_time}_{data_path.name}"
+    data_path = filter_file_for_finetuning(data_path)
     file_upload_resp: dict[str, Any] = openai.File.create(  # type: ignore[reportGeneralTypeIssues]
         file=open(data_path, "rb"),
         purpose="fine-tune",
@@ -136,6 +138,17 @@ def upload_file(data_path: Path, params: FineTuneParams):
     wait_until_uploaded_file_id_is_ready(file_id=file_id)
     print(f"Uploaded file to openai. {file_upload_resp}\n{file_name}")
     return file_id
+
+
+def filter_file_for_finetuning(data_path: Path):
+    """The .json file for OpenAI is only allowed to have the key "`messages` and no others. We load in the file, and save out a temp file with only the messages key."""
+    data = load_jsonl(data_path)
+    new_data = [{"messages": d["messages"]} for d in data]
+    new_data_path = data_path.parent / "temp_filtered.jsonl"
+    with open(new_data_path, "w") as f:
+        for d in new_data:
+            f.write(json.dumps(d) + "\n")
+    return new_data_path
 
 
 def run_finetune(
