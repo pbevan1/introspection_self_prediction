@@ -11,7 +11,11 @@ def identity(row: pd.Series) -> str:
 
 
 def identity_reversed(row: pd.Series) -> str:
-    return str(row["response"].str.lstrip().str.strip())[::-1]
+    """Characters in reverse order"""
+    resp = row["response"]
+    if not isinstance(resp, str):
+        resp = str(resp)
+    return resp.strip()[::-1]
 
 
 def nth_most_likely_initial_token(row: pd.Series, n: int) -> str | None:
