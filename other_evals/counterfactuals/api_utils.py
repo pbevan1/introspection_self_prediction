@@ -1,17 +1,19 @@
-from abc import ABC, abstractmethod
 import logging
 import os
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Self, Sequence, Type, TypeVar, Union
-import anthropic
-from pydantic import BaseModel
-from slist import Slist
-from tenacity import retry as async_retry, retry_if_exception_type, wait_fixed
-from evals.data_models.hashable import deterministic_hash
 
+import anthropic
+import anyio
 import openai
 import openai.error
-import anyio
+from pydantic import BaseModel
+from slist import Slist
+from tenacity import retry as async_retry
+from tenacity import retry_if_exception_type, wait_fixed
+
+from evals.data_models.hashable import deterministic_hash
 
 logger = logging.getLogger(__name__)
 

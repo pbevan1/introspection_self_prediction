@@ -1,6 +1,6 @@
+import statsmodels.stats.api
 from pydantic import BaseModel
 from slist import Slist
-import statsmodels.stats.api
 
 
 class ConfidenceIntervalDescription(BaseModel):

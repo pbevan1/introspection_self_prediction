@@ -1,11 +1,11 @@
-from abc import ABC, abstractmethod
 import random
+from abc import ABC, abstractmethod
 from string import ascii_uppercase
 from typing import Literal, final
+
 from pydantic import BaseModel
 
 from evals.data_models.hashable import deterministic_hash
-
 
 MultipleChoiceAnswer = Literal["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
 

@@ -1,11 +1,15 @@
 import re
+from pathlib import Path
 from typing import Literal, Optional, Sequence
+
 import fire
 from grugstream import Observable
 from pydantic import BaseModel
 from slist import Slist
 from tqdm import tqdm
 
+from evals.locations import EXP_DIR
+from evals.utils import setup_environment
 from other_evals.counterfactuals.api_utils import (
     ChatMessageV2,
     InferenceConfig,
@@ -14,12 +18,12 @@ from other_evals.counterfactuals.api_utils import (
     dump_conversations,
     raise_should_not_happen,
 )
-from other_evals.counterfactuals.datasets.base_example import DataExampleBase, MultipleChoiceAnswer
+from other_evals.counterfactuals.datasets.base_example import (
+    DataExampleBase,
+    MultipleChoiceAnswer,
+)
 from other_evals.counterfactuals.datasets.load_mmlu import mmlu_test
 from other_evals.counterfactuals.stat_utils import average_with_95_ci
-
-from evals.utils import setup_environment
-
 
 PossibleAnswers = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
 
@@ -141,7 +145,9 @@ class SecondRoundAsking(BaseModel):
         prediction_switched = (
             True
             if self.second_round_parsed == "Y"
-            else False if self.second_round_parsed == "N" else raise_should_not_happen()
+            else False
+            if self.second_round_parsed == "N"
+            else raise_should_not_happen()
         )
         return ground_truth_switched == prediction_switched
 
@@ -227,23 +233,10 @@ async def ask_second_round(
 
 
 async def run_counterfactual_asking(
-    bias_on_wrong_answer_only: bool = False, model: str = "gpt-3.5-turbo-0125", number_samples: int = 500
+    model: str,
+    bias_on_wrong_answer_only: bool = False,
+    number_samples: int = 500,
 ):
-    print(f"Running counterfactuals with model {model}")
-    caller = UniversalCallerV2().with_file_cache("exp/counterfactuals.jsonl")
-    # Open one of the bias files
-    potential_data = (
-        # openbook.openbook_train()
-        mmlu_test(questions_per_task=None)
-        # truthful_qa.eval()
-        .shuffle(seed="42").filter(lambda x: x.biased_ans != x.ground_truth if bias_on_wrong_answer_only else True)
-    )
-    assert potential_data.length > 0, "No data found"
-    dataset_data: Slist[CounterfactualTestData] = potential_data.take(number_samples).map(
-        CounterfactualTestData.from_data_example
-    )
-
-    # Call the model
     config = InferenceConfig(
         model=model,
         temperature=0,
@@ -251,11 +244,25 @@ async def run_counterfactual_asking(
         top_p=0.0,
     )
 
+    folder = EXP_DIR / Path(model)
+    print(f"Running counterfactuals with model {model}")
+    caller = UniversalCallerV2().with_file_cache(folder / Path("cache.jsonl"))
+    # Open one of the bias files
+    potential_data = (
+        mmlu_test(questions_per_task=None)
+        .shuffle(seed="42")
+        .filter(lambda x: x.biased_ans != x.ground_truth if bias_on_wrong_answer_only else True)
+    )
+    assert potential_data.length > 0, "No data found"
+    dataset_data: Slist[CounterfactualTestData] = potential_data.take(number_samples).map(
+        CounterfactualTestData.from_data_example
+    )
+
     results: Slist[FirstRoundAsking] = (
         await Observable.from_iterable(dataset_data)  # Using a package to easily stream and parallelize
         .map_async_par(lambda data: ask_first_round(data, caller=caller, config=config), max_par=20)
         .flatten_optional()
-        .tqdm(tqdm_bar=tqdm(desc="First round using", total=dataset_data.length))
+        .tqdm(tqdm_bar=tqdm(desc="First round", total=dataset_data.length))
         # .take(100)
         .to_slist()
     )
@@ -283,10 +290,11 @@ async def run_counterfactual_asking(
     )
 
     dump_conversations(
-        path="exp/affected_ground_truth.txt", messages=affected_ground_truth.map(lambda x: x.final_history)
+        path=folder / Path("affected_ground_truth.txt"), messages=affected_ground_truth.map(lambda x: x.final_history)
     )
     dump_conversations(
-        path="exp/unaffected_ground_truth.txt", messages=unaffected_ground_truth.map(lambda x: x.final_history)
+        path=folder / Path("exp/unaffected_ground_truth.txt"),
+        messages=unaffected_ground_truth.map(lambda x: x.final_history),
     )
 
     smallest_length = min(affected_ground_truth.length, unaffected_ground_truth.length)
@@ -326,6 +334,14 @@ if __name__ == "__main__":
     # model = "gpt-4-0125-preview"
 
     # run this line if you don't want to use fire
+
+    # Make a config
+    # config = InferenceConfig(
+    #     model=model,
+    #     temperature=0,
+    #     max_tokens=1,
+    #     top_p=0.0,
+    # )
     # asyncio.run(run_counterfactual_asking(model=model, bias_on_wrong_answer_only=False, number_samples=300))
 
     fire.Fire(run_counterfactual_asking)
