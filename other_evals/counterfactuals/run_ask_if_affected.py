@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Literal, Optional, Sequence
 
 import fire
+import pandas as pd
 from grugstream import Observable
 from pydantic import BaseModel
 from slist import Slist
@@ -232,11 +233,66 @@ async def ask_second_round(
     )
 
 
+THIS_EXP_FOLDER = EXP_DIR / Path("counterfactuals_ask_if_affected")
+
+
+async def run_multiple_models(
+    models: Sequence[str] = ["gpt-3.5-turbo-0125", "claude-3-sonnet-20240229"],
+    bias_on_wrong_answer_only: bool = False,
+    number_samples: int = 500,
+) -> None:
+    # Dumps results to xxx
+    results: Slist[tuple[str, Slist[SecondRoundAsking]]] = Slist()
+    for model in models:
+        results.append((model, await run_counterfactual_asking(model, bias_on_wrong_answer_only, number_samples)))
+
+    # Make a csv where the rows are the models, and columns are the different accuracies
+    rows: list[dict[str, str | float]] = []
+
+    for model, data in results:
+        affected_ground_truth, unaffected_ground_truth = data.split_by(lambda x: x.first_round.switched_answer)
+        affected_ground_truth_accuracy = average_with_95_ci(
+            affected_ground_truth.map(lambda x: x.predicted_switched_answer_correctly())
+        )
+
+        # print(f"Affected ground truth accuracy: {affected_ground_truth_accuracy}")
+
+        unaffected_ground_truth_accuracy = average_with_95_ci(
+            unaffected_ground_truth.map(lambda x: x.predicted_switched_answer_correctly())
+        )
+
+        # print(f"Unaffected ground truth accuracy: {unaffected_ground_truth_accuracy}")
+
+        micro_av_switch_accuracy = average_with_95_ci(data.map(lambda x: x.predicted_switched_answer_correctly()))
+
+        print(f"Micro-average switch accuracy for {model}: {micro_av_switch_accuracy}")
+        rows.append(
+            {
+                "model": model,
+                "micro_average_switch_accuracy": micro_av_switch_accuracy.average,
+                "micro_average_switch_ci": micro_av_switch_accuracy.ci_string(),
+                "micro_average_switch_count": data.length,
+                "affected_ground_truth_accuracy": affected_ground_truth_accuracy.average,
+                "affected_ground_truth_ci": affected_ground_truth_accuracy.ci_string(),
+                "affected_ground_truth_count": affected_ground_truth.length,
+                "unaffected_ground_truth_accuracy": unaffected_ground_truth_accuracy.average,
+                "unaffected_ground_truth_ci": unaffected_ground_truth_accuracy.ci_string(),
+                "unaffected_ground_truth_count": unaffected_ground_truth.length,
+            }
+        )
+
+    # Make the df
+    df = pd.DataFrame(rows)
+    csv_path = THIS_EXP_FOLDER / Path("results.csv")
+    df.to_csv(csv_path, index=False)
+    print(f"Results saved to {csv_path}")
+
+
 async def run_counterfactual_asking(
     model: str,
     bias_on_wrong_answer_only: bool = False,
     number_samples: int = 500,
-):
+) -> Slist[SecondRoundAsking]:
     config = InferenceConfig(
         model=model,
         temperature=0,
@@ -244,9 +300,9 @@ async def run_counterfactual_asking(
         top_p=0.0,
     )
 
-    folder = EXP_DIR / Path(model)
+    model_specific_folder = THIS_EXP_FOLDER / Path(model)
     print(f"Running counterfactuals with model {model}")
-    caller = UniversalCallerV2().with_file_cache(folder / Path("cache.jsonl"))
+    caller = UniversalCallerV2().with_file_cache(model_specific_folder / Path("cache.jsonl"))
     # Open one of the bias files
     potential_data = (
         mmlu_test(questions_per_task=None)
@@ -290,58 +346,25 @@ async def run_counterfactual_asking(
     )
 
     dump_conversations(
-        path=folder / Path("affected_ground_truth.txt"), messages=affected_ground_truth.map(lambda x: x.final_history)
+        path=model_specific_folder / Path("affected_ground_truth.txt"),
+        messages=affected_ground_truth.map(lambda x: x.final_history),
     )
     dump_conversations(
-        path=folder / Path("exp/unaffected_ground_truth.txt"),
+        path=model_specific_folder / Path("unaffected_ground_truth.txt"),
         messages=unaffected_ground_truth.map(lambda x: x.final_history),
     )
 
     smallest_length = min(affected_ground_truth.length, unaffected_ground_truth.length)
     print(f"Balancing ground truths to have same number of samples: {smallest_length}")
 
-    balanced_ground_truth_data = affected_ground_truth.take(smallest_length) + unaffected_ground_truth.take(
+    balanced_ground_truth_data: Slist[SecondRoundAsking] = affected_ground_truth.take(
         smallest_length
-    )
+    ) + unaffected_ground_truth.take(smallest_length)
 
-    affected_ground_truth_accuracy = average_with_95_ci(
-        affected_ground_truth.map(lambda x: x.predicted_switched_answer_correctly())
-    ).formatted()
-
-    print(f"Affected ground truth accuracy: {affected_ground_truth_accuracy}")
-
-    unaffected_ground_truth_accuracy = average_with_95_ci(
-        unaffected_ground_truth.map(lambda x: x.predicted_switched_answer_correctly())
-    ).formatted()
-
-    print(f"Unaffected ground truth accuracy: {unaffected_ground_truth_accuracy}")
-
-    micro_av_switch_accuracy = average_with_95_ci(
-        balanced_ground_truth_data.map(lambda x: x.predicted_switched_answer_correctly())
-    ).formatted()
-
-    print(f"Micro average switch accuracy: {micro_av_switch_accuracy}")
+    return balanced_ground_truth_data
 
 
 if __name__ == "__main__":
     setup_environment()
 
-    # Example models
-    # model = "gpt-3.5-turbo-0125"
-    # model = "claude-3-sonnet-20240229"
-    # model = "gpt-4-0125-preview"
-    # model = "claude-3-opus-20240229"
-    # model = "gpt-4-0125-preview"
-
-    # run this line if you don't want to use fire
-
-    # Make a config
-    # config = InferenceConfig(
-    #     model=model,
-    #     temperature=0,
-    #     max_tokens=1,
-    #     top_p=0.0,
-    # )
-    # asyncio.run(run_counterfactual_asking(model=model, bias_on_wrong_answer_only=False, number_samples=300))
-
-    fire.Fire(run_counterfactual_asking)
+    fire.Fire(run_multiple_models)

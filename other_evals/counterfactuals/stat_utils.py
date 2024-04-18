@@ -12,6 +12,9 @@ class ConfidenceIntervalDescription(BaseModel):
     def formatted(self) -> str:
         return f"{self.average:.3f}+-{self.upper-self.average:.2f}, n={self.count}"
 
+    def ci_string(self) -> str:
+        return f"{self.average:.3f}+-{self.upper-self.average:.2f}"
+
 
 def average_with_95_ci(data: Slist[bool]) -> ConfidenceIntervalDescription:
     average = data.average_or_raise()
