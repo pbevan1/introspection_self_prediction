@@ -23,7 +23,7 @@ from evals.analysis.loading_data import get_data_path, load_and_prep_dfs  # noqa
 def extract_most_uncertain_strings_from_base(
     input_file_paths, n_out_strings=float("inf"), output_file_path=None, response_properties=["identity"]
 ) -> Path:
-    """Extractst the strings that different models generate different base completions for. Saves a .csv with the strings into the same directory as the input file called `out_strings.csv`.
+    """Extracts the strings that different models generate different base completions for. Saves a .csv with the strings into the same directory as the input file called `out_strings.csv`.
 
     Args:
         input_file_paths: List of paths to the .csv with the base level completions.
@@ -41,6 +41,7 @@ def extract_most_uncertain_strings_from_base(
             output_file_path = Path(input_file_paths[0]).parent / "out_strings.csv"
         df[["string"]].head(n_out_strings).to_csv(output_file_path, index=False)
         LOGGER.info(f"Saved {len(df)} strings to {output_file_path}")
+        return output_file_path
 
     # load the data
     dfs = load_and_prep_dfs(input_file_paths)
