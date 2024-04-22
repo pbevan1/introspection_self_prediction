@@ -1,6 +1,7 @@
 """This file holds helper functions to create the Hydra files for the finetuning dataset configs by sweeping over the different configurations."""
 
 from pathlib import Path
+import argparse
 
 from evals.locations import EXP_DIR
 
@@ -58,3 +59,31 @@ def create_finetuning_dataset_config(
     with open(config_path, "w") as f:
         f.write(config)
     return config_path
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--study_name", type=str, required=True)
+    parser.add_argument("--model_config", type=str, required=True)
+    parser.add_argument("--task_config", type=str, required=True)
+    parser.add_argument("--prompt_config", type=str, required=True)
+    parser.add_argument("--response_property_config", type=str, required=True)
+    parser.add_argument("--train_base_dir", type=str, required=True)
+    parser.add_argument("--val_base_dir", type=str, required=True)
+    parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--overrides", type=str, nargs="+", required=False, default=[])
+    args = parser.parse_args()
+
+    print(
+        create_finetuning_dataset_config(
+            args.study_name,
+            args.model_config,
+            args.task_config,
+            args.prompt_config,
+            args.response_property_config,
+            args.overrides,
+            args.train_base_dir,
+            args.val_base_dir,
+            args.overwrite,
+        )
+    )
