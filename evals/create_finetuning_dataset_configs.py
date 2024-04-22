@@ -74,16 +74,15 @@ if __name__ == "__main__":
     parser.add_argument("--overrides", type=str, nargs="+", required=False, default=[])
     args = parser.parse_args()
 
-    print(
-        create_finetuning_dataset_config(
-            args.study_name,
-            args.model_config,
-            args.task_config,
-            args.prompt_config,
-            args.response_property_config,
-            args.overrides,
-            args.train_base_dir,
-            args.val_base_dir,
-            args.overwrite,
-        )
+    path = create_finetuning_dataset_config(
+        args.study_name,
+        args.model_config,
+        args.task_config,
+        args.prompt_config,
+        args.response_property_config,
+        args.overrides,
+        args.train_base_dir,
+        args.val_base_dir,
+        args.overwrite,
     )
+    print(f"Created config at {path}")
