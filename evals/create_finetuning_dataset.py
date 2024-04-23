@@ -34,7 +34,7 @@ LOGGER = logging.getLogger(__name__)
 def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl") -> tuple[Path, Path]:
     """Generate a jsonl file for finetuning.
 
-    This reads in all config files in the directory, and for each adds loads the base data and genereates the messages for finetuning.
+    This reads in all config files in the directory, and for each adds loads the base data and generates the messages for finetuning.
 
     Args:
         path (Path): Path to the directory containing the config files.
