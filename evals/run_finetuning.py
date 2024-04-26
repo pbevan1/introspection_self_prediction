@@ -38,8 +38,9 @@ def main(cfg: DictConfig) -> str:
     setup_environment(openai_tag=cfg.openai_tag)
     params = FineTuneParams(
         model=cfg.language_model.model,
-        hyperparameters=FineTuneHyperParams(n_epochs=cfg.epochs),
+        hyperparameters=FineTuneHyperParams(n_epochs=cfg.epochs, learning_rate_multiplier=cfg.learning_rate, batch_size=cfg.batch_size),
         suffix=cfg.notes,
+        seed=cfg.seed,
     )
     # try to find the data files
     data_path = Path(cfg.study_dir) / "train_dataset.jsonl"
