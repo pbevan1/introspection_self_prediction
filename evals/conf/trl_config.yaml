@@ -1,0 +1,10 @@
+gradient_accumulation_steps: 1
+max_grad_norm: 1
+seed: 42
+bf16: true
+save_only_model: true
+logging_steps: 1
+evaluation_strategy: "steps"
+eval_steps: 10
+push_to_hub: false
+disable_tqdm: true

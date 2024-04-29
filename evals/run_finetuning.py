@@ -38,7 +38,9 @@ def main(cfg: DictConfig) -> str:
     setup_environment(openai_tag=cfg.openai_tag)
     params = FineTuneParams(
         model=cfg.language_model.model,
-        hyperparameters=FineTuneHyperParams(n_epochs=cfg.epochs, learning_rate_multiplier=cfg.learning_rate, batch_size=cfg.batch_size),
+        hyperparameters=FineTuneHyperParams(
+            n_epochs=cfg.epochs, learning_rate_multiplier=cfg.learning_rate, batch_size=cfg.batch_size
+        ),
         suffix=cfg.notes,
         seed=cfg.seed,
     )
@@ -83,8 +85,21 @@ def main(cfg: DictConfig) -> str:
         run_name = cfg.language_model.model + "_finetuned_" + cfg.notes
         save_path = f"{cfg.study_dir}/{run_name}"
         num_gpus = torch.cuda.device_count()
-        batch_size = 128
-        cmd = f"""accelerate launch --mixed_precision bf16 --num_processes {num_gpus} -m evals.apis.finetuning.hf_finetuning --output_dir {save_path} full_sweep_test/llama-7b-chat/ --run_name {run_name} --model_name_or_path {cfg.language_model.cais_path} --dataset_name {cfg.study_dir} --per_device_train_batch_size 32 {batch_size//num_gpus} --learning_rate 1e-5 --num_train_epochs {params.hyperparameters.n_epochs} --seed 42 --bf16 --save_only_model --logging_steps 1 --evaluation_strategy steps --eval_steps 20"""
+        batch_size = cfg.batch_size or 32
+        lr = cfg.learning_rate or 1e-3
+        n_epochs = cfg.epochs or 5
+        cmd = f"""accelerate launch --config_file evals/conf/accelerate_config.yaml --mixed_precision bf16 --num_processes {num_gpus} -m \
+evals.apis.finetuning.hf_finetuning \
+--config evals/conf/trl_config.yaml \
+--output_dir {save_path} full_sweep_test/llama-7b-chat/ \
+--run_name {run_name} \
+--model_name_or_path {cfg.language_model.cais_path} \
+--dataset_name {cfg.study_dir} \
+--per_device_train_batch_size {batch_size//num_gpus} \
+--learning_rate {lr} \
+--num_train_epochs {n_epochs} """
+        if cfg.lora_rank is not None:
+            cmd += f"--use_peft --lora_r={cfg.lora_rank} --lora_alpha=16"
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         output_lines = []
         for line in process.stdout:
@@ -95,6 +110,18 @@ def main(cfg: DictConfig) -> str:
             raise subprocess.CalledProcessError(process.returncode, cmd)
         print(f"Successfully executed: {cmd}")
         model_id = run_name
+        if cfg.lora_rank is not None:
+            cmd = f"""python evals/apis/finetuning/merge_peft_adapter.py --adapter_model_name {save_path} --base_model_name {cfg.language_model.cais_path} --output_name {save_path}_merged"""
+            save_path += "_merged"
+            process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            output_lines = []
+            for line in process.stdout:
+                print(line, end="")  # stream the output to the command line
+                output_lines.append(line.strip())
+            process.wait()
+            if process.returncode != 0:
+                raise subprocess.CalledProcessError(process.returncode, cmd)
+            print(f"Successfully executed: {cmd}")
 
     LOGGER.info(f"Done with model_id: {model_id}")
     # adding a config file for this finetuned model

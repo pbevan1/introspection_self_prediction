@@ -1,9 +1,17 @@
 import logging
+import os
 
+import torch
 from datasets import load_dataset
 from rich.logging import RichHandler
 from transformers import AutoTokenizer, TrainingArguments
-from trl import ModelConfig, SFTTrainer, get_peft_config
+from trl import (
+    DataCollatorForCompletionOnlyLM,
+    ModelConfig,
+    RichProgressCallback,
+    SFTTrainer,
+    get_peft_config,
+)
 from trl.commands.cli_utils import SftScriptArguments, TrlParser, init_zero_verbose
 
 
@@ -14,17 +22,27 @@ def run_hf_finetuning(
     training_args: TrainingArguments | None = None,
     model_config: ModelConfig | None = None,
 ) -> str:
+    my_rank = torch.distributed.get_rank() if torch.distributed.is_initialized() else 0
+    print(f"Hi, I'm the hf_finetuning.py script, running on node {os.uname().nodename} with rank {my_rank}.")
     dataset = load_dataset("json", data_files={"train": train_data_path, "validation": val_data_path})
     training_args.disable_tqdm = True
+    training_args.push_to_hub = False
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
-    tokenizer.pad_token = tokenizer.unk_token
+    if "llama-3" in model_name.lower():
+        tokenizer.pad_token = tokenizer.eos_token
+        response_template = "<|start_header_id|>assistant<|end_header_id|>\n\n"
+    else:  # llama 2
+        tokenizer.pad_token = tokenizer.unk_token
+        response_template = "[/INST]"
+    collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
     trainer = SFTTrainer(
         model=model_name,
         tokenizer=tokenizer,
         args=training_args,
         train_dataset=dataset["train"],
         eval_dataset=dataset["validation"],
-        # callbacks=[RichProgressCallback],
+        callbacks=[RichProgressCallback],
+        data_collator=collator,
         dataset_kwargs=dict(add_special_tokens=False),
         peft_config=get_peft_config(model_config),
     )
