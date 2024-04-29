@@ -132,7 +132,12 @@ class StudyRunner:
             "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=500
         )
         parser.add_argument("--skip_finetuning", action="store_true", help="Skip the finetuning step.", default=False)
-        parser.add_argument("--skip_finetuning_for_models", type=str, help="Comma-separated list of models to skip finetuning for.", default="")
+        parser.add_argument(
+            "--skip_finetuning_for_models",
+            type=str,
+            help="Comma-separated list of models to skip finetuning for.",
+            default="",
+        )
         self.args = parser.parse_args()
 
     def run_command(self, command):
@@ -165,7 +170,7 @@ class StudyRunner:
             "prompt_configs",
             "inference_overrides",
             "finetuning_overrides",
-            "skip_finetuning_for_models"
+            "skip_finetuning_for_models",
         ]:
             setattr(
                 self.args, arg, getattr(self.args, arg).replace(", ", ",").split(",") if getattr(self.args, arg) else []
