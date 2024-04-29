@@ -193,7 +193,7 @@ def get_finetuned_model(model: str, task: str):
     # is there a single yaml file?
     yaml_files = list(path.glob("*.yaml"))
     if len(yaml_files) == 1:
-        return yaml_files[0].stem
+        return yaml_files[0].relative_to(CONF_DIR / "language_model").with_suffix("")
     elif len(yaml_files) > 1:
         raise ValueError(f"Multiple yaml files found in {path}. Expected only one.")
     elif len(yaml_files) == 0:
@@ -201,8 +201,15 @@ def get_finetuned_model(model: str, task: str):
 
 
 if __name__ == "__main__":
+    # which non-fted models?
     models = ["gpt-3.5-turbo"]
+    # generate divergent strings from fixed models
     generate_model_divergent_string()
+    # run the evaluation suite
     run_inference_only(models)
+    # finetune the model for each task individually
     run_finetuning(models)
+    # see how well the finetuned models do on their task
+    for model in models:
+        run_finetuned_models_on_their_task(model)
     # run_get_floor_ceiling_for_untrained_models(models)
