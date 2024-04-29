@@ -16,10 +16,11 @@ study_name: ??? # the name of the study
 defaults:
   - language_model: gpt-3.5-turbo
 
-epochs: ~ # how many epochs to train for Use `~` to let OpenAI figure it out. 
-learning_rate: ~ # the learning rate. OpenAI default is the learning rate multiplier of 2. Use `~` to let OpenAI figure it out. 
-batch_size: ~ # the batch size. OpenAI default is 3. Use `~` to let OpenAI figure it out. 
+epochs: ~ # how many epochs to train for. Use `~` to let the training script figure it out.
+learning_rate: ~ # the learning rate. OpenAI default is the learning rate multiplier of 2; our HuggingFace default is 1e-3. Use `~` to let the training script figure it out.
+batch_size: ~ # the batch size. OpenAI default is 3; our HugginFace default is 32. Use `~` to let the training script figure it out.
 seed: 0 # the seed for the run.
+lora_rank: ~ # the rank of LORA adapters when using LORA with HugginFace training; null or ~ to disable LORA.
 
 notes: ??? # notes about the run
 

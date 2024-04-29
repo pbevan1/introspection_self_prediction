@@ -46,7 +46,7 @@ class HuggingFaceModel(InferenceAPIModel):
                 self.pipe = pipeline(
                     "text-generation",
                     model=hf_model_path,
-                    torch_dtype=torch.float16,
+                    torch_dtype=torch.bfloat16,
                     device_map="auto",
                 )
                 self.tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
