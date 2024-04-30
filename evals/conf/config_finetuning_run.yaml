@@ -24,7 +24,8 @@ lora_rank: ~ # the rank of LORA adapters when using LORA with HugginFace trainin
 
 notes: ??? # notes about the run
 
-organization: OWAIN_ORG
+# organization: OWAIN_ORG
+organization: DEFAULT_ORG
 openai_tag: OPENAI_API_KEY
 
 use_wandb: true
