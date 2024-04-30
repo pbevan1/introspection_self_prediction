@@ -64,6 +64,10 @@ class AsyncInferenceAPITestCase(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises((ValueError, RuntimeError)):
             await self.api("claude-2.1", prompt=self.prompt_with_only_none, **self.kwargs)
 
+    async def test_gemini_api(self):
+        responses = await self.api("gemini-1.0-pro-001", prompt=self.prompt, **self.kwargs)
+        self.assertIsInstance(responses[0].completion, str)
+
     async def test_is_valid_fails(self):
         with self.assertRaises(RuntimeError):
             await self.api(

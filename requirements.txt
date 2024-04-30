@@ -16,6 +16,7 @@ tqdm
 wandb
 nltk
 scipy
+vertexai==1.48.0
 
 # counterfactual evals
 grugstream
