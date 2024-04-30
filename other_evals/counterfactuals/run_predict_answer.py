@@ -1,7 +1,8 @@
 import re
-from typing import Literal, Optional, Sequence
+from typing import Literal, Optional, Sequence, assert_never
 import fire
 from grugstream import Observable
+import pandas as pd
 from pydantic import BaseModel
 from slist import Slist
 from tqdm import tqdm
@@ -11,6 +12,7 @@ from other_evals.counterfactuals.api_utils import (
     InferenceConfig,
     ModelCallerV2,
     UniversalCallerV2,
+    display_conversation,
     dump_conversations,
     raise_should_not_happen,
 )
@@ -120,6 +122,7 @@ class SecondRoundAsking(BaseModel):
     first_round: FirstRoundAsking
     second_round_message: list[ChatMessageV2]
     second_round_raw: str
+    config : InferenceConfig
     final_history: list[ChatMessageV2]
     second_round_parsed: MultipleChoiceAnswer | None
 
@@ -206,24 +209,71 @@ async def ask_second_round(
         second_round_parsed=parsed_answer,  # type: ignore
         second_round_raw=response.single_response,
         final_history=final_history,
+        config=config
     )
 
-FINETUNED_ON_CLAUDE = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9HWNzLoE"
-FINETUNED_ON_GPT_35= "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9FgW32xp"
+
+# FINETUNED_ON_CLAUDE = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9HWNzLoE"
+FINETUNED_ON_GPT_35 = "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9FgW32xp"
 # current_model = "gpt-3.5-turbo-1106" # 15%
 # current_model = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9EXL6W9A" # 18%
 # meta_model = "gpt-3.5-turbo-1106"
 # meta_model ="claude-3-sonnet-20240229"
-meta_model = FINETUNED_ON_GPT_35
+meta_model = "gpt-3.5-turbo-1106"
+# meta_model = FINETUNED_ON_GPT_35
 # object_level_model = "claude-3-sonnet-20240229"
-# object_level_model =  "gpt-3.5-turbo-1106"
+object_level_model =  "gpt-3.5-turbo-1106"
 # object_level_model = "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9FgW32xp"
-object_level_model = FINETUNED_ON_GPT_35
+# object_level_model = FINETUNED_ON_GPT_35
 
+
+def second_round_to_json(second_round: SecondRoundAsking) -> dict:
+    biased_qn: str = display_conversation(second_round.first_round.biased_new_history)
+    biased_qn_second_round: str = display_conversation(second_round.final_history)
+    unbiased_qn: str = display_conversation(second_round.first_round.unbiased_new_history)
+
+    biased_context_inline_with_bias: bool = (
+        second_round.first_round.parsed_biased_answer == second_round.first_round.test_data.biased_option
+    )
+    biased_ans = second_round.first_round.test_data.biased_option
+    ground_truth = second_round.first_round.test_data.ground_truth
+    unbiased_correct: bool = second_round.first_round.parsed_unbiased_answer == ground_truth
+    biased_correct: bool = second_round.first_round.parsed_biased_answer == ground_truth
+    match unbiased_correct, biased_correct:
+        case (True, True):
+            correctness = "both_correct"
+        case (False, False):
+            correctness = "both_incorrect"
+        case (True, False):
+            correctness = "unbiased_correct_biased_incorrect"
+        case (False, True):
+            correctness = "unbiased_incorrect_biased_correct"
+        case _:
+            assert_never((unbiased_correct, biased_correct)) # type: ignore
+
+    biased_towards = "incorrect" if biased_ans != ground_truth else "correct"
+    return {
+        "object_model": second_round.first_round.config.model,
+        "meta_model": second_round.config.model,
+        "biased_qn": biased_qn,
+        "biased_qn_second_round": biased_qn_second_round,
+        "unbiased_qn": unbiased_qn,
+        "ground_truth": ground_truth,
+        "correctness": correctness,
+        "biased_context_inline_with_bias": biased_context_inline_with_bias,
+        "unbiased_correct": unbiased_correct,
+        "biased_correct": biased_correct,
+        "switched": second_round.first_round.switched_answer,
+        "predicted_unbiased_correctly": int(second_round.predicted_counterfactual_answer_correctly()),
+        "biased_towards": biased_towards,
+    }
 
 
 async def run_counterfactual_asking(
-    bias_on_wrong_answer_only: bool = False, meta_model: str = meta_model, number_samples: int = 10_000, object_model: str = object_level_model,
+    bias_on_wrong_answer_only: bool = False,
+    meta_model: str = meta_model,
+    number_samples: int = 10_000,
+    object_model: str = object_level_model,
 ):
     print(f"Running counterfactuals with {meta_model=} on {object_model=}")
     caller = UniversalCallerV2().with_file_cache("exp/counterfactuals.jsonl")
@@ -280,41 +330,47 @@ async def run_counterfactual_asking(
     second_round_extracted_answer = second_round_results.filter(lambda x: x.second_round_parsed is not None)
     print(f"After filtering out {second_round_results.length - second_round_extracted_answer.length} missing answers")
 
+    second_round_dicts = second_round_extracted_answer.map(second_round_to_json)
+    # make a df
+    second_round_df = pd.DataFrame(second_round_dicts)
+    second_round_df.to_csv("second_round_results.csv", index=False)
+
+
     affected_ground_truth, unaffected_ground_truth = second_round_extracted_answer.split_by(
         lambda x: x.first_round.switched_answer
     )
 
-    dump_conversations(
-        path="exp/affected_ground_truth.txt", messages=affected_ground_truth.map(lambda x: x.final_history)
-    )
-    dump_conversations(
-        path="exp/unaffected_ground_truth.txt", messages=unaffected_ground_truth.map(lambda x: x.final_history)
-    )
+    # dump_conversations(
+    #     path="exp/affected_ground_truth.txt", messages=affected_ground_truth.map(lambda x: x.final_history)
+    # )
+    # dump_conversations(
+    #     path="exp/unaffected_ground_truth.txt", messages=unaffected_ground_truth.map(lambda x: x.final_history)
+    # )
 
-    smallest_length = min(affected_ground_truth.length, unaffected_ground_truth.length)
-    print(f"Balancing ground truths to have same number of samples: {smallest_length}")
+    # smallest_length = min(affected_ground_truth.length, unaffected_ground_truth.length)
+    # print(f"Balancing ground truths to have same number of samples: {smallest_length}")
 
-    balanced_ground_truth_data = affected_ground_truth.take(smallest_length) + unaffected_ground_truth.take(
-        smallest_length
-    )
+    # balanced_ground_truth_data = affected_ground_truth.take(smallest_length) + unaffected_ground_truth.take(
+    #     smallest_length
+    # )
 
-    affected_ground_truth_accuracy = average_with_95_ci(
-        affected_ground_truth.map(lambda x: x.predicted_counterfactual_answer_correctly())
-    ).formatted()
+    # affected_ground_truth_accuracy = average_with_95_ci(
+    #     affected_ground_truth.map(lambda x: x.predicted_counterfactual_answer_correctly())
+    # ).formatted()
 
-    print(f"Affected ground truth accuracy: {affected_ground_truth_accuracy}")
+    # print(f"Affected ground truth accuracy: {affected_ground_truth_accuracy}")
 
-    unaffected_ground_truth_accuracy = average_with_95_ci(
-        unaffected_ground_truth.map(lambda x: x.predicted_counterfactual_answer_correctly())
-    ).formatted()
+    # unaffected_ground_truth_accuracy = average_with_95_ci(
+    #     unaffected_ground_truth.map(lambda x: x.predicted_counterfactual_answer_correctly())
+    # ).formatted()
 
-    print(f"Unaffected ground truth accuracy: {unaffected_ground_truth_accuracy}")
+    # print(f"Unaffected ground truth accuracy: {unaffected_ground_truth_accuracy}")
 
-    micro_av_switch_accuracy = average_with_95_ci(
-        balanced_ground_truth_data.map(lambda x: x.predicted_counterfactual_answer_correctly())
-    ).formatted()
+    # micro_av_switch_accuracy = average_with_95_ci(
+    #     balanced_ground_truth_data.map(lambda x: x.predicted_counterfactual_answer_correctly())
+    # ).formatted()
 
-    print(f"Micro average switch accuracy: {micro_av_switch_accuracy}")
+    # print(f"Micro average switch accuracy: {micro_av_switch_accuracy}")
 
 
 if __name__ == "__main__":

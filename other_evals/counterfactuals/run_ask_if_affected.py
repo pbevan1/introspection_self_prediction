@@ -146,9 +146,7 @@ class SecondRoundAsking(BaseModel):
         prediction_switched = (
             True
             if self.second_round_parsed == "Y"
-            else False
-            if self.second_round_parsed == "N"
-            else raise_should_not_happen()
+            else False if self.second_round_parsed == "N" else raise_should_not_happen()
         )
         return ground_truth_switched == prediction_switched
 
