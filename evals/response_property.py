@@ -226,3 +226,23 @@ def more_than_3_characters(row: pd.Series):
 
 def more_than_5_characters(row: pd.Series):
     return more_than_n_characters(row, 5)
+
+
+#### object shift properties ####
+"""These functions are meant for experiments that manipulate the object level of a model through finetuning. """
+
+
+def replace_with_387(row: pd.Series):
+    """Replace the response with "387"."""
+    return "387"
+
+
+def round_to_nearest_10(row: pd.Series):
+    """Round the response to the nearest 10."""
+    response = row["response"]
+    try:
+        response = int(response)
+        response = round(response, -1)
+    except (TypeError, ValueError):
+        response = None
+    return str(response)
