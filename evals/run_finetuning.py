@@ -60,7 +60,7 @@ def main(cfg: DictConfig) -> str:
     except KeyError:
         LOGGER.error(f"Organization {cfg.organization} not found in secrets")
         raise
-    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS) or str(params.model).lower().startswith("ft:gpt"):
         if cfg.use_wandb:
             syncer = WandbSyncer.create(project_name=str(cfg.study_name).replace("/", "_"), notes=cfg.notes)
             # if more_config:
