@@ -89,7 +89,7 @@ def main(cfg: DictConfig) -> str:
         lr = cfg.learning_rate or 1e-3
         n_epochs = cfg.epochs or 5
         try:
-            train_batch_size = batch_size//num_gpus
+            train_batch_size = batch_size // num_gpus
         except ZeroDivisionError:
             train_batch_size = batch_size
         cmd = f"""accelerate launch --config_file evals/conf/accelerate_config.yaml --mixed_precision bf16 --num_processes {num_gpus} -m \
