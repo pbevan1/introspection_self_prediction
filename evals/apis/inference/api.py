@@ -73,9 +73,7 @@ class InferenceAPI:
             prompt_history_dir=self.prompt_history_dir,
         )
 
-        vertexai.init(
-            project="roots-api-1475521819980", location="us-central1"
-        )  # TODO: more appropriate place for this?
+        vertexai.init(project="roots-api-1475521819980", location="us-central1")
         self._gemini_chat = GeminiModel(prompt_history_dir=self.prompt_history_dir)
 
         self._huggingface_chat = HuggingFaceModel(prompt_history_dir=self.prompt_history_dir)
