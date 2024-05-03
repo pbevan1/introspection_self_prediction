@@ -91,7 +91,7 @@ class InferenceAPI:
             return self._openai_chat
         elif model_id in ANTHROPIC_MODELS:
             return self._anthropic_chat
-        elif model_id in GEMINI_MODELS:
+        elif model_id in GEMINI_MODELS or "projects/" in model_id:
             return self._gemini_chat
         else:
             return self._huggingface_chat

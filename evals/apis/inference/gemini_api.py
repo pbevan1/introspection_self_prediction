@@ -35,6 +35,8 @@ def price_per_token(model_id: str) -> tuple[float, float]:
     elif model_id.startswith("gemini-1.5-pro"):  # 001 and 002
         # $0.0025 / 1k characters, $0.0075 / 1k characters
         prices = 0.0025, 0.0075
+    elif model_id.startswith("projects/"):  # assuming 1.0 pro prices for now since that's the only finetunable model
+        prices = 0.000125, 0.000375
     else:
         raise ValueError(f"Invalid model id: {model_id}")
     return tuple(price / 1000 * CHAR_PER_TOKEN for price in prices)
