@@ -78,7 +78,7 @@ class GeminiModel(InferenceAPIModel):
             "temperature": kwargs.get("temperature", 0.0),
         }
 
-        response = await model.generate_content_async(contents=[prompt_messages], generation_config=generation_config)
+        response = await model.generate_content_async(contents=prompt_messages, generation_config=generation_config)
 
         api_duration = time.time() - api_start
         duration = time.time() - start
