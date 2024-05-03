@@ -1,7 +1,11 @@
+import asyncio
 import logging
 import time
 from pathlib import Path
+from traceback import format_exc
+from typing import Any, Coroutine, Optional
 
+from aiolimiter import AsyncLimiter
 from vertexai.generative_models import FinishReason, GenerativeModel
 
 from evals.apis.inference.model import InferenceAPIModel
@@ -39,8 +43,9 @@ def price_per_token(model_id: str) -> tuple[float, float]:
 class GeminiModel(InferenceAPIModel):
     def __init__(self, prompt_history_dir: Path = None):
         self.prompt_history_dir = prompt_history_dir
+        self.limiter = AsyncLimiter(60, 60)  # 60 requests per 60 seconds
 
-    async def __call__(
+    async def _make_api_call(
         self,
         model_ids: list[str],
         prompt: Prompt,
@@ -66,16 +71,14 @@ class GeminiModel(InferenceAPIModel):
 
         LOGGER.debug(f"Making {model_id} call")
 
-        # TODO: should not be initializing everytime probably
-        # "gemini-1.0-pro-001"
-        model = GenerativeModel(model_id)
+        model = GenerativeModel(model_id)  # not expensive to create
         api_start = time.time()
         generation_config = {
             "max_output_tokens": kwargs.get("max_tokens_to_sample", 2000),
             "temperature": kwargs.get("temperature", 0.0),
         }
 
-        response = await model.generate_content_async(contents=prompt_messages, generation_config=generation_config)
+        response = await model.generate_content_async(contents=[prompt_messages], generation_config=generation_config)
 
         api_duration = time.time() - api_start
         duration = time.time() - start
@@ -102,5 +105,29 @@ class GeminiModel(InferenceAPIModel):
 
         if print_prompt_and_response:
             prompt.pretty_print(responses)
+
+        LOGGER.debug(f"Completed call to {model_id} in {time.time() - start}s.")
+
+        return responses
+
+    async def __call__(
+        self, model_ids: list[str], prompt, print_prompt_and_response: bool, max_attempts: int, **kwargs
+    ) -> Coroutine[Any, Any, list[LLMResponse]]:
+        responses: Optional[list[LLMResponse]] = None
+        for i in range(max_attempts):
+            try:
+                async with self.limiter:
+                    responses = await self._make_api_call(
+                        model_ids, prompt, print_prompt_and_response, max_attempts, **kwargs
+                    )
+            except Exception as e:
+                error_info = f"Exception Type: {type(e).__name__}, Error Details: {str(e)}, Traceback: {format_exc()}"
+                LOGGER.warn(f"Encountered API error: {error_info}.\nRetrying now. (Attempt {i})")
+                await asyncio.sleep(1.5**i)
+            else:
+                break
+
+        if responses is None:
+            raise RuntimeError(f"Failed to get a response from the API after {max_attempts} attempts.")
 
         return responses
