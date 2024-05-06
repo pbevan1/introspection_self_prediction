@@ -52,11 +52,7 @@ class CounterfactualTestData(BaseModel):
     unbiased_question: list[ChatMessageV2]
     biased_question: list[ChatMessageV2]
     ground_truth: MultipleChoiceAnswer
-    biased_option: MultipleChoiceAnswer
 
-    @property
-    def bias_on_wrong_answer(self) -> bool:
-        return self.biased_option != self.ground_truth
 
     @staticmethod
     def from_data_example(data: DataExampleBase) -> "CounterfactualTestData":
@@ -72,7 +68,7 @@ class CounterfactualTestData(BaseModel):
         meta_messages = [
             ChatMessageV2(
                 role="user",
-                content=data.get_parsed_input() + f"\n{meta}" + round_1_answer_format,
+                content=data.get_parsed_input() + f"\n{meta}",
             ),
         ]
         assert len(unbiased_question) != 0
@@ -81,7 +77,6 @@ class CounterfactualTestData(BaseModel):
             original_question_hash=data.hash(),
             unbiased_question=unbiased_question,
             biased_question=meta_messages,
-            biased_option=biased_option,  # type: ignore
             ground_truth=data.ground_truth,  # type: ignore
         )
 
@@ -104,6 +99,15 @@ class FirstRoundAsking(BaseModel):
     @property
     def switched_answer(self) -> bool:
         return self.parsed_biased_answer != self.parsed_unbiased_answer
+    
+    @property
+    def predicted_correctly_that_can_answer_correctly(self) -> bool:
+        assert self.parsed_biased_answer is not None
+        is_actually_correct = self.test_data.ground_truth == self.parsed_unbiased_answer
+        if self.parsed_biased_answer == "Y":
+            return is_actually_correct
+        if self.parsed_biased_answer == "N":
+            return not is_actually_correct
 
 
 
@@ -152,6 +156,7 @@ async def ask_first_round(
         return None
     
     parsed_answer= extract_yes_or_no(meta_response.single_response)
+    
 
 
     meta_new_history = single_data.biased_question + [
@@ -181,17 +186,17 @@ FINETUNED_ON_GPT_35= "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9K95FtMU"
 # current_model = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9EXL6W9A" # 18%
 # meta_model = "gpt-3.5-turbo-1106"
 # meta_model = "claude-3-sonnet-20240229"
-# meta_model = "gpt-3.5-turbo-1106"
-meta_model = FINETUNED_ON_GPT_35
+meta_model = "gpt-3.5-turbo-1106"
+# meta_model = FINETUNED_ON_GPT_35
 # object_level_model = "claude-3-sonnet-20240229"
-# object_level_model =  "gpt-3.5-turbo-1106"
+object_level_model =  "gpt-3.5-turbo-1106"
 # object_level_model = "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9FgW32xp"
-object_level_model = FINETUNED_ON_GPT_35
+# object_level_model = FINETUNED_ON_GPT_35
 
 
 async def run_counterfactual_asking(
     meta_model: str = meta_model,
-    number_samples: int = 10_000,
+    number_samples: int = 1000,
     object_model: str = object_level_model,
 ):
     print(f"Running counterfactuals with {meta_model=} on {object_model=}")
@@ -229,10 +234,14 @@ async def run_counterfactual_asking(
         # .take(100)
         .to_slist()
     )
+    predicted = results.filter(lambda x: x.both_successful).map(
+        lambda x: x.predicted_correctly_that_can_answer_correctly
+    ).average()
+    print(f"Accuracy: {predicted}")
 
-    # dump_conversations(
-    #     path="exp/affected_ground_truth.txt", messages=affected_ground_truth.map(lambda x: x.final_history)
-    # )
+    dump_conversations(
+        path="exp/results.txt", messages=results.map(lambda x: x.biased_new_history)
+    )
     # dump_conversations(
     #     path="exp/unaffected_ground_truth.txt", messages=unaffected_ground_truth.map(lambda x: x.final_history)
     # )
