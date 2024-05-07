@@ -1,17 +1,20 @@
 import datetime
 import json
 import logging
+import os
 import time
 from pathlib import Path
 from typing import Any, Optional
 
 import openai
+from google.cloud import storage
 from openai.error import APIConnectionError, RateLimitError
 from pydantic import BaseModel
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 from evals.apis.finetuning.syncer import WandbSyncer
-from evals.utils import load_jsonl
+from evals.apis.inference.openai.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
+from evals.utils import GCLOUD_BUCKET, GCLOUD_PROJECT, load_jsonl
 
 logger = logging.getLogger(__name__)
 
@@ -137,19 +140,36 @@ def queue_finetune(
     return parsed_job_resp
 
 
+def upload_to_gcloud_bucket(data_path: Path, file_name: str):
+    storage_client = storage.Client(project=GCLOUD_PROJECT)
+    bucket = storage_client.bucket(GCLOUD_BUCKET)
+    destination_name = os.path.join("instrospection-astra", file_name)
+    blob = bucket.blob(destination_name)
+    blob.upload_from_filename(data_path)
+    print(f"File {data_path.name} uploaded to {destination_name}.")
+    return destination_name
+
+
 def upload_file(data_path: Path, params: FineTuneParams):
     now_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     file_name = f"{params.model}-{now_time}_{data_path.name}"
     data_path = filter_file_for_finetuning(data_path)
-    file_upload_resp: dict[str, Any] = openai.File.create(  # type: ignore[reportGeneralTypeIssues]
-        file=open(data_path, "rb"),
-        purpose="fine-tune",
-        user_provided_filename=file_name,
-    )
-    file_id = file_upload_resp["id"]
-    print(f"Starting file upload. {file_id}\n{file_name}")
-    wait_until_uploaded_file_id_is_ready(file_id=file_id)
-    print(f"Uploaded file to openai. {file_upload_resp}\n{file_name}")
+    print(f"Starting file upload.\n{file_name}")
+    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+        print("Uploading to openai")
+        file_upload_resp: dict[str, Any] = openai.File.create(  # type: ignore[reportGeneralTypeIssues]
+            file=open(data_path, "rb"),
+            purpose="fine-tune",
+            user_provided_filename=file_name,
+        )
+        file_id = file_upload_resp["id"]
+        wait_until_uploaded_file_id_is_ready(file_id=file_id)
+    elif params.model == "gemini-1.0-pro-002":
+        print("Uploading to gcloud")
+        file_id = upload_to_gcloud_bucket(data_path, file_name)
+    else:
+        raise ValueError(f"Model {params.model} not supported")
+    print(f"Uploaded file.\n{file_name}\n{file_id}")
     return file_id
 
 
@@ -185,7 +205,7 @@ def run_finetune(
 
     file_id = upload_file(data_path=data_path, params=params)
     if syncer:
-        syncer.update_openai_file_id(openai_file_id=file_id)
+        syncer.update_file_id(file_id=file_id)
 
     if val_data_path:
         val_file_id = upload_file(data_path=val_data_path, params=params)
