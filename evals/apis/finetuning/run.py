@@ -147,7 +147,9 @@ def upload_to_gcloud_bucket(data_path: Path, file_name: str):
     blob = bucket.blob(destination_name)
     blob.upload_from_filename(data_path)
     print(f"File {data_path.name} uploaded to {destination_name}.")
-    return destination_name
+    uri = f"gs://{GCLOUD_BUCKET}/{destination_name}"
+    print(f"File ID is gsutil URI: {uri}")
+    return uri
 
 
 def upload_file(data_path: Path, params: FineTuneParams):
