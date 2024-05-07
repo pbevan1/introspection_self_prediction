@@ -120,18 +120,24 @@ class StudyRunner:
             default="",
         )
         parser.add_argument(
-            "--n_object_train", type=int, help="Number of object level completions for training.", default=10000
+            "--n_object_train", type=int, help="Number of object level completions for training.", default=2000
         )
         parser.add_argument(
-            "--n_object_val", type=int, help="Number of object level completions for validation.", default=2500
+            "--n_object_val", type=int, help="Number of object level completions for validation.", default=500
         )
         parser.add_argument(
-            "--n_finetuning", type=int, help="Number of finetuning completions to generate.", default=12500
+            "--n_finetuning", type=int, help="Number of finetuning completions to generate.", default=500
         )
         parser.add_argument(
             "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=500
         )
         parser.add_argument("--skip_finetuning", action="store_true", help="Skip the finetuning step.", default=False)
+        parser.add_argument(
+            "--skip_finetuning_for_models",
+            type=str,
+            help="Comma-separated list of models to skip finetuning for.",
+            default="",
+        )
         self.args = parser.parse_args()
 
     def run_command(self, command):
@@ -164,6 +170,7 @@ class StudyRunner:
             "prompt_configs",
             "inference_overrides",
             "finetuning_overrides",
+            "skip_finetuning_for_models",
         ]:
             setattr(
                 self.args, arg, getattr(self.args, arg).replace(", ", ",").split(",") if getattr(self.args, arg) else []
@@ -373,6 +380,9 @@ class StudyRunner:
         #### run finetuning ####
         finetuning_commands = []
         for model in self.args.model_configs:
+            if model in self.args.skip_finetuning_for_models:
+                print(f"Skipping finetuning for {model} because it is in --skip_finetuning_for_models.")
+                continue
             for ft_study in finetuning_study_names:
                 command = self.get_finetuning_command(
                     model, f"{self.args.study_name}/{ft_study}", "sweep", self.args.finetuning_overrides

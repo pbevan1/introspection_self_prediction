@@ -1,5 +1,6 @@
 """This file holds helper functions to create the Hydra files for the finetuning dataset configs by sweeping over the different configurations."""
 
+import argparse
 from pathlib import Path
 
 from evals.locations import EXP_DIR
@@ -37,7 +38,7 @@ def create_finetuning_dataset_config(
 
     name = f"{model_config.replace('/', '-')}_{task_config.replace('/', '-')}_{response_property_config.replace('/', '-')}_{prompt_config.replace('/', '-')}"  # name of the config. We need to replace the / in the prompt config to avoid issues with the file path.
 
-    overrides_str = "\n".join(overrides)
+    overrides_str = " ".join(overrides)
 
     if "meta_level/" not in prompt_config:  # we need to load the meta level prompt
         prompt_config = f"meta_level/{prompt_config}"
@@ -58,3 +59,30 @@ def create_finetuning_dataset_config(
     with open(config_path, "w") as f:
         f.write(config)
     return config_path
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--study_name", type=str, required=True)
+    parser.add_argument("--model_config", type=str, required=True)
+    parser.add_argument("--task_config", type=str, required=True)
+    parser.add_argument("--prompt_config", type=str, required=True)
+    parser.add_argument("--response_property_config", type=str, required=True)
+    parser.add_argument("--train_base_dir", type=str, required=True)
+    parser.add_argument("--val_base_dir", type=str, required=True)
+    parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--overrides", type=str, nargs="+", required=False, default=[])
+    args = parser.parse_args()
+
+    path = create_finetuning_dataset_config(
+        args.study_name,
+        args.model_config,
+        args.task_config,
+        args.prompt_config,
+        args.response_property_config,
+        args.overrides,
+        args.train_base_dir,
+        args.val_base_dir,
+        args.overwrite,
+    )
+    print(f"Created config at {path}")

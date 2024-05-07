@@ -70,6 +70,7 @@ class DatasetRunner:
                 print_prompt_and_response=self.print_prompt_and_response,
                 logprobs=self.llm_params.logprobs,
                 seed=self.llm_params.seed,
+                cais_path=self.llm_params.cais_path,
             )
             # save successful prompt/response to file
             if self.cache_manager is not None:

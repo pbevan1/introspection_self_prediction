@@ -31,7 +31,7 @@ def load_dataset(
     """
     path = Path(path)
     if not path.exists():
-        raise FileNotFoundError(f"Dataset file not found at {path}")
+        raise FileNotFoundError(f"Dataset file not found at {path.absolute()}")
 
     assert path.suffix == ".jsonl", f"Dataset file must be a .jsonl file: {path}. Got {path.suffix} instead."
 

@@ -43,6 +43,8 @@ def load_and_prep_dfs(
     # TODO all of this should be small functions...
     """Loads and cleans a number of dataframes. Returns a dictionary of dataframes with the names as keys."""
 
+    df_paths = [Path(path) for path in df_paths]
+
     if configs is None:
         configs = [get_hydra_config(path.parent) for path in df_paths]
 
@@ -52,7 +54,10 @@ def load_and_prep_dfs(
     # load the data
     dfs = {}
     for path, name in zip(df_paths, configs):
-        dfs[name] = pd.read_csv(path, dtype={"complete": bool, "string": "str", "response": "str", "logprobs": "str"})
+        dfs[name] = pd.read_csv(path, dtype={"complete": bool})
+        # convert other columns to string
+        other_cols = [col for col in dfs[name].columns if col != "complete"]
+        dfs[name][other_cols] = dfs[name][other_cols].astype(str)
         print(f"Loaded {len(dfs[name])} rows from {path}")
 
     # exclude rows with complete=False

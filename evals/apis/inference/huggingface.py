@@ -4,7 +4,12 @@ import time
 from pathlib import Path
 
 import torch
-from transformers import TextGenerationPipeline, pipeline
+from transformers import (
+    AutoTokenizer,
+    PreTrainedTokenizerFast,
+    TextGenerationPipeline,
+    pipeline,
+)
 
 from evals.apis.inference.model import InferenceAPIModel
 from evals.data_models.inference import LLMResponse
@@ -16,6 +21,7 @@ LOGGER = logging.getLogger(__name__)
 class HuggingFaceModel(InferenceAPIModel):
     def __init__(self, prompt_history_dir: Path = None):
         self.pipe: TextGenerationPipeline | None = None
+        self.tokenizer: PreTrainedTokenizerFast | None = None
         self.prompt_history_dir = prompt_history_dir
         self.lock = asyncio.Lock()
 
@@ -29,28 +35,28 @@ class HuggingFaceModel(InferenceAPIModel):
     ) -> list[LLMResponse]:
         async with self.lock:  # Ensure that only one call is made at a time (to avoid OOM errors)
             start = time.time()
-            assert len(model_ids) == 1, "HuggingFace implementation only supports one model at a time."
-            hf_model_path = model_ids[0]
-            if "/" in hf_model_path:
-                short_model_name = hf_model_path.split("/")[-1]
-            else:
-                short_model_name = hf_model_path
+            assert len(model_ids) == 1, "HuggingFace transformers inference only supports one model at a time."
+            short_model_name = model_ids[0]
+            assert (
+                kwargs.get("cais_path", None) is not None
+            ), f"the config file for {short_model_name} lacks the `cais_path` key"
+            hf_model_path = kwargs["cais_path"]
             if self.pipe is None:
                 LOGGER.info(f"Loading model weights for {short_model_name}")
                 self.pipe = pipeline(
                     "text-generation",
                     model=hf_model_path,
-                    torch_dtype=torch.float16,
+                    torch_dtype=torch.bfloat16,
                     device_map="auto",
                 )
+                self.tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
                 LOGGER.info(f"Model weights for {short_model_name} loaded; {self.pipe.device=}")
             elif self.pipe.model.name_or_path != hf_model_path:
                 raise RuntimeError("HuggingFace InferenceAPI only supports one model at a time")
             else:
                 LOGGER.debug(f"Reusing a pipeline for {short_model_name}")
-            LOGGER.debug(f"Making {short_model_name} call")
             hf_input: list[dict[str, str]] = prompt.anthropic_format()
-            prompt_string: str = prompt.anthropic_format_string()
+            prompt_string: str = prompt.openai_format()
             prompt_file = self.create_prompt_history_file(prompt_string, short_model_name, self.prompt_history_dir)
 
             # make a forward pass
@@ -107,7 +113,12 @@ async def test():
     prompts = [Prompt(messages=messages) for messages in prompt_examples]
     print(prompts)
     tasks = [
-        huggingface_api(model_ids=["llama-7b-chat"], prompt=prompt, print_prompt_and_response=True)
+        huggingface_api(
+            model_ids=["llama-7b-chat"],
+            prompt=prompt,
+            print_prompt_and_response=True,
+            cais_path="/data/public_models/meta-llama/Llama-2-7b-chat-hf",
+        )
         for prompt in prompts
     ]
     result = await asyncio.gather(*tasks)

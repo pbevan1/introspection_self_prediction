@@ -1,12 +1,15 @@
 import logging
 import os
+import subprocess
 from pathlib import Path
 
 import hydra
+import torch
 from omegaconf import DictConfig
 
 from evals.apis.finetuning.run import FineTuneHyperParams, FineTuneParams, run_finetune
 from evals.apis.finetuning.syncer import WandbSyncer
+from evals.apis.inference.openai.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
 from evals.locations import CONF_DIR
 from evals.utils import get_current_git_hash, load_secrets, setup_environment
 
@@ -15,7 +18,8 @@ LOGGER = logging.getLogger(__name__)
 ROOT_DIR = Path(__file__).parent.parent
 
 FT_CONFIG_TEMPLATE = """
-model: ${model}
+model: {model}
+cais_path: {cais_path}
 temperature: 0.0
 top_p: 1.0
 max_tokens: null
@@ -34,17 +38,12 @@ def main(cfg: DictConfig) -> str:
     setup_environment(openai_tag=cfg.openai_tag)
     params = FineTuneParams(
         model=cfg.language_model.model,
-        hyperparameters=FineTuneHyperParams(n_epochs=cfg.epochs),
+        hyperparameters=FineTuneHyperParams(
+            n_epochs=cfg.epochs, learning_rate_multiplier=cfg.learning_rate, batch_size=cfg.batch_size
+        ),
         suffix=cfg.notes,
+        seed=cfg.seed,
     )
-    if cfg.use_wandb:
-        syncer = WandbSyncer.create(project_name=str(cfg.study_name).replace("/", "_"), notes=cfg.notes)
-        # if more_config:
-        #     more_config = {k: v for k, v in [x.split("=") for x in more_config.split(",")]}
-        #     syncer.update_parameters_with_dict(params=more_config)
-    else:
-        syncer = None
-
     # try to find the data files
     data_path = Path(cfg.study_dir) / "train_dataset.jsonl"
     val_data_path = Path(cfg.study_dir) / "val_dataset.jsonl"
@@ -61,24 +60,77 @@ def main(cfg: DictConfig) -> str:
     except KeyError:
         LOGGER.error(f"Organization {cfg.organization} not found in secrets")
         raise
+    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+        if cfg.use_wandb:
+            syncer = WandbSyncer.create(project_name=str(cfg.study_name).replace("/", "_"), notes=cfg.notes)
+            # if more_config:
+            #     more_config = {k: v for k, v in [x.split("=") for x in more_config.split(",")]}
+            #     syncer.update_parameters_with_dict(params=more_config)
+        else:
+            syncer = None
 
-    model_id = run_finetune(
-        params=params,
-        data_path=data_path,
-        syncer=syncer,
-        ask_to_validate_training=cfg.ask_to_validate_training,
-        val_data_path=val_data_path,
-        organisation=org,
-    )
+        model_id = run_finetune(
+            params=params,
+            data_path=data_path,
+            syncer=syncer,
+            ask_to_validate_training=cfg.ask_to_validate_training,
+            val_data_path=val_data_path,
+            organisation=org,
+        )
+        # add dummy save path
+        save_path = "~"
+
+    else:
+        LOGGER.info("Running HF finetuning")
+        run_name = cfg.language_model.model + "_finetuned_" + cfg.notes
+        save_path = f"{cfg.study_dir}/{run_name}"
+        num_gpus = torch.cuda.device_count()
+        batch_size = cfg.batch_size or 32
+        lr = cfg.learning_rate or 1e-3
+        n_epochs = cfg.epochs or 5
+        cmd = f"""accelerate launch --config_file evals/conf/accelerate_config.yaml --mixed_precision bf16 --num_processes {num_gpus} -m \
+evals.apis.finetuning.hf_finetuning \
+--config evals/conf/trl_config.yaml \
+--output_dir {save_path} full_sweep_test/llama-7b-chat/ \
+--run_name {run_name} \
+--model_name_or_path {cfg.language_model.cais_path} \
+--dataset_name {cfg.study_dir} \
+--per_device_train_batch_size {batch_size//num_gpus} \
+--learning_rate {lr} \
+--num_train_epochs {n_epochs} """
+        if cfg.lora_rank is not None:
+            cmd += f"--use_peft --lora_r={cfg.lora_rank} --lora_alpha=16"
+        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        output_lines = []
+        for line in process.stdout:
+            print(line, end="")  # stream the output to the command line
+            output_lines.append(line.strip())
+        process.wait()
+        if process.returncode != 0:
+            raise subprocess.CalledProcessError(process.returncode, cmd)
+        print(f"Successfully executed: {cmd}")
+        model_id = run_name
+        if cfg.lora_rank is not None:
+            cmd = f"""python evals/apis/finetuning/merge_peft_adapter.py --adapter_model_name {save_path} --base_model_name {cfg.language_model.cais_path} --output_name {save_path}_merged"""
+            save_path += "_merged"
+            process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            output_lines = []
+            for line in process.stdout:
+                print(line, end="")  # stream the output to the command line
+                output_lines.append(line.strip())
+            process.wait()
+            if process.returncode != 0:
+                raise subprocess.CalledProcessError(process.returncode, cmd)
+            print(f"Successfully executed: {cmd}")
 
     LOGGER.info(f"Done with model_id: {model_id}")
     # adding a config file for this finetuned model
-    config_id = create_finetuned_model_config(cfg, model_id)
+    config_id = create_finetuned_model_config(cfg, model_id, cais_path=save_path)
     print(config_id)
     return model_id
 
 
-def create_finetuned_model_config(cfg, ft_model_id, overwrite=False):
+def create_finetuned_model_config(cfg, ft_model_id, cais_path="~", overwrite=True):
     """Creates a model config file for the finetuned model in the config directory."""
     safe_model_id = ft_model_id.replace(":", "_")
     directory = CONF_DIR / "language_model" / "finetuned" / cfg.study_name
@@ -88,7 +140,7 @@ def create_finetuned_model_config(cfg, ft_model_id, overwrite=False):
         LOGGER.warning(f"File already exists at {file_path}. Not overwriting.")
         return f"finetuned/{cfg.study_name}/{safe_model_id}"
     with open(directory / file_path, "w") as f:
-        f.write(FT_CONFIG_TEMPLATE.replace("${model}", ft_model_id))
+        f.write(FT_CONFIG_TEMPLATE.format(model=ft_model_id, cais_path=cais_path))
     return f"finetuned/{cfg.study_name}/{safe_model_id}"  # return the name of the config that can be loaded by Hydra
 
 

@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import time
 from pathlib import Path
@@ -16,16 +17,20 @@ logger = logging.getLogger(__name__)
 
 
 class FineTuneHyperParams(BaseModel):
-    n_epochs: int = 1
-    # TODO: the new api doesn't have these params?
-    # batch_size: int = 1
-    # learning_rate_multiplier: float = 1.0
+    """
+    https://platform.openai.com/docs/api-reference/fine-tuning/create
+    """
+
+    n_epochs: int | None = None  # None sets it auto.
+    learning_rate_multiplier: float | None = None  # None sets it auto.
+    batch_size: int | None = None  # None sets it auto.
 
 
 class FineTuneParams(BaseModel):
     model: str
-    suffix: str = None
+    suffix: str | None = None
     hyperparameters: FineTuneHyperParams
+    seed: int | None = 0  # None sets it auto.
 
 
 class FinetuneJob(BaseModel):
@@ -88,16 +93,44 @@ def queue_finetune(
     suffix: str = None,
     val_file_id: str = None,
     organization: Optional[str] = None,
+    seed: Optional[int] = None,
+    retries: int = 10,  # number of retries. 30 * 2^10 = 8.5 hours
+    retry_time: int = 30,  # time to wait before retrying in seconds
 ) -> FinetuneJob:
+    if retries == 0:
+        raise Exception("Retries exhausted. Exiting")
+    if seed is None:
+        seed = int(time.time())
     # Keep retrying until we can queue the finetune job
-    finetune_job_resp = openai.FineTuningJob.create(
-        training_file=file_id,
-        model=model,
-        hyperparameters=hyperparameters.dict(),
-        suffix=suffix,
-        validation_file=val_file_id,
-        organization=organization,
-    )
+    if not isinstance(hyperparameters, dict):
+        hyperparameters = hyperparameters.dict()
+    # filter out Nones
+    hyperparameters = {k: v for k, v in hyperparameters.items() if v is not None}
+    try:
+        finetune_job_resp = openai.FineTuningJob.create(
+            training_file=file_id,
+            model=model,
+            hyperparameters=hyperparameters,
+            suffix=suffix,
+            validation_file=val_file_id,
+            organization=organization,
+            seed=seed,
+        )
+    except RateLimitError:
+        logger.error(f"Rate limit error. Retrying in {retry_time} seconds. {retries} retries left.")
+        time.sleep(retry_time)
+        retry_time *= 2  # exponential backoff
+        return queue_finetune(
+            file_id=file_id,
+            model=model,
+            hyperparameters=hyperparameters,
+            suffix=suffix,
+            val_file_id=val_file_id,
+            organization=organization,
+            retries=retries - 1,
+            retry_time=retry_time,
+            seed=seed,
+        )
 
     print(f"Started finetune job. {finetune_job_resp}")
     parsed_job_resp: FinetuneJob = FinetuneJob.parse_obj(finetune_job_resp)
@@ -107,6 +140,7 @@ def queue_finetune(
 def upload_file(data_path: Path, params: FineTuneParams):
     now_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     file_name = f"{params.model}-{now_time}_{data_path.name}"
+    data_path = filter_file_for_finetuning(data_path)
     file_upload_resp: dict[str, Any] = openai.File.create(  # type: ignore[reportGeneralTypeIssues]
         file=open(data_path, "rb"),
         purpose="fine-tune",
@@ -117,6 +151,17 @@ def upload_file(data_path: Path, params: FineTuneParams):
     wait_until_uploaded_file_id_is_ready(file_id=file_id)
     print(f"Uploaded file to openai. {file_upload_resp}\n{file_name}")
     return file_id
+
+
+def filter_file_for_finetuning(data_path: Path):
+    """The .json file for OpenAI is only allowed to have the key "`messages` and no others. We load in the file, and save out a temp file with only the messages key."""
+    data = load_jsonl(data_path)
+    new_data = [{"messages": d["messages"]} for d in data]
+    new_data_path = data_path.parent / "temp_filtered.jsonl"
+    with open(new_data_path, "w") as f:
+        for d in new_data:
+            f.write(json.dumps(d) + "\n")
+    return new_data_path
 
 
 def run_finetune(
@@ -153,6 +198,7 @@ def run_finetune(
         suffix=params.suffix,
         val_file_id=val_file_id,
         organization=organisation,
+        seed=params.seed,
     )
     print(f"Started finetune job. {finetune_job_resp}")
 

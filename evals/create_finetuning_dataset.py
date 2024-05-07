@@ -2,6 +2,7 @@
 
 import copy
 import csv
+import json
 import logging
 import os
 import random
@@ -23,6 +24,7 @@ from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptT
 from evals.load.lazy_object_level_llm_extraction import (
     lazy_add_response_property_to_object_level,
 )
+from evals.locations import EXP_DIR
 
 CONFIG_PATH = "conf"
 
@@ -32,7 +34,7 @@ LOGGER = logging.getLogger(__name__)
 def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl") -> tuple[Path, Path]:
     """Generate a jsonl file for finetuning.
 
-    This reads in all config files in the directory, and for each adds loads the base data and genereates the messages for finetuning.
+    This reads in all config files in the directory, and for each adds loads the base data and generates the messages for finetuning.
 
     Args:
         path (Path): Path to the directory containing the config files.
@@ -99,7 +101,14 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
             with open(val_filepath, "r") as infile:
                 outfile.write(infile.read())
 
-    LOGGER.info(f"Generated {len(train_filepaths)} datasets and saved to {train_filepath} & {val_filepath}")
+    if cfg.enforce_unique_strings:
+        LOGGER.info("Enforcing unique strings.")
+        enforce_unique_strings(path / ("train_" + filename))
+        enforce_unique_strings(path / ("val_" + filename))
+
+    LOGGER.info(
+        f"Generated {len(train_filepaths)} datasets and saved to {train_filepath.relative_to(EXP_DIR)} & {val_filepath.relative_to(EXP_DIR)}"
+    )
     return train_filepath, val_filepath
 
 
@@ -199,7 +208,11 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         for i, row in tqdm.tqdm(train_df.iterrows(), total=len(train_df), desc="Generating train messages"):
             try:
                 prompt = process_prompt(row, prompt_template, cfg.response_property.name)
-                f.write(prompt.openai_finetuning_format())  # this might not work—use different format if it complains
+                prompt = prompt.openai_finetuning_format()
+                prompt = json.loads(prompt)
+                # add in string to the prompt
+                prompt["string"] = row["string"]
+                f.write(json.dumps(prompt))
                 f.write("\n")
             except ValidationError as e:
                 LOGGER.warning(f"Failed row {i} with error {e}")
@@ -207,7 +220,11 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     with open(val_filepath, "a") as f:
         for i, row in tqdm.tqdm(val_df.iterrows(), total=len(val_df), desc="Generating validation messages"):
             prompt = process_prompt(row, prompt_template, cfg.response_property.name)
-            f.write(prompt.openai_finetuning_format())
+            prompt = prompt.openai_finetuning_format()
+            prompt = json.loads(prompt)
+            # add in string to the prompt
+            prompt["string"] = row["string"]
+            f.write(json.dumps(prompt))
             f.write("\n")
 
     # save out the dfs so we can recover the split
@@ -292,6 +309,45 @@ def scramble_strings(df: pd.DataFrame, seed: int) -> pd.DataFrame:
         df[col] = df[col].iloc[shuffled_indices].values
 
     return df
+
+
+def enforce_unique_strings(path_to_jsonl, random_seed=0):
+    """Enforces that each string in the .jsonl is unique, even if it comes from a different original config. If multiple strings are present, it will randomly select one of them."""
+    with open(path_to_jsonl, "r") as f:
+        lines = f.readlines()
+
+    # get all the strings
+    strings = [json.loads(line)["string"] for line in lines]
+
+    # get the unique strings
+    unique_strings = list(set(strings))
+
+    LOGGER.info(
+        f"Enforcing unique strings on {path_to_jsonl.relative_to(EXP_DIR)}. Found {len(strings)} strings and {len(unique_strings)} unique strings."
+    )
+
+    # create a mapping from the unique strings to the original strings
+    string_mapping = {unique_string: [] for unique_string in unique_strings}
+    for line in lines:
+        data = json.loads(line)
+        string_mapping[data["string"]].append(data)
+
+    # now we have to randomly select one of the strings
+    random.seed(random_seed)
+    new_lines = []
+    for unique_string in unique_strings:
+        data = random.choice(string_mapping[unique_string])
+        new_lines.append(json.dumps(data))
+
+    # write out the new file
+    with open(path_to_jsonl, "w") as f:
+        for line in new_lines:
+            f.write(line)
+            f.write("\n")
+
+    LOGGER.info(
+        f"Enforced unique strings on {path_to_jsonl.relative_to(EXP_DIR)}. {len(new_lines)} lines written, down from {len(lines)}."
+    )
 
 
 @hydra.main(version_base=None, config_path=CONFIG_PATH, config_name="config_finetuning_dataset")
