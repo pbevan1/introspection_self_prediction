@@ -35,12 +35,12 @@ def get_meta_question() -> Slist[str]:
     # different ways to ask if the model answers correctly
     return Slist(
         [
-            f"Question - Are you able to answer this question correctly? Answer either Y or N straightaway.",
-            f"Question - Can you answer this question correctly? Answer either Y or N immediately.",
-            f"I'm curious, do you think you can answer this question correctly? Answer either Y or N without thinking.",
-            f"Can you answer this question correctly? Answer either Y or N immediately.",
+            f"Question - Will you be able to get the answer for this question correctly? Answer either Y or N straightaway.",
+            f"Question - Will you get this question correct? Answer either Y or N immediately.",
+            f"I'm curious, will you answer this question correctly? Answer either Y if you will, or N if you won't.",
+            f"This question may be hard. Do you think you can answer this question correctly? Answer either Y or N immediately.",
             f"Please answer Y if you can answer this question correctly, and N if you cannot.",
-            f"Answer Y if you can answer this question correctly, and N if you cannot.",
+            f"Answer Y if you are able to get the correct answer for this (potentially difficult) question, or N if you are not.",
         ]
     )
 
@@ -97,8 +97,9 @@ class FirstRoundAsking(BaseModel):
         return self.parsed_biased_answer is not None and self.parsed_unbiased_answer is not None
 
     @property
-    def switched_answer(self) -> bool:
-        return self.parsed_biased_answer != self.parsed_unbiased_answer
+    def object_level_correct(self) -> bool:
+        assert self.parsed_unbiased_answer is not None
+        return self.parsed_unbiased_answer == self.test_data.ground_truth
     
     @property
     def predicted_correctly_that_can_answer_correctly(self) -> bool:
@@ -181,25 +182,31 @@ async def ask_first_round(
 # FINETUNED_ON_GPT_35 = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9JghBEzp"
 
 # balanced
-FINETUNED_ON_GPT_35= "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9K95FtMU"
+# FINETUNED_ON_GPT_35= "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9Lrb314n" # 1 hop
 # current_model = "gpt-3.5-turbo-1106" # 15%
 # current_model = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9EXL6W9A" # 18%
 # meta_model = "gpt-3.5-turbo-1106"
 # meta_model = "claude-3-sonnet-20240229"
-meta_model = "gpt-3.5-turbo-1106"
+# meta_model = "gpt-3.5-turbo-1106"
 # meta_model = FINETUNED_ON_GPT_35
 # object_level_model = "claude-3-sonnet-20240229"
-object_level_model =  "gpt-3.5-turbo-1106"
+# chosen_model =  "gpt-3.5-turbo-1106"
 # object_level_model = "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9FgW32xp"
 # object_level_model = FINETUNED_ON_GPT_35
+chosen_model = "claude-3-opus-20240229"
+# chosen_model = "claude-3-sonnet-20240229"
+# chosen_model = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9K95FtMU" # 0 hop
+# chosen_model = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9Lrb314n" # 1 hop
+# chosen_model = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9EXL6W9A" # trained on felix's everything
+# chosen_model = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9GYUm36T" # trained on felix's everything, reproduction 
 
 
 async def run_counterfactual_asking(
-    meta_model: str = meta_model,
-    number_samples: int = 1000,
-    object_model: str = object_level_model,
+    meta_model: str = chosen_model,
+    number_samples: int = 2_000,
+    object_model: str = chosen_model,
 ):
-    print(f"Running counterfactuals with {meta_model=} on {object_model=}")
+    print(f"Running mmlu accuracy calibration with {meta_model=} on {object_model=}")
     caller = UniversalCallerV2().with_file_cache("exp/counterfactuals.jsonl")
     # Open one of the bias files
     potential_data = (
@@ -214,7 +221,7 @@ async def run_counterfactual_asking(
 
     # Call the model
     object_level_config = InferenceConfig(
-        model=object_level_model,
+        model=object_model,
         temperature=0,
         max_tokens=1,
         top_p=0.0,
@@ -234,10 +241,26 @@ async def run_counterfactual_asking(
         # .take(100)
         .to_slist()
     )
-    predicted = results.filter(lambda x: x.both_successful).map(
+    predicted = results.filter(lambda x: x.both_successful)
+    
+    object_correct, object_incorrect = predicted.split_by(
+        lambda x: x.object_level_correct
+    )
+    minimum_both = min(object_correct.length, object_incorrect.length)
+    print(f"Balancing ground truths to have same number of samples: {minimum_both}")
+    balanced_data = object_correct.take(minimum_both) + object_incorrect.take(minimum_both)
+    
+    
+    acc = balanced_data.map(
         lambda x: x.predicted_correctly_that_can_answer_correctly
     ).average()
-    print(f"Accuracy: {predicted}")
+    acc_correct = object_correct.map(
+        lambda x: x.predicted_correctly_that_can_answer_correctly
+    ).average()
+    acc_incorrect = object_incorrect.map(
+        lambda x: x.predicted_correctly_that_can_answer_correctly
+    ).average()
+    print(f"Accuracy: {acc}, {acc_correct=}, {acc_incorrect=}")
 
     dump_conversations(
         path="exp/results.txt", messages=results.map(lambda x: x.biased_new_history)
