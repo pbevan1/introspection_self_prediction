@@ -20,6 +20,7 @@ from omegaconf import DictConfig, OmegaConf
 from pydantic_core._pydantic_core import ValidationError
 
 from evals.analysis.loading_data import get_data_path, get_hydra_config, load_single_df
+from evals.apis.inference.openai.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
 from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
 from evals.load.lazy_object_level_llm_extraction import (
     lazy_add_response_property_to_object_level,
@@ -208,7 +209,14 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
         for i, row in tqdm.tqdm(train_df.iterrows(), total=len(train_df), desc="Generating train messages"):
             try:
                 prompt = process_prompt(row, prompt_template, cfg.response_property.name)
-                prompt = prompt.openai_finetuning_format()
+                if cfg.language_model.model in (
+                    COMPLETION_MODELS | GPT_CHAT_MODELS
+                ):  # TODO: I do this check a bunch so could refactor
+                    prompt = prompt.openai_finetuning_format()
+                elif cfg.language_model.model == "gemini-1.0-pro-002":
+                    prompt = prompt.gemini_finetuning_format()
+                else:
+                    raise ValueError(f"Model {cfg.language_model.model} not supported.")
                 prompt = json.loads(prompt)
                 # add in string to the prompt
                 prompt["string"] = row["string"]
@@ -220,7 +228,14 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     with open(val_filepath, "a") as f:
         for i, row in tqdm.tqdm(val_df.iterrows(), total=len(val_df), desc="Generating validation messages"):
             prompt = process_prompt(row, prompt_template, cfg.response_property.name)
-            prompt = prompt.openai_finetuning_format()
+            if cfg.language_model.model in (
+                COMPLETION_MODELS | GPT_CHAT_MODELS
+            ):  # TODO: I do this check a bunch so could refactor
+                prompt = prompt.openai_finetuning_format()
+            elif cfg.language_model.model == "gemini-1.0-pro-002":
+                prompt = prompt.gemini_finetuning_format()
+            else:
+                raise ValueError(f"Model {cfg.language_model.model} not supported.")
             prompt = json.loads(prompt)
             # add in string to the prompt
             prompt["string"] = row["string"]

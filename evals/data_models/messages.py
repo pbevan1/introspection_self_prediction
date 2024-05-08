@@ -85,6 +85,16 @@ class Prompt(HashableBaseModel):
         line = {"messages": msgs}
         return json.dumps(line)
 
+    def gemini_finetuning_format(self) -> str:
+        # Gemini uses the same format as OpenAI except uses 'model' instead of 'assistant'
+        msgs = [msg.model_dump() for msg in self.messages]
+        # fix the message roles
+        for i, msg in enumerate(msgs):
+            val = msg["role"].value
+            msgs[i]["role"] = val if val != "assistant" else "model"
+        line = {"messages": msgs}
+        return json.dumps(line)
+
     def gemini_format(self) -> str:
         if self.is_none_in_messages():
             raise ValueError(f"Gemini chat prompts cannot have a None role. Got {self.messages}")
@@ -94,6 +104,8 @@ class Prompt(HashableBaseModel):
                 messages.append({"role": "system", "content": msg.content})
             elif msg.role == MessageRole.user:
                 messages.append({"role": "user", "content": msg.content})
+            elif msg.role == MessageRole.assistant:
+                messages.append({"role": "model", "content": msg.content})
         return messages
 
     def anthropic_format(self) -> list[dict]:
