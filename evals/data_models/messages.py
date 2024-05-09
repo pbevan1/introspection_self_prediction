@@ -77,7 +77,6 @@ class Prompt(HashableBaseModel):
         return [msg.model_dump() for msg in self.messages]
 
     def openai_finetuning_format(self) -> str:
-        # Gemini finetuning uses the same data format as OpenAI
         msgs = [msg.model_dump() for msg in self.messages]
         # fix the message roles
         for i, msg in enumerate(msgs):
@@ -100,7 +99,7 @@ class Prompt(HashableBaseModel):
             raise ValueError(f"Gemini chat prompts cannot have a None role. Got {self.messages}")
         messages = []
         for msg in self.messages:
-            if msg.role == MessageRole.system:
+            if msg.role == MessageRole.system and msg.content:  # Drop system role if content is empty
                 messages.append({"role": "system", "content": msg.content})
             elif msg.role == MessageRole.user:
                 messages.append({"role": "user", "content": msg.content})
@@ -114,7 +113,7 @@ class Prompt(HashableBaseModel):
 
         messages = []
         for msg in self.messages:
-            if msg.role == MessageRole.system:
+            if msg.role == MessageRole.system and msg.content:  # Drop system role if content is empty:
                 messages.append({"role": "system", "content": msg.content})
             elif msg.role == MessageRole.user:
                 messages.append({"role": "user", "content": msg.content})
