@@ -60,7 +60,7 @@ def main(cfg: DictConfig) -> str:
     except KeyError:
         LOGGER.error(f"Organization {cfg.organization} not found in secrets")
         raise
-    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS | {"gemini-1.0-pro-002"}):
         if cfg.use_wandb:
             syncer = WandbSyncer.create(project_name=str(cfg.study_name).replace("/", "_"), notes=cfg.notes)
             # if more_config:
@@ -132,7 +132,7 @@ evals.apis.finetuning.hf_finetuning \
 
 def create_finetuned_model_config(cfg, ft_model_id, cais_path="~", overwrite=True):
     """Creates a model config file for the finetuned model in the config directory."""
-    safe_model_id = ft_model_id.replace(":", "_")
+    safe_model_id = ft_model_id.replace(":", "_").replace("/", "_")
     directory = CONF_DIR / "language_model" / "finetuned" / cfg.study_name
     file_path = directory / f"{safe_model_id}.yaml"
     directory.mkdir(parents=True, exist_ok=True)
