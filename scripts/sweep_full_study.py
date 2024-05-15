@@ -228,13 +228,17 @@ class StudyRunner:
         return command
 
     def get_meta_level_command(
-        self, model, task, response_property, prompt, limit, set, strings_path="~", overrides=""
+        self, model, task, response_property, prompt, limit, set, strings_path="~", overrides=[]
     ):
+        overrides = "\n".join(overrides)
         command = f"python -m evals.run_meta_level study_name={self.args.study_name} language_model={model} task={task} response_property={response_property} task.set={set} prompt=meta_level/{prompt} limit={limit} strings_path={strings_path} {overrides}"
         return command
 
     def get_finetuning_command(self, model, ft_study, notes, overrides=""):
-        return f"python -m evals.run_finetuning study_name={ft_study} language_model={model} notes={notes} {' '.join(overrides)}"
+        override_str = ' '.join(overrides)
+        return (
+            f"python -m evals.run_finetuning study_name={ft_study} language_model={model} notes={notes} {override_str}"
+        )
 
     def run_study(self):
         pool = Pool()  # create a pool of worker processes
@@ -341,7 +345,7 @@ class StudyRunner:
                             task,
                             prompt,
                             response_property,
-                            self.args.finetuning_overrides,
+                            "",  # overrides string—not using that here
                             train_folder,
                             val_folder,
                             overwrite=False,
