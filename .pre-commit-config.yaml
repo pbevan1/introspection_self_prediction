@@ -5,13 +5,13 @@ repos:
     rev: v4.4.0
     hooks:
       - id: trailing-whitespace
+        exclude: other_evals/
       - id: end-of-file-fixer
       - id: check-shebang-scripts-are-executable
       - id: check-yaml
       - id: check-merge-conflict
       - id: debug-statements
       - id: no-commit-to-branch
-        exclude: other_evals/
         args: ['--branch=main']
         stages:
           - commit
