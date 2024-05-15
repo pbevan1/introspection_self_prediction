@@ -4,7 +4,7 @@ meta_level_prompt: "Is the answer that you gave greater than 500? Respond only w
 property_extraction_prompt: ~ # prompt to use for the extraction of the property with an LLM. $response will be replaced with the response. Other variables corresponding to columns in the dataframe can be used as well (eg. $target).
 
 # Exclusion rules. See `evals/analysis/compliance.py` for a list of rules.
-exclusion_rule_groups: [default] # list of exclusion rules to apply to the responses.
+exclusion_rule_groups: [true_false] # list of exclusion rules to apply to the responses.
 
 # How are object and meta-level responses to be scored? 
 scoring_method: "exact_match" # exact_match or LLM.
