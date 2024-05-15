@@ -19,7 +19,7 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-        args: ["--exclude=other_evals/"]
+        exclude: other_evals/
 
   - repo: https://github.com/pycqa/isort
     rev: 5.11.5
