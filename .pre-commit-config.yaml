@@ -19,16 +19,17 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
+        args: [--exclude, other_evals/]
 
   - repo: https://github.com/pycqa/isort
     rev: 5.11.5
     hooks:
       - id: isort
-        args: ["--profile", "black", "--filter-files"]
+        args: ["--profile", "black", "--filter-files",'--exclude','other_evals/']
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.11
     hooks:
       # Run the linter.
       - id: ruff
-        args: [ --fix ]
+        args: [ --fix ,'--exclude','other_evals/']
