@@ -25,7 +25,7 @@ repos:
     rev: 5.11.5
     hooks:
       - id: isort
-        args: ["--profile", "black", "--filter-files",'--exclude','other_evals/']
+        args: ["--profile", "black", "--filter-files",'--skip','other_evals/']
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.11
