@@ -375,10 +375,8 @@ class StudyRunner:
             self.write_state_file()
             finetuning_dataset_creation_commands.append(command)
 
-        pool.map(
-            partial(run_finetuning_dataset_creation, state=self.state, state_lock=self.state_lock),
-            finetuning_dataset_creation_commands,
-        )
+        for command in finetuning_dataset_creation_commands:
+            run_finetuning_dataset_creation(state=self.state, state_lock=self.state_lock, command=command)
         print(f"Created {len(finetuning_dataset_creation_commands)} finetuning datasets.")
 
         #### run finetuning ####
