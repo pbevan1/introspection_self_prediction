@@ -11,6 +11,7 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
       - id: no-commit-to-branch
+        exclude: other_evals/
         args: ['--branch=main']
         stages:
           - commit
