@@ -25,11 +25,13 @@ repos:
     rev: 5.11.5
     hooks:
       - id: isort
-        args: ["--profile", "black", "--filter-files",'--skip=other_evals/']
+        exclude: other_evals/
+        args: ["--profile", "black", "--filter-files"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.11
     hooks:
       # Run the linter.
       - id: ruff
-        args: [ --fix ,"--exclude=other_evals/"]
+        exclude: other_evals/
+        args: [ --fix ]
