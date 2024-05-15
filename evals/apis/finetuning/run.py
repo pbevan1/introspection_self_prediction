@@ -11,6 +11,7 @@ from google.cloud import storage
 from openai.error import APIConnectionError, RateLimitError
 from pydantic import BaseModel
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+from vertexai.preview.tuning import sft
 
 from evals.apis.finetuning.syncer import WandbSyncer
 from evals.apis.inference.openai.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
@@ -38,13 +39,15 @@ class FineTuneParams(BaseModel):
 
 class FinetuneJob(BaseModel):
     model: str
-    id: str  # job id
+    # Job id, for Gemini this is tuning job ID
+    # e.g. projects/351298396653/locations/us-central1/tuningJobs/4314075193183043584
+    id: str
 
 
 class FinetunedJobResults(BaseModel):
     fine_tuned_model: str
-    result_files: list[str] = []
-    trained_tokens: int
+    result_files: list[str] | None = []
+    trained_tokens: int | None
 
 
 @retry(
@@ -60,14 +63,31 @@ def wait_until_uploaded_file_id_is_ready(file_id: str) -> None:
         time.sleep(1)
 
 
-def wait_until_finetune_job_is_ready(finetune_job_id: str) -> FinetunedJobResults:
+def wait_until_finetune_job_is_ready(ft_job: FinetuneJob) -> FinetunedJobResults:
     """Returns the fine tuned model id"""
-    while True:
-        finetune_job = openai.FineTuningJob.retrieve(finetune_job_id)
-        if finetune_job["status"] == "succeeded":
-            print(finetune_job)
-            return FinetunedJobResults.parse_obj(finetune_job)
-        time.sleep(1)
+    if ft_job.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+        while True:
+            finetune_job = openai.FineTuningJob.retrieve(ft_job.id)
+            if finetune_job["status"] == "succeeded":
+                print(finetune_job)
+                return FinetunedJobResults.parse_obj(finetune_job)
+            time.sleep(1)
+    # TODO: add timeout?
+    elif ft_job.model == "gemini-1.0-pro-002":
+        sft_tuning_job = sft.SupervisedTuningJob(ft_job.id)
+        print("Running Gemini SFT job:\n", sft_tuning_job.to_dict())
+        while not sft_tuning_job.has_ended:
+            print("Waiting for job to finish...")
+            time.sleep(60)
+            sft_tuning_job.refresh()
+        if sft_tuning_job.state == "JOB_STATE_FAILED":
+            raise Exception(f"Job failed: {sft_tuning_job.to_dict()}")
+        # Google does not have API access to training metrics
+        return FinetunedJobResults(
+            fine_tuned_model=sft_tuning_job.tuned_model_endpoint_name, result_files=None, trained_tokens=None
+        )
+    else:
+        raise ValueError(f"Model {ft_job.id} not supported")
 
 
 def confirm_to_continue(file_path: Path) -> None:
@@ -110,16 +130,33 @@ def queue_finetune(
     # filter out Nones
     hyperparameters = {k: v for k, v in hyperparameters.items() if v is not None}
     try:
-        finetune_job_resp = openai.FineTuningJob.create(
-            training_file=file_id,
-            model=model,
-            hyperparameters=hyperparameters,
-            suffix=suffix,
-            validation_file=val_file_id,
-            organization=organization,
-            seed=seed,
-        )
-    except RateLimitError:
+        if model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+            finetune_job_resp = openai.FineTuningJob.create(
+                training_file=file_id,
+                model=model,
+                hyperparameters=hyperparameters,
+                suffix=suffix,
+                validation_file=val_file_id,
+                organization=organization,
+                seed=seed,
+            )
+            parsed_job_resp: FinetuneJob = FinetuneJob.parse_obj(finetune_job_resp)
+        elif model == "gemini-1.0-pro-002":
+            finetune_job_resp = sft.train(
+                source_model=model,
+                train_dataset=file_id,  # file ID is the gsutil URI
+                validation_dataset=val_file_id,
+                epochs=hyperparameters.get("n_epochs", None),
+                learning_rate_multiplier=hyperparameters.get("learning_rate_multiplier", None),
+                tuned_model_display_name=f"gemini-1.0-pro-002:{suffix}",  # TODO: is suffix usually set?
+            ).to_dict()
+            # TODO: Should I just be splitting this out? semantics of id and how it is used is diff bt apis
+            parsed_job_resp: FinetuneJob = FinetuneJob(
+                model=finetune_job_resp["baseModel"], id=finetune_job_resp["name"]
+            )
+        else:
+            raise ValueError(f"Model {model} not supported")
+    except RateLimitError:  # TODO: rate limit errors for gemini finetuning not well documented
         logger.error(f"Rate limit error. Retrying in {retry_time} seconds. {retries} retries left.")
         time.sleep(retry_time)
         retry_time *= 2  # exponential backoff
@@ -136,7 +173,7 @@ def queue_finetune(
         )
 
     print(f"Started finetune job. {finetune_job_resp}")
-    parsed_job_resp: FinetuneJob = FinetuneJob.parse_obj(finetune_job_resp)
+
     return parsed_job_resp
 
 
@@ -226,11 +263,12 @@ def run_finetune(
 
     if syncer:
         syncer.update_finetune_job_id(finetune_job_id=finetune_job_resp.id)
-    result: FinetunedJobResults = wait_until_finetune_job_is_ready(finetune_job_id=finetune_job_resp.id)
+    result: FinetunedJobResults = wait_until_finetune_job_is_ready(ft_job=finetune_job_resp)
     model_id = result.fine_tuned_model
     print(f"Fine tuned model id: {model_id}. You can now use this model in the API")
     if syncer:
         syncer.update_finetune_model_id(finetune_model_id=model_id)
-        syncer.update_training_results(results_id=result.result_files[0])
+        if result.result_files:
+            syncer.update_training_results(results_id=result.result_files[0])
         syncer.end()
     return model_id

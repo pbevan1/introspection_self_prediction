@@ -153,6 +153,11 @@ def sanitize_folder_name(key: str) -> str:
     # Replace "/" with "_"
     sanitized_key = sanitized_key.replace("meta_level/", "meta_level_")
     sanitized_key = sanitized_key.replace("object_level/", "object_level_")
+    # This is common prefix for gemini endpoint names
+    sanitized_key = sanitized_key.replace(
+        "projects/351298396653/locations/us-central1/endpoints/",
+        "projects_351298396653_locations_us-central1_endpoints_",
+    )
     return sanitized_key
 
 
