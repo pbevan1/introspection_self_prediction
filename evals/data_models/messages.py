@@ -87,6 +87,7 @@ class Prompt(HashableBaseModel):
     def gemini_finetuning_format(self) -> str:
         # Gemini uses the same format as OpenAI except uses 'model' instead of 'assistant'
         msgs = [msg.model_dump() for msg in self.messages]
+        msgs = [msg for msg in msgs if msg["content"]]  # filter out roles with empty content eg system
         # fix the message roles
         for i, msg in enumerate(msgs):
             val = msg["role"].value
@@ -103,6 +104,7 @@ class Prompt(HashableBaseModel):
                 messages.append({"role": "system", "content": msg.content})
             elif msg.role == MessageRole.user:
                 messages.append({"role": "user", "content": msg.content})
+            # Gemini uses the same format as OpenAI except uses 'model' instead of 'assistant'
             elif msg.role == MessageRole.assistant:
                 messages.append({"role": "model", "content": msg.content})
         return messages
