@@ -202,9 +202,8 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     val_df = val_df.dropna(subset=[cfg.response_property.name])
     LOGGER.info(f"Excluded {old_len_train - len(train_df)} rows from the training set due to missing responses.")
     LOGGER.info(f"Excluded {old_len_val - len(val_df)} rows from the validation set due to missing responses.")
-    # import ipdb; ipdb.set_trace()
 
-    # TODO: try to figure out how to make this less hacky
+    # TODO: this is a bit hacky, ideally would add source model name to cfg
     model = cfg.dataset_folder
     assert model in COMPLETION_MODELS | GPT_CHAT_MODELS | {"gemini-1.0-pro-002"}
     # generate the messages

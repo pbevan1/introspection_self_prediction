@@ -148,9 +148,8 @@ def queue_finetune(
                 validation_dataset=val_file_id,
                 epochs=hyperparameters.get("n_epochs", None),
                 learning_rate_multiplier=hyperparameters.get("learning_rate_multiplier", None),
-                tuned_model_display_name=f"gemini-1.0-pro-002:{suffix}",  # TODO: is suffix usually set?
+                tuned_model_display_name=f"gemini-1.0-pro-002:{suffix}",
             ).to_dict()
-            # TODO: Should I just be splitting this out? semantics of id and how it is used is diff bt apis
             parsed_job_resp: FinetuneJob = FinetuneJob(
                 model=finetune_job_resp["baseModel"], id=finetune_job_resp["name"]
             )
