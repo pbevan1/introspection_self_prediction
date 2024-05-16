@@ -51,7 +51,7 @@ def price_per_token(model_id: str) -> tuple[float, float]:
 class GeminiModel(InferenceAPIModel):
     def __init__(self, prompt_history_dir: Path = None):
         self.prompt_history_dir = prompt_history_dir
-        self.limiter = AsyncLimiter(60, 60)  # 60 requests per 60 seconds
+        self.limiter = AsyncLimiter(300, 60)  # 60 requests per 60 seconds
 
     async def _make_api_call(
         self,
