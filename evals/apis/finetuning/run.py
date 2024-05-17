@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 import os
+import random
 import time
 from pathlib import Path
 from typing import Any, Optional
@@ -23,6 +24,8 @@ from evals.utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+GEMINI_VALIDATION_LIMIT = 256
 
 
 class FineTuneHyperParams(BaseModel):
@@ -193,10 +196,10 @@ def upload_to_gcloud_bucket(data_path: Path, file_name: str):
     return uri
 
 
-def upload_file(data_path: Path, params: FineTuneParams):
+def upload_file(data_path: Path, params: FineTuneParams, limit=None):
     now_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     file_name = f"{params.model}-{now_time}_{data_path.name}"
-    data_path = filter_file_for_finetuning(data_path)
+    data_path = filter_file_for_finetuning(data_path, limit=limit)
     print(f"Starting file upload.\n{file_name}")
     if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
         print("Uploading to openai")
@@ -216,9 +219,12 @@ def upload_file(data_path: Path, params: FineTuneParams):
     return file_id
 
 
-def filter_file_for_finetuning(data_path: Path):
+def filter_file_for_finetuning(data_path: Path, limit=None):
     """The .json file for OpenAI is only allowed to have the key "`messages` and no others. We load in the file, and save out a temp file with only the messages key."""
     data = load_jsonl(data_path)
+    if limit is not None:
+        random.seed(25)
+        data = random.sample(data, limit)
     new_data = [{"messages": d["messages"]} for d in data]
     new_data_path = data_path.parent / "temp_filtered.jsonl"
     with open(new_data_path, "w") as f:
@@ -251,7 +257,8 @@ def run_finetune(
         syncer.update_file_id(file_id=file_id)
 
     if val_data_path:
-        val_file_id = upload_file(data_path=val_data_path, params=params)
+        limit = GEMINI_VALIDATION_LIMIT if params.model == "gemini-1.0-pro-002" else None
+        val_file_id = upload_file(data_path=val_data_path, params=params, limit=limit)
     else:
         val_file_id = None
     finetune_job_resp = queue_finetune(
