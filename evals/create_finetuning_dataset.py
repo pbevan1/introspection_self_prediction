@@ -20,12 +20,12 @@ from omegaconf import DictConfig, OmegaConf
 from pydantic_core._pydantic_core import ValidationError
 
 from evals.analysis.loading_data import get_data_path, get_hydra_config, load_single_df
-from evals.apis.inference.openai.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
 from evals.data_models.messages import ChatMessage, MessageRole, Prompt, PromptTemplate
 from evals.load.lazy_object_level_llm_extraction import (
     lazy_add_response_property_to_object_level,
 )
 from evals.locations import EXP_DIR
+from evals.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
 
 CONFIG_PATH = "conf"
 

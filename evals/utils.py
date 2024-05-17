@@ -26,6 +26,46 @@ GCLOUD_PROJECT = "roots-api-1475521819980"
 GCLOUD_LOCATION = "us-central1"
 GCLOUD_BUCKET = "cloud-ai-platform-6e5ab5cb-3fca-49e0-a42c-ce00ed910490"
 
+GEMINI_MODELS = {
+    "gemini-1.0-pro-001",
+    "gemini-1.0-pro-002",
+    "gemini-1.5-pro-001",
+}
+
+COMPLETION_MODELS = {
+    "davinci-002",
+    "babbage-002",
+    "text-davinci-003",
+    "text-davinci-002",
+    "gpt-4-base",
+    "gpt-3.5-turbo-instruct",
+}
+
+_GPT_4_MODELS = [
+    "gpt-4",
+    "gpt-4-0314",
+    "gpt-4-0613",
+    "gpt-4-32k",
+    "gpt-4-32k-0314",
+    "gpt-4-32k-0613",
+    "gpt-4-1106-preview",
+    "gpt-4-0125-preview",
+]
+_GPT_TURBO_MODELS = [
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-0613",
+    "gpt-3.5-turbo-16k",
+    "gpt-3.5-turbo-16k-0613",
+    "gpt-3.5-turbo-1106",
+    "gpt-3.5-turbo-0125",
+]
+GPT_CHAT_MODELS = set(_GPT_4_MODELS + _GPT_TURBO_MODELS)
+
+MODEL_TO_FAMILY_MAP = {
+    **{model: "openai" for model in GPT_CHAT_MODELS},
+    **{model: "gemini" for model in GEMINI_MODELS},
+}
+
 
 def setup_environment(
     anthropic_tag: str = "ANTHROPIC_API_KEY",
@@ -36,6 +76,36 @@ def setup_environment(
     secrets = load_secrets(Path(__file__).parent.parent / "SECRETS")
     openai.api_key = secrets[openai_tag]
     os.environ["ANTHROPIC_API_KEY"] = secrets[anthropic_tag]
+
+
+# import logging
+# from colorama import Fore, Style, init
+
+# # Initialize colorama
+# init()
+
+# # Define a custom formatter
+# class ColoredFormatter(logging.Formatter):
+#     def format(self, record):
+#         # Define your colored prefix
+#         levelname = record.levelname
+#         if levelname == 'DEBUG':
+#             prefix = Fore.BLUE + '[DEBUG]' + Style.RESET_ALL
+#         elif levelname == 'INFO':
+#             prefix = Fore.GREEN + '[INFO]' + Style.RESET_ALL
+#         elif levelname == 'WARNING':
+#             prefix = Fore.YELLOW + '[WARNING]' + Style.RESET_ALL
+#         elif levelname == 'ERROR':
+#             prefix = Fore.RED + '[ERROR]' + Style.RESET_ALL
+#         elif levelname == 'CRITICAL':
+#             prefix = Fore.MAGENTA + '[CRITICAL]' + Style.RESET_ALL
+#         else:
+#             prefix = '[LOG]'
+
+#         # Apply the prefix to the message
+#         record.msg = f"{prefix} {record.msg}"
+
+#         return super().format(record)
 
 
 def setup_logging(logging_level):

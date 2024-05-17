@@ -14,8 +14,13 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fi
 from vertexai.preview.tuning import sft
 
 from evals.apis.finetuning.syncer import WandbSyncer
-from evals.apis.inference.openai.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
-from evals.utils import GCLOUD_BUCKET, GCLOUD_PROJECT, load_jsonl
+from evals.utils import (
+    COMPLETION_MODELS,
+    GCLOUD_BUCKET,
+    GCLOUD_PROJECT,
+    GPT_CHAT_MODELS,
+    load_jsonl,
+)
 
 logger = logging.getLogger(__name__)
 

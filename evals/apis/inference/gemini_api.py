@@ -18,17 +18,10 @@ from evals.utils import GCLOUD_LOCATION, GCLOUD_PROJECT
 LOGGER = logging.getLogger(__name__)
 
 
-GEMINI_MODELS = {
-    "gemini-1.0-pro-001",
-    "gemini-1.0-pro-002",
-    "gemini-1.5-pro-001",
-}
-
 FINISH_REASON_MAP = {
     FinishReason.MAX_TOKENS: "max_tokens",
     FinishReason.STOP: "stop_sequence",
     FinishReason.OTHER: "unknown",
-    # BlockedReason.PROHIBITED_CONTENT: "safety",
 }
 CHAR_PER_TOKEN = 4  # estimating this at 4
 

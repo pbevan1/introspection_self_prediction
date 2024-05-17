@@ -9,9 +9,14 @@ from omegaconf import DictConfig
 
 from evals.apis.finetuning.run import FineTuneHyperParams, FineTuneParams, run_finetune
 from evals.apis.finetuning.syncer import WandbSyncer
-from evals.apis.inference.openai.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
 from evals.locations import CONF_DIR
-from evals.utils import get_current_git_hash, load_secrets, setup_environment
+from evals.utils import (
+    COMPLETION_MODELS,
+    GPT_CHAT_MODELS,
+    get_current_git_hash,
+    load_secrets,
+    setup_environment,
+)
 
 LOGGER = logging.getLogger(__name__)
 
