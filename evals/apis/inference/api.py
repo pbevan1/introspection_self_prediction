@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from evals.apis.inference.anthropic_api import ANTHROPIC_MODELS, AnthropicChatModel
-from evals.apis.inference.gemini_api import GEMINI_MODELS, GeminiModel
+from evals.apis.inference.gemini_api import GeminiModel
 from evals.apis.inference.huggingface import HuggingFaceModel
 from evals.apis.inference.model import InferenceAPIModel
 from evals.apis.inference.openai.chat import OpenAIChatModel
@@ -18,6 +18,7 @@ from evals.data_models.inference import LLMResponse
 from evals.data_models.messages import Prompt
 from evals.utils import (
     COMPLETION_MODELS,
+    GEMINI_MODELS,
     GPT_CHAT_MODELS,
     load_secrets,
     setup_environment,
