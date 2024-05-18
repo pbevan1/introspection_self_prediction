@@ -352,9 +352,11 @@ class StudyRunner:
             [p.parent.name for p in finetuning_folder_paths]
         )  # we need the name of the subfolder
 
+        finetune_models = list(set(self.args.model_configs) - set(self.args.skip_finetuning_for_models))
+        finetune_models = "[" + ",".join(finetune_models) + "]"
         finetuning_dataset_creation_commands = []
         for data_folder in finetuning_study_names:
-            command = f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder}"
+            command = f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder} 'finetune_models={finetune_models}'"
             if command not in self.state["finetuning_dataset_creation"]:
                 with self.state_lock:
                     self.state["finetuning_dataset_creation"].update(

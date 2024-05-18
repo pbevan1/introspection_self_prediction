@@ -64,10 +64,6 @@ GPT_CHAT_MODELS = set(_GPT_4_MODELS + _GPT_TURBO_MODELS)
 MODEL_TO_FAMILY_MAP = {}
 MODEL_TO_FAMILY_MAP.update({model: "openai" for model in GPT_CHAT_MODELS})
 MODEL_TO_FAMILY_MAP.update({model: "gemini" for model in GEMINI_MODELS})
-# MODEL_TO_FAMILY_MAP = {
-#     **{model: "openai" for model in GPT_CHAT_MODELS},
-#     **{model: "gemini" for model in GEMINI_MODELS},
-# }
 
 
 def setup_environment(

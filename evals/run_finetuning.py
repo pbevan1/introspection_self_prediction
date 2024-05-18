@@ -13,6 +13,7 @@ from evals.locations import CONF_DIR
 from evals.utils import (
     COMPLETION_MODELS,
     GPT_CHAT_MODELS,
+    MODEL_TO_FAMILY_MAP,
     get_current_git_hash,
     load_secrets,
     setup_environment,
@@ -49,9 +50,11 @@ def main(cfg: DictConfig) -> str:
         suffix=cfg.notes,
         seed=cfg.seed,
     )
+
+    model_family = MODEL_TO_FAMILY_MAP[cfg.language_model.model]
     # try to find the data files
-    data_path = Path(cfg.study_dir) / "train_dataset.jsonl"
-    val_data_path = Path(cfg.study_dir) / "val_dataset.jsonl"
+    data_path = Path(cfg.study_dir) / f"train_dataset-format_{model_family}.jsonl"
+    val_data_path = Path(cfg.study_dir) / f"val_dataset-format_{model_family}.jsonl"
     if not data_path.exists():
         raise FileNotFoundError(f"Data file not found at {data_path}")
     if not val_data_path.exists():

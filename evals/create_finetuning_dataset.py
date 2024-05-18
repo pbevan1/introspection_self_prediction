@@ -25,14 +25,16 @@ from evals.load.lazy_object_level_llm_extraction import (
     lazy_add_response_property_to_object_level,
 )
 from evals.locations import EXP_DIR
-from evals.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
+from evals.utils import MODEL_TO_FAMILY_MAP
 
 CONFIG_PATH = "conf"
 
 LOGGER = logging.getLogger(__name__)
 
 
-def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl") -> tuple[Path, Path]:
+def generate_finetuning_jsonl(
+    main_cfg: DictConfig, path: Path, finetune_models: str, fname: str = "dataset"
+) -> tuple[Path, Path]:
     """Generate a jsonl file for finetuning.
 
     This reads in all config files in the directory, and for each adds loads the base data and generates the messages for finetuning.
@@ -45,11 +47,10 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
         Path: Path to the generated jsonl file.
     """
 
+    finetune_formats = list(set([MODEL_TO_FAMILY_MAP[model] for model in finetune_models]))
+
     if not path.exists():
         raise FileNotFoundError(f"Path {path} does not exist.")
-
-    if not filename.endswith(".jsonl"):
-        filename += ".jsonl"
 
     # lets ensure that the config file isn't changed when we do things with hydra.
     main_cfg = copy.deepcopy(main_cfg)
@@ -60,60 +61,63 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
 
     assert len(config_files) > 0, f"No config files found in {path}"
 
-    train_filepaths = []
-    val_filepaths = []
+    for ft_format in finetune_formats:
+        train_filepaths = []
+        val_filepaths = []
 
-    for config_file in config_files:
-        cfg = load_hydra_config(config_file)
-        # Allow new fields to be added to the configuration
-        OmegaConf.set_struct(main_cfg, False)
-        # extend main_cfg with the config file
-        cfg = OmegaConf.merge(main_cfg, cfg)
-        LOGGER.info(f"Processing config {config_file}")
+        for config_file in config_files:
+            cfg = load_hydra_config(config_file)
+            # Allow new fields to be added to the configuration
+            OmegaConf.set_struct(main_cfg, False)
+            # extend main_cfg with the config file
+            cfg = OmegaConf.merge(main_cfg, cfg)
+            LOGGER.info(f"Processing config {config_file}")
 
-        # set up filenames
-        train_filename = cfg.name + "_train_" + filename
-        val_filename = cfg.name + "_val_" + filename
+            # set up filenames
+            filename = fname + f"-format_{ft_format}"
+            if not filename.endswith(".jsonl"):
+                filename += ".jsonl"
+            train_filename = cfg.name + "_train_" + filename
+            val_filename = cfg.name + "_val_" + filename
 
-        # do we have the file?
-        if (path / train_filename).exists():
-            LOGGER.info(f"File {filename} already exists. Overwriting.")
-            (path / train_filename).unlink()
-        if (path / val_filename).exists():
-            LOGGER.info(f"File {filename} already exists. Overwriting.")
-            (path / val_filename).unlink()
+            # do we have the file?
+            if (path / train_filename).exists():
+                LOGGER.info(f"File {filename} already exists. Overwriting.")
+                (path / train_filename).unlink()
+            if (path / val_filename).exists():
+                LOGGER.info(f"File {filename} already exists. Overwriting.")
+                (path / val_filename).unlink()
 
-        train_filepath = path / train_filename
-        val_filepath = path / val_filename
+            train_filepath = path / train_filename
+            val_filepath = path / val_filename
 
-        generate_single_config_dataset(cfg, train_filepath, val_filepath)
+            generate_single_config_dataset(cfg, train_filepath, val_filepath, ft_format)
 
-        train_filepaths.append(train_filepath)
-        val_filepaths.append(val_filepath)
+            train_filepaths.append(train_filepath)
+            val_filepaths.append(val_filepath)
 
-    # merge the files into a single one
-    with open(path / ("train_" + filename), "w") as outfile:
-        for train_filepath in train_filepaths:
-            with open(train_filepath, "r") as infile:
-                outfile.write(infile.read())
+        # merge the files into a single one
+        with open(path / ("train_" + filename), "w") as outfile:
+            for train_filepath in train_filepaths:
+                with open(train_filepath, "r") as infile:
+                    outfile.write(infile.read())
 
-    with open(path / ("val_" + filename), "w") as outfile:
-        for val_filepath in val_filepaths:
-            with open(val_filepath, "r") as infile:
-                outfile.write(infile.read())
+        with open(path / ("val_" + filename), "w") as outfile:
+            for val_filepath in val_filepaths:
+                with open(val_filepath, "r") as infile:
+                    outfile.write(infile.read())
 
-    if cfg.enforce_unique_strings:
-        LOGGER.info("Enforcing unique strings.")
-        enforce_unique_strings(path / ("train_" + filename))
-        enforce_unique_strings(path / ("val_" + filename))
+        if cfg.enforce_unique_strings:
+            LOGGER.info("Enforcing unique strings.")
+            enforce_unique_strings(path / ("train_" + filename))
+            enforce_unique_strings(path / ("val_" + filename))
 
-    LOGGER.info(
-        f"Generated {len(train_filepaths)} datasets and saved to {train_filepath.relative_to(EXP_DIR)} & {val_filepath.relative_to(EXP_DIR)}"
-    )
-    return train_filepath, val_filepath
+        LOGGER.info(
+            f"Generated {len(train_filepaths)} datasets and saved to {train_filepath.relative_to(EXP_DIR)} & {val_filepath.relative_to(EXP_DIR)}"
+        )
 
 
-def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_filepath: Path) -> None:
+def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_filepath: Path, ft_format: str) -> None:
     """Load the base completions and generate the messages for finetuning.
     The messages are saved directly to file.
 
@@ -203,21 +207,18 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     LOGGER.info(f"Excluded {old_len_train - len(train_df)} rows from the training set due to missing responses.")
     LOGGER.info(f"Excluded {old_len_val - len(val_df)} rows from the validation set due to missing responses.")
 
-    # TODO: this is a bit hacky, ideally would add source model name to cfg
-    model = cfg.dataset_folder
-    assert model in COMPLETION_MODELS | GPT_CHAT_MODELS | {"gemini-1.0-pro-002"}
     # generate the messages
     prompt_template = PromptTemplate(**OmegaConf.to_container(cfg.prompt, resolve=True))
     with open(train_filepath, "a") as f:
         for i, row in tqdm.tqdm(train_df.iterrows(), total=len(train_df), desc="Generating train messages"):
             try:
                 prompt = process_prompt(row, prompt_template, cfg.response_property.name)
-                if model in (COMPLETION_MODELS | GPT_CHAT_MODELS):  # TODO: I do this check a bunch so could refactor
+                if ft_format == "openai":
                     prompt = prompt.openai_finetuning_format()
-                elif model == "gemini-1.0-pro-002":
+                elif ft_format == "gemini":
                     prompt = prompt.gemini_finetuning_format()
                 else:
-                    raise ValueError(f"Model {cfg.language_model.model} not supported.")
+                    raise ValueError(f"Format {ft_format} not supported.")
                 prompt = json.loads(prompt)
                 # add in string to the prompt
                 prompt["string"] = row["string"]
@@ -229,12 +230,12 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
     with open(val_filepath, "a") as f:
         for i, row in tqdm.tqdm(val_df.iterrows(), total=len(val_df), desc="Generating validation messages"):
             prompt = process_prompt(row, prompt_template, cfg.response_property.name)
-            if model in (COMPLETION_MODELS | GPT_CHAT_MODELS):  # TODO: I do this check a bunch so could refactor
+            if ft_format == "openai":
                 prompt = prompt.openai_finetuning_format()
-            elif model == "gemini-1.0-pro-002":
+            elif ft_format == "gemini":
                 prompt = prompt.gemini_finetuning_format()
             else:
-                raise ValueError(f"Model {model} not supported.")
+                raise ValueError(f"Format {ft_format} not supported.")
             prompt = json.loads(prompt)
             # add in string to the prompt
             prompt["string"] = row["string"]
@@ -367,7 +368,7 @@ def enforce_unique_strings(path_to_jsonl, random_seed=0):
 @hydra.main(version_base=None, config_path=CONFIG_PATH, config_name="config_finetuning_dataset")
 def main(cfg: DictConfig):
     LOGGER.info(OmegaConf.to_yaml(cfg))
-    generate_finetuning_jsonl(cfg, Path(cfg.study_dir))
+    generate_finetuning_jsonl(cfg, Path(cfg.study_dir), cfg.finetune_models)
 
 
 if __name__ == "__main__":
