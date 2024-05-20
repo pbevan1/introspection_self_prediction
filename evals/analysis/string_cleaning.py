@@ -125,7 +125,7 @@ def match_log_probs_to_trimmed_response(response, logprobs):
     logprobs (str): The log probabilities of the words in the string.
     """
     response = str(response)
-    if logprobs is None or isinstance(logprobs, float):  # ie is it nan?
+    if logprobs is None or isinstance(logprobs, float) or logprobs == [{}]:  # ie is it nan?
         # we don't have logprobs
         return logprobs
     if isinstance(logprobs, str):
