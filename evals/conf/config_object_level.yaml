@@ -9,6 +9,7 @@ hydra:
       level: INFO
 
 defaults:
+  - _self_
   - prompt: object_level/minimal
   - language_model: gpt-3.5-turbo
   - task: wikipedia
@@ -33,7 +34,7 @@ prompt_history_dir: ${exp_dir}/prompt_history
 # Model
 language_model:
   temperature: 0.0
-  logprobs: 2
+  logprobs: 0
 
 task:
   num: ${limit}

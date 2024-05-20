@@ -1,6 +1,7 @@
 name: object_shift/387
 
 defaults:
+  - _self_
   - parent_response_property: ../identity # which response property is this overriding?
 
 python_function: replace_with_387 # ~ to use LLM extraction. Function has to be in evals/parent_response_property.py

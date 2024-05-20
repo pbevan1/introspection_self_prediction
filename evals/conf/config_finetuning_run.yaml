@@ -14,6 +14,7 @@ exp_dir: ${study_dir}/${sanitize:${language_model.model}_${epochs}_epochs}
 study_name: ??? # the name of the study
 
 defaults:
+  - _self_
   - language_model: gpt-3.5-turbo
 
 epochs: ~ # how many epochs to train for. Use `~` to let the training script figure it out.
