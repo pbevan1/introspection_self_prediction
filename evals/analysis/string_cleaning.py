@@ -132,12 +132,16 @@ def match_log_probs_to_trimmed_response(response, logprobs):
         logprobs = eval(logprobs)
     if len(logprobs) == 0 or min([len(l) for l in logprobs]) == 0: # we don't have logprobs
         return logprobs
-    index = 0
-    while index < len(logprobs):
-        logprob = logprobs[index]
-        # get most likely token
-        token = max(logprob, key=logprob.get)
-        if response.lower().startswith(token.lower()):
-            return str(logprobs[index:])
-        index += 1
-    return None
+    try:
+        index = 0
+        while index < len(logprobs):
+            logprob = logprobs[index]
+            # get most likely token
+            token = max(logprob, key=logprob.get)
+            if response.lower().startswith(token.lower()):
+                return str(logprobs[index:])
+            index += 1
+    except Exception as e:
+        pass
+    finally:
+        return None
