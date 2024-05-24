@@ -120,16 +120,16 @@ class StudyRunner:
             default="",
         )
         parser.add_argument(
-            "--n_object_train", type=int, help="Number of object level completions for training.", default=2000
+            "--n_object_train", type=int, help="Number of object level completions for training.", default=750
         )
         parser.add_argument(
-            "--n_object_val", type=int, help="Number of object level completions for validation.", default=500
+            "--n_object_val", type=int, help="Number of object level completions for validation.", default=100
         )
         parser.add_argument(
-            "--n_finetuning", type=int, help="Number of finetuning completions to generate.", default=500
+            "--n_finetuning", type=int, help="Number of finetuning completions to generate.", default=300
         )
         parser.add_argument(
-            "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=500
+            "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=100
         )
         parser.add_argument("--skip_finetuning", action="store_true", help="Skip the finetuning step.", default=False)
         parser.add_argument(
