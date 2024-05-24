@@ -25,6 +25,7 @@ python -m scripts.sweep_full_study
 --val_only_model_configs="gpt-4"
 --tasks='{"wikipedia": ["identity", "sentiment"], "dear_abbie": ["identity", "sentiment", "dear_abbie/sympathetic_advice"]}'
 --val_tasks='{"number_triplets": ["identity", "is_even"], "english_words": ["identity", "first_character"]}'
+--other_evals='["AreYouAffectedByBias", "WhatAnswerWithoutBias", "WillYouBeCorrect", "ChangeAnswerAreYouSure"]'
 --prompt_configs='minimal'
 --n_object_train=1000
 --n_object_val=250
@@ -45,6 +46,7 @@ from typing import Dict
 from evals.create_finetuning_dataset_configs import create_finetuning_dataset_config
 from evals.locations import EXP_DIR
 from evals.utils import get_current_git_hash
+from other_evals.counterfactuals.runners import run_sweep_over_other_evals
 
 
 def json_string(arg_value):
@@ -95,6 +97,11 @@ class StudyRunner:
             else:
                 setattr(self.args, arg, {})
 
+        ### Other evals is just a list of strings
+        other_evals = eval(self.args.other_evals)
+        assert isinstance(other_evals, list), "other_evals must be a list of strings"
+        self.args.other_evals = other_evals
+
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Run a full study sweeping over the following configs.")
         parser.add_argument("--study_name", type=str, help="The name of the study. Defines the output directory.")
@@ -109,6 +116,12 @@ class StudyRunner:
         )
         parser.add_argument("--tasks", type=str, help="JSON string of tasks configuration")
         parser.add_argument("--val_tasks", type=str, help="JSON string of validation tasks configuration", default="{}")
+        parser.add_argument(
+            "--other_evals",
+            type=str,
+            help="List of other evals to run. e.g. ['AreYouAffectedByBias']. See OTHER_EVAL_NAMES",
+            default="[]",
+        )
         parser.add_argument("--prompt_configs", type=str, help="Comma-separated list of prompt configurations.")
         parser.add_argument(
             "--inference_overrides", type=str, help="Comma-separated list of Hydra configuration overrides.", default=""
@@ -235,7 +248,7 @@ class StudyRunner:
         return command
 
     def get_finetuning_command(self, model, ft_study, notes, overrides=""):
-        override_str = ' '.join(overrides)
+        override_str = " ".join(overrides)
         return (
             f"python -m evals.run_finetuning study_name={ft_study} language_model={model} notes={notes} {override_str}"
         )
@@ -243,7 +256,7 @@ class StudyRunner:
     def run_study(self):
         pool = Pool()  # create a pool of worker processes
 
-        #### run object level completions on train ####
+        ### run object level completions on train ####
         object_train_commands = []
         for model in self.args.model_configs:
             for task in self.args.tasks.keys():
@@ -465,6 +478,27 @@ class StudyRunner:
 
         pool.map(partial(run_meta_val_command, state=self.state, state_lock=self.state_lock), meta_val_commands)
         self.write_state_file()
+
+        if self.args.other_evals:
+            print(f"Running other evals... {self.args.other_evals}")
+            object_level_models: list[str] = self.args.model_configs + self.args.val_only_model_configs
+            meta_level_models: list[str] = (
+                self.args.model_configs + self.get_finetuned_model_configs() + self.args.val_only_model_configs
+            )
+            object_and_meta = [
+                (object_model, meta_model) for object_model in object_level_models for meta_model in meta_level_models
+            ]
+
+            other_evals_limit: int = self.args.n_meta_val
+            other_evals_path = Path(EXP_DIR / self.args.study_name) / "other_evals"
+            # TODO: Possibly run all sweeps in parallel, but need to silence tqdm output
+            # Creates csv files for each eval in the other_evals_list, which you can view the heatmap of with the function plot_heatmap_with_ci
+            run_sweep_over_other_evals(
+                eval_list=self.args.other_evals,
+                object_and_meta=object_and_meta,
+                limit=other_evals_limit,
+                study_folder=other_evals_path,
+            )
 
         pool.close()  # close the pool of worker processes
         pool.join()  # wait for all processes to finish
