@@ -125,17 +125,23 @@ def match_log_probs_to_trimmed_response(response, logprobs):
     logprobs (str): The log probabilities of the words in the string.
     """
     response = str(response)
-    if logprobs is None or isinstance(logprobs, float) or logprobs == [{}]:  # ie is it nan?
+    if logprobs is None or isinstance(logprobs, float) or logprobs == "[{}]":  # ie is it nan?
         # we don't have logprobs
         return logprobs
     if isinstance(logprobs, str):
         logprobs = eval(logprobs)
-    index = 0
-    while index < len(logprobs):
-        logprob = logprobs[index]
-        # get most likely token
-        token = max(logprob, key=logprob.get)
-        if response.lower().startswith(token.lower()):
-            return str(logprobs[index:])
-        index += 1
-    return None
+    if len(logprobs) == 0 or min([len(l) for l in logprobs]) == 0: # we don't have logprobs
+        return logprobs
+    try:
+        index = 0
+        while index < len(logprobs):
+            logprob = logprobs[index]
+            # get most likely token
+            token = max(logprob, key=logprob.get)
+            if response.lower().startswith(token.lower()):
+                return str(logprobs[index:])
+            index += 1
+    except Exception as e:
+        pass
+    finally:
+        return None
