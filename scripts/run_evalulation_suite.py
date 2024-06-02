@@ -14,12 +14,13 @@ from evals.locations import CONF_DIR, EXP_DIR, REPO_DIR
 from other_evals.counterfactuals.runners import run_sweep_over_other_evals
 
 EVAL_SUITE = {
-    "number_triplets": ["identity", "is_even"],
-    "english_words": ["identity", "first_character"],
-    "wikipedia": ["identity", "first_character"],
-    "daily_dialog": ["identity", "first_character"],
-    "dear_abbie": ["first_word", "sentiment", "dear_abbie/sympathetic_advice"],
-    # "mmlu": ["matches_target"]
+    # "number_triplets": ["identity", "is_even"],
+    # "english_words": ["identity", "first_character"],
+    # "wikipedia": ["identity", "first_character"],
+    # "daily_dialog": ["identity", "first_character"],
+    # "dear_abbie": ["first_word", "sentiment", "dear_abbie/sympathetic_advice"],
+    "mmlu_non_cot": ["identity"],
+    "mmlu_cot": ["first_word"],
     # "writing_stories": ["writing_stories/good_ending", "writing_stories/main_character_name"], # inside/outside, main char male/female,
     # "jailbreak": ["jailbreak/jailbreak"],
     # "bias"
@@ -31,7 +32,8 @@ DIVERGENT_STRINGS = {
     "wikipedia": "exp/evaluation_suite/model_divergent_strings_wikipedia.csv",
     "daily_dialog": "exp/evaluation_suite/model_divergent_strings_daily_dialog.csv",
     "dear_abbie": "exp/evaluation_suite/model_divergent_strings_dear_abbie.csv",
-    "mmlu": "exp/evaluation_suite/model_divergent_strings_mmlu.csv",
+    "mmlu_non_cot": "exp/evaluation_suite/model_divergent_strings_mmlu_non_cot.csv",
+    "mmlu_cot": "exp/evaluation_suite/model_divergent_strings_mmlu_cot.csv",
     # "writing_stories": "exp/evaluation_suite/model_divergent_strings_writing_stories.csv",
     # "jailbreak": "exp/evaluation_suite/model_divergent_strings_jailbreak.csv",
     # "bias
@@ -215,20 +217,20 @@ if __name__ == "__main__":
     generate_model_divergent_string()
     # run the evaluation suite
     run_inference_only(models)
-    # finetune the model for each task individually
-    run_finetuning(models)
-    # see how well the finetuned models do on their task
-    for model in models:
-        run_finetuned_models_on_their_task(model)
-    run_get_floor_ceiling_for_untrained_models(models)
+    # # finetune the model for each task individually
+    # run_finetuning(models)
+    # # see how well the finetuned models do on their task
+    # for model in models:
+    #     run_finetuned_models_on_their_task(model)
+    # run_get_floor_ceiling_for_untrained_models(models)
 
-    # Run the other evals every combination of object and meta models
-    object_and_meta_models = [(object_model, meta_model) for object_model in models for meta_model in models]
-    if OTHER_EVALS:
-        run_sweep_over_other_evals(
-            object_and_meta=object_and_meta_models,
-            eval_list=OTHER_EVALS,
-            limit=N_EVAL,
-            show_plot=True,
-            study_folder=EXP_DIR / STUDY_NAME,
-        )
+    # # Run the other evals every combination of object and meta models
+    # object_and_meta_models = [(object_model, meta_model) for object_model in models for meta_model in models]
+    # if OTHER_EVALS:
+    #     run_sweep_over_other_evals(
+    #         object_and_meta=object_and_meta_models,
+    #         eval_list=OTHER_EVALS,
+    #         limit=N_EVAL,
+    #         show_plot=True,
+    #         study_folder=EXP_DIR / STUDY_NAME,
+    #     )
