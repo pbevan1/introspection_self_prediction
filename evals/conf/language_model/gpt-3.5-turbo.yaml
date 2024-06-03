@@ -1,4 +1,4 @@
-model: "gpt-3.5-turbo-1106" # this is the one that can be finetuned
+model: "gpt-3.5-turbo-0125" # this is the one that can be finetuned
 temperature: 0.0
 top_p: 1.0
 max_tokens: null
