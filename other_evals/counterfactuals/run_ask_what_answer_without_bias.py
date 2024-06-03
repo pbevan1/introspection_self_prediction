@@ -1,8 +1,6 @@
-import re
-from typing import Optional, Sequence, assert_never
+from typing import Sequence, assert_never
 import fire
 from grugstream import Observable
-import pandas as pd
 from pydantic import BaseModel
 from slist import Slist
 from tqdm import tqdm
@@ -11,13 +9,16 @@ from other_evals.counterfactuals.api_utils import (
     ChatMessageV2,
     InferenceConfig,
     ModelCallerV2,
-    UniversalCallerV2,
+    RepoCompatCaller,
     display_conversation,
 )
 from other_evals.counterfactuals.datasets.base_example import DataExampleBase, MultipleChoiceAnswer
 from other_evals.counterfactuals.datasets.load_mmlu import mmlu_test
 
 from evals.utils import setup_environment
+from other_evals.counterfactuals.extract_answers import extract_answer_non_cot
+from other_evals.counterfactuals.inference_api_cache import CachedInferenceAPI
+from other_evals.counterfactuals.other_eval_csv_format import OtherEvalCSVFormat
 
 
 PossibleAnswers = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
@@ -102,7 +103,7 @@ class FirstRoundAsking(BaseModel):
     raw_biased_response: str
     unbiased_new_history: Sequence[ChatMessageV2]
     raw_unbiased_response: str
-    config: InferenceConfig
+    object_config: InferenceConfig
     parsed_biased_answer: MultipleChoiceAnswer | None
     parsed_unbiased_answer: MultipleChoiceAnswer | None
 
@@ -115,11 +116,11 @@ class FirstRoundAsking(BaseModel):
         return self.parsed_biased_answer != self.parsed_unbiased_answer
 
 
-class SecondRoundAsking(BaseModel):
+class AskWhatAnswerResult(BaseModel):
     first_round: FirstRoundAsking
     second_round_message: list[ChatMessageV2]
     second_round_raw: str
-    config: InferenceConfig
+    meta_config: InferenceConfig
     final_history: list[ChatMessageV2]
     second_round_parsed: MultipleChoiceAnswer | None
 
@@ -132,20 +133,24 @@ class SecondRoundAsking(BaseModel):
     def first_round_switched_answer(self) -> bool:
         return self.first_round.switched_answer
 
-
-def extract_answer_non_cot(
-    response: str,
-) -> Optional[str]:
-    response = response.strip().replace("The best answer is: (", "")
-
-    pattern = re.compile(r"^\(?([a-zA-Z\d]+)\)?")
-    match = pattern.match(response)
-    if match:
-        candidate_ans = match.group(1)
-        if candidate_ans:
-            if candidate_ans in ["A", "B", "C", "D", "E", "F", "G", "H"]:
-                return candidate_ans
-    return None
+    def to_other_eval_format(self, eval_name: str) -> OtherEvalCSVFormat:
+        object_parsed = self.first_round.parsed_unbiased_answer
+        assert object_parsed is not None
+        meta_parsed = self.second_round_parsed
+        assert meta_parsed is not None
+        return OtherEvalCSVFormat(
+            object_history="BIASED HISTORY:\n"
+            + display_conversation(self.first_round.biased_new_history)
+            + "\nUNBIASED HISTORY:\n"
+            + display_conversation(self.first_round.unbiased_new_history),
+            object_model=self.first_round.object_config.model,
+            object_parsed_result=object_parsed,
+            meta_history=display_conversation(self.final_history),
+            meta_model=self.meta_config.model,
+            meta_parsed_result=meta_parsed,
+            meta_predicted_correctly=self.predicted_counterfactual_answer_correctly(),
+            eval_name=eval_name,
+        )
 
 
 async def ask_first_round(
@@ -173,7 +178,7 @@ async def ask_first_round(
         test_data=single_data,
         raw_biased_response=response.single_response,
         raw_unbiased_response=unbiased_response.single_response,
-        config=config,
+        object_config=config,
         parsed_biased_answer=parsed_answer,  # type: ignore
         parsed_unbiased_answer=parsed_unbiased,  # type: ignore
         biased_new_history=biased_new_history,
@@ -183,7 +188,7 @@ async def ask_first_round(
 
 async def ask_second_round(
     single_data: FirstRoundAsking, caller: ModelCallerV2, config: InferenceConfig
-) -> SecondRoundAsking:
+) -> AskWhatAnswerResult:
     history = single_data.biased_new_history
     counterfactual_question = (
         ask_if_answer_changes(single_data.test_data.biased_option)
@@ -200,13 +205,13 @@ async def ask_second_round(
     parsed_answer = extract_answer_non_cot(response.single_response)
     final_history = new_question + [ChatMessageV2(role="assistant", content=response.single_response)]
 
-    return SecondRoundAsking(
+    return AskWhatAnswerResult(
         first_round=single_data,
         second_round_message=new_question,
         second_round_parsed=parsed_answer,  # type: ignore
         second_round_raw=response.single_response,
         final_history=final_history,
-        config=config,
+        meta_config=config,
     )
 
 
@@ -220,14 +225,12 @@ async def ask_second_round(
 # meta_model = "gpt-3.5-turbo-1106"
 # meta_model = "claude-3-sonnet-20240229"
 # meta_model = "gpt-3.5-turbo-1106"
-meta_model = "gpt-3.5-turbo-1106"
 # object_level_model = "claude-3-sonnet-20240229"
 # object_level_model =  "gpt-3.5-turbo-1106"
 # object_level_model = "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9FgW32xp"
-object_level_model = "gpt-3.5-turbo-1106"
 
 
-def second_round_to_json(second_round: SecondRoundAsking) -> dict:
+def second_round_to_json(second_round: AskWhatAnswerResult) -> dict:
     biased_qn: str = display_conversation(second_round.first_round.biased_new_history)
     biased_qn_second_round: str = display_conversation(second_round.final_history)
     unbiased_qn: str = display_conversation(second_round.first_round.unbiased_new_history)
@@ -253,8 +256,8 @@ def second_round_to_json(second_round: SecondRoundAsking) -> dict:
 
     biased_towards = "incorrect" if biased_ans != ground_truth else "correct"
     return {
-        "object_model": second_round.first_round.config.model,
-        "meta_model": second_round.config.model,
+        "object_model": second_round.first_round.object_config.model,
+        "meta_model": second_round.meta_config.model,
         "biased_qn": biased_qn,
         "biased_qn_second_round": biased_qn_second_round,
         "unbiased_qn": unbiased_qn,
@@ -269,14 +272,15 @@ def second_round_to_json(second_round: SecondRoundAsking) -> dict:
     }
 
 
-async def run_counterfactual_asking(
+async def run_single_what_answer_without_bias(
+    api: CachedInferenceAPI,
+    meta_model: str,
+    object_model: str,
+    number_samples: int = 10000,
     bias_on_wrong_answer_only: bool = False,
-    meta_model: str = meta_model,
-    number_samples: int = 10_000,
-    object_model: str = object_level_model,
-):
+) -> Slist[AskWhatAnswerResult]:
     print(f"Running counterfactuals with {meta_model=} on {object_model=}")
-    caller = UniversalCallerV2().with_file_cache("exp/counterfactuals.jsonl")
+    caller = RepoCompatCaller(api=api)
     # Open one of the bias files
     potential_data = (
         # openbook.openbook_train()
@@ -291,7 +295,7 @@ async def run_counterfactual_asking(
 
     # Call the model
     object_level_config = InferenceConfig(
-        model=object_level_model,
+        model=object_model,
         temperature=0,
         max_tokens=1,
         top_p=0.0,
@@ -321,7 +325,7 @@ async def run_counterfactual_asking(
     print(f"% of examples where the model is affected by the biasing text: {average_affected_by_text:2f}")
 
     # run the second round where we ask if the model would
-    second_round_results: Slist[SecondRoundAsking] = (
+    second_round_results: Slist[AskWhatAnswerResult] = (
         await Observable.from_iterable(parsed_answers)
         .map_async_par(lambda data: ask_second_round(data, caller=caller, config=meta_level_config), max_par=20)
         .tqdm(tqdm_bar=tqdm(desc="Second round", total=parsed_answers.length))
@@ -330,10 +334,10 @@ async def run_counterfactual_asking(
     second_round_extracted_answer = second_round_results.filter(lambda x: x.second_round_parsed is not None)
     print(f"After filtering out {second_round_results.length - second_round_extracted_answer.length} missing answers")
 
-    second_round_dicts = second_round_extracted_answer.map(second_round_to_json)
+    # second_round_dicts = second_round_extracted_answer.map(second_round_to_json)
     # make a df
-    second_round_df = pd.DataFrame(second_round_dicts)
-    second_round_df.to_csv("second_round_results.csv", index=False)
+    # second_round_df = pd.DataFrame(second_round_dicts)
+    # second_round_df.to_csv("second_round_results.csv", index=False)
 
     affected_ground_truth, unaffected_ground_truth = second_round_extracted_answer.split_by(
         lambda x: x.first_round.switched_answer
@@ -346,12 +350,13 @@ async def run_counterfactual_asking(
     #     path="exp/unaffected_ground_truth.txt", messages=unaffected_ground_truth.map(lambda x: x.final_history)
     # )
 
-    # smallest_length = min(affected_ground_truth.length, unaffected_ground_truth.length)
+    smallest_length = min(affected_ground_truth.length, unaffected_ground_truth.length)
     # print(f"Balancing ground truths to have same number of samples: {smallest_length}")
 
-    # balanced_ground_truth_data = affected_ground_truth.take(smallest_length) + unaffected_ground_truth.take(
-    #     smallest_length
-    # )
+    balanced_ground_truth_data = affected_ground_truth.take(smallest_length) + unaffected_ground_truth.take(
+        smallest_length
+    )
+    return balanced_ground_truth_data
 
     # affected_ground_truth_accuracy = average_with_95_ci(
     #     affected_ground_truth.map(lambda x: x.predicted_counterfactual_answer_correctly())
@@ -385,4 +390,4 @@ if __name__ == "__main__":
     # run this line if you don't want to use fire
     # asyncio.run(run_counterfactual_asking(model=model, bias_on_wrong_answer_only=False, number_samples=300))
 
-    fire.Fire(run_counterfactual_asking)
+    fire.Fire(run_single_what_answer_without_bias)
