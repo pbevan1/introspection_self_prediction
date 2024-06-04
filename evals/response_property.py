@@ -79,6 +79,14 @@ def numeric_property(row: pd.Series, prop_func: Callable[..., bool] = lambda x: 
 def is_even(row: pd.Series) -> str | None:
     return numeric_property(row, lambda x: x % 2 == 0)
 
+def is_either_a_or_c(row: pd.Series) -> str | None:
+    response = row["response"]
+    return str(response.lower() in ["a", "c"]).lower()
+
+def is_either_b_or_d(row: pd.Series) -> str | None:
+    response = row["response"]
+    return str(response.lower() in ["b", "d"]).lower()
+
 
 def is_odd(row: pd.Series) -> str | None:
     return numeric_property(row, lambda x: x % 2 != 0)

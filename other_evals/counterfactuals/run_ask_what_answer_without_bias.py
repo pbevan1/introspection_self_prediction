@@ -13,12 +13,13 @@ from other_evals.counterfactuals.api_utils import (
     display_conversation,
 )
 from other_evals.counterfactuals.datasets.base_example import DataExampleBase, MultipleChoiceAnswer
+from other_evals.counterfactuals.datasets.all_train import all_non_mmlu
 from other_evals.counterfactuals.datasets.load_mmlu import mmlu_test
 
 from evals.utils import setup_environment
 from other_evals.counterfactuals.extract_answers import extract_answer_non_cot
 from other_evals.counterfactuals.inference_api_cache import CachedInferenceAPI
-from other_evals.counterfactuals.other_eval_csv_format import OtherEvalCSVFormat
+from other_evals.counterfactuals.other_eval_csv_format import FinetuneConversation, OtherEvalCSVFormat
 
 
 PossibleAnswers = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
@@ -215,6 +216,27 @@ async def ask_second_round(
     )
 
 
+def first_round_to_finetune_sample(single_data: FirstRoundAsking) -> FinetuneConversation:
+    history = single_data.biased_new_history
+    counterfactual_question = (
+        ask_if_answer_changes(single_data.test_data.biased_option)
+        .shuffle(seed=single_data.test_data.original_question_hash)
+        .first_or_raise()
+    )
+
+    should_respond_with = single_data.parsed_unbiased_answer
+    assert should_respond_with is not None
+    new_question = list(history) + [
+        ChatMessageV2(
+            role="user",
+            content=counterfactual_question + round_2_answer_format,
+        ),
+        ChatMessageV2(role="assistant", content=should_respond_with),
+    ]
+    messages = [m.to_finetune() for m in new_question]
+    return FinetuneConversation(messages=messages)
+
+
 # FINETUNED_ON_CLAUDE = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9HWNzLoE"
 # FINETUNED_ON_GPT_35 = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9JghBEzp"
 
@@ -272,6 +294,49 @@ def second_round_to_json(second_round: AskWhatAnswerResult) -> dict:
     }
 
 
+async def finetune_samples_what_answer_without_bias(
+    object_model: str,
+    api: CachedInferenceAPI,
+    bias_on_wrong_answer_only: bool = False,
+    number_samples: int = 500,
+) -> Slist[FinetuneConversation]:
+    print(f"Getting finetune samples with {object_model=}")
+    caller = RepoCompatCaller(api=api)
+    # Open one of the bias files
+    potential_data = (
+        # openbook.openbook_train()
+        # mmlu_test(questions_per_task=None)
+        all_non_mmlu()
+        # truthful_qa.eval()
+        .shuffle(seed="42").filter(lambda x: x.biased_ans != x.ground_truth if bias_on_wrong_answer_only else True)
+    )
+    assert potential_data.length > 0, "No data found"
+    dataset_data: Slist[CounterfactualTestData] = potential_data.take(number_samples).map(
+        CounterfactualTestData.from_data_example
+    )
+
+    # Call the model
+    object_level_config = InferenceConfig(
+        model=object_model,
+        temperature=0,
+        max_tokens=1,
+        top_p=0.0,
+    )
+
+    results: Slist[FirstRoundAsking] = (
+        await Observable.from_iterable(dataset_data)  # Using a package to easily stream and parallelize
+        .map_async_par(lambda data: ask_first_round(data, caller=caller, config=object_level_config), max_par=20)
+        .flatten_optional()
+        .tqdm(tqdm_bar=tqdm(desc="What answer without bias first round", total=dataset_data.length))
+        .filter(lambda x: x.both_successful)
+        .to_slist()
+    )
+    did_switch, did_not_switch = results.split_by(lambda x: x.switched_answer)
+    min_length = min(did_switch.length, did_not_switch.length)
+    balanced_data = did_switch.take(min_length) + did_not_switch.take(min_length)
+    return balanced_data.map(first_round_to_finetune_sample)
+
+
 async def run_single_what_answer_without_bias(
     api: CachedInferenceAPI,
     meta_model: str,
@@ -318,17 +383,20 @@ async def run_single_what_answer_without_bias(
 
     # Get the average % of parsed answers that match the bias
     parsed_answers = results.filter(lambda x: x.both_successful)
-    print(
-        f"Got {len(parsed_answers)} parsed answers after filtering out {len(results) - len(parsed_answers)} missing answers"
-    )
-    average_affected_by_text: float = parsed_answers.map(lambda x: x.switched_answer).average_or_raise()
-    print(f"% of examples where the model is affected by the biasing text: {average_affected_by_text:2f}")
+    affected, unaffected = parsed_answers.shuffle("42").split_by(lambda x: x.switched_answer)
+    smallest_length = min(affected.length, unaffected.length)
+    balanced_data = affected.take(smallest_length) + unaffected.take(smallest_length)
+    # print(
+    #     f"Got {len(parsed_answers)} parsed answers after filtering out {len(results) - len(parsed_answers)} missing answers"
+    # )
+    # average_affected_by_text: float = parsed_answers.map(lambda x: x.switched_answer).average_or_raise()
+    # print(f"% of examples where the model is affected by the biasing text: {average_affected_by_text:2f}")
 
     # run the second round where we ask if the model would
     second_round_results: Slist[AskWhatAnswerResult] = (
-        await Observable.from_iterable(parsed_answers)
+        await Observable.from_iterable(balanced_data)
         .map_async_par(lambda data: ask_second_round(data, caller=caller, config=meta_level_config), max_par=20)
-        .tqdm(tqdm_bar=tqdm(desc="Second round", total=parsed_answers.length))
+        .tqdm(tqdm_bar=tqdm(desc="Second round", total=balanced_data.length))
         .to_slist()
     )
     second_round_extracted_answer = second_round_results.filter(lambda x: x.second_round_parsed is not None)
@@ -339,24 +407,7 @@ async def run_single_what_answer_without_bias(
     # second_round_df = pd.DataFrame(second_round_dicts)
     # second_round_df.to_csv("second_round_results.csv", index=False)
 
-    affected_ground_truth, unaffected_ground_truth = second_round_extracted_answer.split_by(
-        lambda x: x.first_round.switched_answer
-    )
-
-    # dump_conversations(
-    #     path="exp/affected_ground_truth.txt", messages=affected_ground_truth.map(lambda x: x.final_history)
-    # )
-    # dump_conversations(
-    #     path="exp/unaffected_ground_truth.txt", messages=unaffected_ground_truth.map(lambda x: x.final_history)
-    # )
-
-    smallest_length = min(affected_ground_truth.length, unaffected_ground_truth.length)
-    # print(f"Balancing ground truths to have same number of samples: {smallest_length}")
-
-    balanced_ground_truth_data = affected_ground_truth.take(smallest_length) + unaffected_ground_truth.take(
-        smallest_length
-    )
-    return balanced_ground_truth_data
+    return second_round_results
 
     # affected_ground_truth_accuracy = average_with_95_ci(
     #     affected_ground_truth.map(lambda x: x.predicted_counterfactual_answer_correctly())

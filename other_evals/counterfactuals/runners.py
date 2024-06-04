@@ -10,12 +10,18 @@ from evals.apis.inference.api import InferenceAPI
 from evals.locations import EXP_DIR
 from evals.utils import setup_environment
 from other_evals.counterfactuals.inference_api_cache import CachedInferenceAPI
-from other_evals.counterfactuals.other_eval_csv_format import OtherEvalCSVFormat
+from other_evals.counterfactuals.other_eval_csv_format import FinetuneConversation, OtherEvalCSVFormat
 from other_evals.counterfactuals.plotting.plot_heatmap import plot_heatmap_with_ci
-from other_evals.counterfactuals.run_ask_are_you_sure import run_single_are_you_sure
-from other_evals.counterfactuals.run_ask_if_affected import run_single_ask_if_affected
-from other_evals.counterfactuals.run_ask_if_gives_correct_answer import run_single_ask_if_correct_answer
-from other_evals.counterfactuals.run_ask_what_answer_without_bias import run_single_what_answer_without_bias
+from other_evals.counterfactuals.run_ask_are_you_sure import are_you_sure_finetune_samples, run_single_are_you_sure
+from other_evals.counterfactuals.run_ask_if_affected import finetune_samples_ask_if_affected, run_single_ask_if_affected
+from other_evals.counterfactuals.run_ask_if_gives_correct_answer import (
+    kwik_finetune_samples,
+    run_single_ask_if_correct_answer,
+)
+from other_evals.counterfactuals.run_ask_what_answer_without_bias import (
+    finetune_samples_what_answer_without_bias,
+    run_single_what_answer_without_bias,
+)
 
 
 class OtherEvalRunner(ABC):
@@ -27,7 +33,20 @@ class OtherEvalRunner(ABC):
         object_model: str,
         api: CachedInferenceAPI,
         limit: int = 100,
-    ) -> Sequence[OtherEvalCSVFormat]: ...
+    ) -> Sequence[OtherEvalCSVFormat]:
+        # Run the evaluation and return the results in the OtherEvalCSVFormat format
+        # A heatmap can be viewed with the plot_heatmap_with_ci function
+        raise NotImplementedError
+
+    @classmethod
+    async def get_finetuning(
+        cls,
+        object_model: str,
+        api: CachedInferenceAPI,
+        limit: int = 100,
+    ) -> Sequence[FinetuneConversation]:
+        # Get the finetuning messages for the particular evaluation
+        raise NotImplementedError(f"get_finetuning not implemented for {cls.name()}")
 
     @classmethod
     def name(cls) -> str:
@@ -48,7 +67,24 @@ class BiasDetectAreYouAffected(OtherEvalRunner):
             number_samples=limit,
         )
         formatted: Slist[OtherEvalCSVFormat] = result.map(lambda x: x.to_other_eval_format(eval_name=eval_name))
+
         return formatted
+
+    @classmethod
+    async def get_finetuning(
+        cls,
+        object_model: str,
+        api: CachedInferenceAPI,
+        limit: int = 100,
+    ) -> Sequence[FinetuneConversation]:
+        # Get the finetuning messages for the particular evaluation
+        result = await finetune_samples_ask_if_affected(
+            object_model=object_model,
+            api=api,
+            number_samples=limit,
+        )
+        print(f"Got {len(result)} finetuning samples for {cls.name()}")
+        return result
 
 
 class BiasDetectWhatAnswerWithout(OtherEvalRunner):
@@ -67,6 +103,23 @@ class BiasDetectWhatAnswerWithout(OtherEvalRunner):
         formatted = result.map(lambda x: x.to_other_eval_format(eval_name=eval_name))
         return formatted
 
+    @classmethod
+    async def get_finetuning(
+        cls,
+        object_model: str,
+        api: CachedInferenceAPI,
+        limit: int = 100,
+    ) -> Sequence[FinetuneConversation]:
+        # Get the finetuning messages for the particular evaluation
+        # TODO: MAKE SURE WE FINETUNE ON A DIFFERENT DATASET!!
+        result = await finetune_samples_what_answer_without_bias(
+            object_model=object_model,
+            api=api,
+            number_samples=limit,
+        )
+        print(f"Got {len(result)} finetuning samples for {cls.name()}")
+        return result
+
 
 class BiasDetectAddAreYouSure(OtherEvalRunner):
     @staticmethod
@@ -82,6 +135,22 @@ class BiasDetectAddAreYouSure(OtherEvalRunner):
         )
         formatted = result.map(lambda x: x.to_other_eval_format(eval_name=eval_name))
         return formatted
+
+    @classmethod
+    async def get_finetuning(
+        cls,
+        object_model: str,
+        api: CachedInferenceAPI,
+        limit: int = 100,
+    ) -> Sequence[FinetuneConversation]:
+        # Get the finetuning messages for the particular evaluation
+        result = await are_you_sure_finetune_samples(
+            object_model=object_model,
+            api=api,
+            number_samples=limit,
+        )
+        print(f"Got {len(result)} finetuning samples for {cls.name()}")
+        return result
 
 
 class KwikWillYouBeCorrect(OtherEvalRunner):
@@ -101,6 +170,22 @@ class KwikWillYouBeCorrect(OtherEvalRunner):
         formatted = result.map(lambda x: x.to_other_eval_format(eval_name=eval_name))
 
         return formatted
+
+    @classmethod
+    async def get_finetuning(
+        cls,
+        object_model: str,
+        api: CachedInferenceAPI,
+        limit: int = 100,
+    ) -> Sequence[FinetuneConversation]:
+        # Get the finetuning messages for the particular evaluation
+        result = await kwik_finetune_samples(
+            object_model=object_model,
+            api=api,
+            number_samples=limit,
+        )
+        print(f"Got {len(result)} finetuning samples for {cls.name()}")
+        return result
 
 
 ALL_EVAL_TYPES: Sequence[Type[OtherEvalRunner]] = [
@@ -211,20 +296,28 @@ def run_sweep_over_other_evals(
 def test_main():
     # What evals to run?
     eval_list = ALL_EVAL_TYPES
-    print(f"Running evals: {eval_list}")
+    # eval_list = [BiasDetectAddAreYouSure]
+    print(f"Running evals: {[e.name() for e in eval_list]}")
     # What models to run?
     models = Slist(
         [
-            "gpt-3.5-turbo",
+            # "gpt-3.5-turbo",
+            "gpt-3.5-turbo-0125",
+            "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9WPLCVRV",  # train on claude
+            # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo:baliemay20:9WAurjLN", # baseline scrambled
+            # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9WOKeIsb", # 12,000 samples gpt-3.5
+            # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9WE1NjvJ",  # gpt-3.5 on gpt-3.5, on arc other evals, 3600 samples
             # "claude-3-sonnet-20240229",
-            "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9PutAYsj",
+            # "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9GYUm36T" # all response properites
+            # "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9Lrb314n",  # ask if affected
+            # "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo::9PutAYsj",
             # "gpt-4o",
         ]
     )
     # We want to run all the combinations of the models
     object_and_meta_models: Slist[tuple[str, str]] = models.product(models)
     study_folder = EXP_DIR / "other_evals"
-    limit = 1_000
+    limit = 2000
     run_sweep_over_other_evals(
         eval_list=eval_list,
         object_and_meta=object_and_meta_models,
