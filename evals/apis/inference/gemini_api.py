@@ -5,6 +5,7 @@ from pathlib import Path
 from traceback import format_exc
 from typing import Any, Coroutine, Optional
 
+import google
 import vertexai
 import vertexai.preview.generative_models as generative_models
 from aiolimiter import AsyncLimiter
@@ -151,6 +152,9 @@ class GeminiModel(InferenceAPIModel):
                     responses = await self._make_api_call(
                         model_ids, prompt, print_prompt_and_response, max_attempts, **kwargs
                     )
+            except google.api_core.exceptions.ResourceExhausted:
+                LOGGER.warn(f"Encountered ResourceExhausted error. Retrying now. (Attempt {i})")
+                await asyncio.sleep(1.5**i)
             except Exception as e:
                 error_info = f"Exception Type: {type(e).__name__}, Error Details: {str(e)}, Traceback: {format_exc()}"
                 LOGGER.warn(f"Encountered API error: {error_info}.\nRetrying now. (Attempt {i})")
