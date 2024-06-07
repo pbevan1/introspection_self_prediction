@@ -4,11 +4,13 @@ import logging
 import os
 import subprocess
 from pathlib import Path
+from typing import List
 
 import omegaconf
 import openai
 import yaml
 from tenacity import retry, retry_if_result, stop_after_attempt
+from vertexai.preview.tuning import sft
 
 from evals.locations import EXP_DIR
 
@@ -75,36 +77,6 @@ def setup_environment(
     secrets = load_secrets(Path(__file__).parent.parent / "SECRETS")
     openai.api_key = secrets[openai_tag]
     os.environ["ANTHROPIC_API_KEY"] = secrets[anthropic_tag]
-
-
-# import logging
-# from colorama import Fore, Style, init
-
-# # Initialize colorama
-# init()
-
-# # Define a custom formatter
-# class ColoredFormatter(logging.Formatter):
-#     def format(self, record):
-#         # Define your colored prefix
-#         levelname = record.levelname
-#         if levelname == 'DEBUG':
-#             prefix = Fore.BLUE + '[DEBUG]' + Style.RESET_ALL
-#         elif levelname == 'INFO':
-#             prefix = Fore.GREEN + '[INFO]' + Style.RESET_ALL
-#         elif levelname == 'WARNING':
-#             prefix = Fore.YELLOW + '[WARNING]' + Style.RESET_ALL
-#         elif levelname == 'ERROR':
-#             prefix = Fore.RED + '[ERROR]' + Style.RESET_ALL
-#         elif levelname == 'CRITICAL':
-#             prefix = Fore.MAGENTA + '[CRITICAL]' + Style.RESET_ALL
-#         else:
-#             prefix = '[LOG]'
-
-#         # Apply the prefix to the message
-#         record.msg = f"{prefix} {record.msg}"
-
-#         return super().format(record)
 
 
 def setup_logging(logging_level):
@@ -273,3 +245,19 @@ def run_command(command):
     except subprocess.CalledProcessError as e:
         print(f"Error executing {command}: {e}")
         raise e
+
+
+def get_hparams_for_endpoints(endpoint_names):
+    """
+    E.g.
+    Args: ["projects/351298396653/locations/us-central1/endpoints/5520944751202795520"]
+    Returns: [{"epochCount": 1, "learningRateMultiplier": 0.1, "adapterSize": "ADAPTERSIZE_SIXTEEN"}]
+    """
+    responses: List[sft.SupervisedTuningJob] = sft.SupervisedTuningJob.list()
+    out = []
+    for response in responses:
+        for endpoint in endpoint_names:
+            if response.tuned_model_endpoint_name == endpoint:
+                hp = response.to_dict()["supervisedTuningSpec"]["hyperParameters"]
+                out.append(hp)
+    return out
