@@ -71,6 +71,12 @@ def wait_until_uploaded_file_id_is_ready(file_id: str) -> None:
         time.sleep(1)
 
 
+@retry(
+    # Retry if we get a rate limit error
+    # Also retry if we get an API connection error - e.g. when you close your laptop lol
+    retry=retry_if_exception_type((APIConnectionError, openai.APIError)),
+    wait=wait_fixed(30),
+)
 def wait_until_finetune_job_is_ready(ft_job: FinetuneJob) -> FinetunedJobResults:
     """Returns the fine tuned model id"""
     if ft_job.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
