@@ -87,9 +87,8 @@ class StudyRunner:
             "finetuning_overrides",
         ]:
             setattr(
-                self.args, arg, getattr(self.args, arg).replace(", ", ",").split(",") if getattr(self.args, arg) else []
+                self.args, arg, [x.strip() for x in getattr(self.args, arg).split(",")] if getattr(self.args, arg) else []
             )
-
         # Handling JSON string arguments for tasks and validation tasks
         for arg in ["tasks", "val_tasks"]:
             if getattr(self.args, arg):
@@ -170,11 +169,11 @@ class StudyRunner:
                 raise subprocess.CalledProcessError(process.returncode, command)
 
             last_line = output_lines[-1] if output_lines else ""
-            print(f"Successfully executed: {command}")
+            print(f"✅ Successfully executed: {command}")
             return last_line
 
         except subprocess.CalledProcessError as e:
-            print(f"Error executing {command}: {e}")
+            print(f"❌ Error executing {command}: {e}")
             raise e
 
     def parse_args_into_lists(self):
