@@ -9,9 +9,15 @@ from omegaconf import DictConfig
 
 from evals.apis.finetuning.run import FineTuneHyperParams, FineTuneParams, run_finetune
 from evals.apis.finetuning.syncer import WandbSyncer
-from evals.apis.inference.openai.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
 from evals.locations import CONF_DIR
-from evals.utils import get_current_git_hash, load_secrets, setup_environment
+from evals.utils import (
+    COMPLETION_MODELS,
+    GPT_CHAT_MODELS,
+    MODEL_TO_FAMILY_MAP,
+    get_current_git_hash,
+    load_secrets,
+    setup_environment,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -44,9 +50,11 @@ def main(cfg: DictConfig) -> str:
         suffix=cfg.notes,
         seed=cfg.seed,
     )
+
+    model_family = MODEL_TO_FAMILY_MAP[cfg.language_model.model]
     # try to find the data files
-    data_path = Path(cfg.study_dir) / "train_dataset.jsonl"
-    val_data_path = Path(cfg.study_dir) / "val_dataset.jsonl"
+    data_path = Path(cfg.study_dir) / f"train_dataset-format_{model_family}.jsonl"
+    val_data_path = Path(cfg.study_dir) / f"val_dataset-format_{model_family}.jsonl"
     if not data_path.exists():
         raise FileNotFoundError(f"Data file not found at {data_path}")
     if not val_data_path.exists():
@@ -60,7 +68,9 @@ def main(cfg: DictConfig) -> str:
     except KeyError:
         LOGGER.error(f"Organization {cfg.organization} not found in secrets")
         raise
-    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS) or str(params.model).lower().startswith("ft:gpt"):
+    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS | {"gemini-1.0-pro-002"}) or str(
+        params.model
+    ).lower().startswith("ft:gpt"):
         if cfg.use_wandb:
             syncer = WandbSyncer.create(project_name=str(cfg.study_name).replace("/", "_"), notes=cfg.notes)
             # if more_config:
@@ -136,7 +146,7 @@ evals.apis.finetuning.hf_finetuning \
 
 def create_finetuned_model_config(cfg, ft_model_id, cais_path="~", overwrite=True):
     """Creates a model config file for the finetuned model in the config directory."""
-    safe_model_id = ft_model_id.replace(":", "_")
+    safe_model_id = ft_model_id.replace(":", "_").replace("/", "_")
     directory = CONF_DIR / "language_model" / "finetuned" / cfg.study_name
     file_path = directory / f"{safe_model_id}.yaml"
     directory.mkdir(parents=True, exist_ok=True)
