@@ -12,6 +12,7 @@ from typing import Optional
 import hydra
 import pandas as pd
 from omegaconf import DictConfig, OmegaConf
+from tenacity import RetryError
 
 from evals.apis.inference.api import InferenceAPI
 from evals.apis.inference.cache_manager import CacheManager
@@ -195,12 +196,18 @@ async def async_main(cfg: DictConfig):
         LOGGER.info(f"File {filename} exists. Will not recreate.")
 
     # run dataset (with retry)
-    complete = await async_function_with_retry(
-        run_dataset,
-        filename,
-        dataset_runner,
-        limit=cfg.limit,
-    )
+    try:
+        complete = await async_function_with_retry(
+            run_dataset,
+            filename,
+            dataset_runner,
+            limit=cfg.limit,
+        )
+    except RetryError as e: # make sure to reraise the proper error not the one from the async function
+        LOGGER.error(f"Failed with error {e}")
+        LOGGER.error(traceback.format_exc())
+        LOGGER.error("Failed to complete dataset—at least one row is not completed.")
+        complete = False
     print(exp_dir)  # print the experiment directory for scripting purposes
     return complete
 
