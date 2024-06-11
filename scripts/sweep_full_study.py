@@ -88,6 +88,7 @@ class StudyRunner:
             "prompt_configs",
             "inference_overrides",
             "finetuning_overrides",
+            "skip_finetuning_for_models",
         ]:
             setattr(
                 self.args, arg, [x.strip() for x in getattr(self.args, arg).split(",")] if getattr(self.args, arg) else []
@@ -371,7 +372,7 @@ class StudyRunner:
         )  # we need the name of the subfolder
 
         finetune_models = list(set(self.args.model_configs) - set(self.args.skip_finetuning_for_models))
-        finetune_models = "\\'" + ",".join(finetune_models) + "\\'"
+        finetune_models = "[" + ",".join(finetune_models) + "]"
         finetuning_dataset_creation_commands = []
         with self.state_lock:
             for data_folder in finetuning_study_names:

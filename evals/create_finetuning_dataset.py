@@ -46,6 +46,8 @@ def generate_finetuning_jsonl(
     Returns:
         Path: Path to the generated jsonl file.
     """
+    if isinstance(finetune_models, str): # making sure that we have a list here
+        finetune_models = eval(finetune_models)
 
     finetune_formats = list(set([MODEL_TO_FAMILY_MAP[model] for model in finetune_models]))
 
