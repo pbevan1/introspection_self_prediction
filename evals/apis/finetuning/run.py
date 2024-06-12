@@ -207,7 +207,7 @@ def upload_file(data_path: Path, params: FineTuneParams, limit=None):
     file_name = f"{params.model}-{now_time}_{data_path.name}"
     data_path = filter_file_for_finetuning(data_path, limit=limit)
     print(f"Starting file upload.\n{file_name}")
-    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS) or "ft:gpt-" in params.model:
         print("Uploading to openai")
         file_upload_resp: dict[str, Any] = openai.File.create(  # type: ignore[reportGeneralTypeIssues]
             file=open(data_path, "rb"),
