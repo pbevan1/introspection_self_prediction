@@ -144,7 +144,7 @@ def queue_finetune(
     # filter out Nones
     hyperparameters = {k: v for k, v in hyperparameters.items() if v is not None}
     try:
-        if model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+        if model in (COMPLETION_MODELS | GPT_CHAT_MODELS) or "ft:gpt-" in model:
             finetune_job_resp = openai.FineTuningJob.create(
                 training_file=file_id,
                 model=model,
