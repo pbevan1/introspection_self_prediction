@@ -275,15 +275,25 @@ def get_hydra_config(exp_folder: Union[Path, str]) -> Union[DictConfig, ListConf
     if not logs:
         raise ValueError(f"No valid log directories found in {logs_folder}")
     logs.sort(key=lambda x: x.stat().st_ctime, reverse=True)
+
     log_day_folder = logs[0]
     # find most recent subfolder, ignoring .DS_Store
     log_time_folders = [f for f in log_day_folder.glob("*") if f.name != ".DS_Store"]
     if not log_time_folders:
         raise ValueError(f"No valid log time directories found in {log_day_folder}")
     log_time_folders.sort(key=lambda x: x.stat().st_ctime, reverse=True)
-    hydra_folder = log_time_folders[0] / ".hydra"
-    # use hydra to parse the yaml config
-    config = OmegaConf.load(hydra_folder / "config.yaml")
+
+    config = None
+    for folder in log_time_folders:
+        hydra_folder = folder / ".hydra"
+        config_path = hydra_folder / "config.yaml"
+        if os.path.exists(config_path):
+            # use hydra to parse the yaml config
+            config = OmegaConf.load(config_path)
+            break
+
+    if config is None:
+        raise ValueError("No config file found in any of the log time directories.")
     return config
 
 
