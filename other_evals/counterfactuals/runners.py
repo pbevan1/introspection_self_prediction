@@ -9,6 +9,7 @@ from slist import Slist
 from evals.apis.inference.api import InferenceAPI
 from evals.locations import EXP_DIR
 from evals.utils import setup_environment
+from other_evals.counterfactuals.api_utils import RepoCompatCaller
 from other_evals.counterfactuals.inference_api_cache import CachedInferenceAPI
 from other_evals.counterfactuals.other_eval_csv_format import FinetuneConversation, OtherEvalCSVFormat
 from other_evals.counterfactuals.plotting.plot_heatmap import plot_heatmap_with_ci
@@ -23,6 +24,7 @@ from other_evals.counterfactuals.run_ask_what_answer_without_bias import (
     run_single_what_answer_without_bias,
 )
 from other_evals.counterfactuals.yaml_compat_utils import read_model_id_from_model_config
+from other_evals.model_generated.run_are_you_giving_deontological import run_single_ask_deontology
 
 
 class OtherEvalRunner(ABC):
@@ -189,6 +191,23 @@ class KwikWillYouBeCorrect(OtherEvalRunner):
         return result
 
 
+class WillYouGiveDeontology(OtherEvalRunner):
+    @staticmethod
+    async def run(
+        eval_name: str, meta_model: str, object_model: str, api: CachedInferenceAPI, limit: int = 100
+    ) -> Sequence[OtherEvalCSVFormat]:
+        """Ask the model if it is going to get the correct answer. Y/N answers"""
+        result = await run_single_ask_deontology(
+            object_model=object_model,
+            meta_model=meta_model,
+            caller=RepoCompatCaller(api=api),
+            number_samples=limit,
+        )
+        formatted = result.map(lambda x: x.to_other_eval_format(eval_name=eval_name))
+
+        return formatted
+
+
 ALL_EVAL_TYPES: Sequence[Type[OtherEvalRunner]] = [
     BiasDetectAddAreYouSure,
     BiasDetectAreYouAffected,
@@ -258,6 +277,28 @@ def run_sweep_over_other_evals(
     cache_path: str | Path = "exp/other_evals/cache",
     show_plot: bool = False,
 ) -> None:
+    object_and_meta_ids = [
+        (read_model_id_from_model_config(object_config), read_model_id_from_model_config(meta_config))
+        for object_config, meta_config in object_and_meta_configs
+    ]
+    return run_sweep_over_other_evals_ids(
+        object_and_meta_ids=object_and_meta_ids,
+        eval_list=eval_list,
+        limit=limit,
+        study_folder=study_folder,
+        cache_path=cache_path,
+        show_plot=show_plot,
+    )
+
+
+def run_sweep_over_other_evals_ids(
+    object_and_meta_ids: Sequence[tuple[str, str]] = [("gpt-3.5-turbo", "gpt-3.5-turbo")],
+    eval_list: Sequence[Type[OtherEvalRunner]] = [BiasDetectAddAreYouSure],
+    limit: int = 100,
+    study_folder: str | Path = "exp/other_evals",
+    cache_path: str | Path = "exp/other_evals/cache",
+    show_plot: bool = False,
+) -> None:
     """
     object_and_meta: a list of tuples of object and meta models
     eval_list: a list of evaluation names. See the keys in OTHER_EVAL_NAMES.
@@ -265,10 +306,6 @@ def run_sweep_over_other_evals(
     limit: the number of samples to run
     study_folder: the folder where the results will be saved
     """
-    object_and_meta_ids = [
-        (read_model_id_from_model_config(object_config), read_model_id_from_model_config(meta_config))
-        for object_config, meta_config in object_and_meta_configs
-    ]
     setup_environment()
     # Entry point for sweeping
     # the sweep ain't a async function so we use asyncio.run
@@ -301,17 +338,27 @@ def run_sweep_over_other_evals(
 
 def test_main():
     # What evals to run?
-    eval_list = ALL_EVAL_TYPES
+    eval_list = [WillYouGiveDeontology]
     # eval_list = [BiasDetectAddAreYouSure]
     print(f"Running evals: {[e.name() for e in eval_list]}")
+    limit = 500
     # What models to run?
     models = Slist(
         [
             # "gpt-3.5-turbo",
-            "gpt-3.5-turbo-0125",
+            # "gpt-3.5-turbo-0125",
+            # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo:nommlu:9YISrgjH", # non mmlu sweep
+            # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo:sweep:9WBVcb4d",  # mmlu sweep
+            # "gpt-3.5-turbo-1106",
+            # "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9XGmIcNV" # train on felix + james'
+            # "gpt-4-0613",
+            # "ft:gpt-4-0613:dcevals-kokotajlo:sweep:9RSQ9BDP" # gpt-4 on gpt -4
+            # "gpt-3.5-turbo-1106",
+            # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo:sweep:9WBVcb4d"
+            # "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9YHdMAcl", # leave out are you sure
             # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9WPLCVRV",  # train on claude
             "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo:baliemay20:9WAurjLN",  # baseline scrambled
-            "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9WPLCVRV",  # train on claude
+            # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9WPLCVRV",  # train on claude
             # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo:baliemay20:9WAurjLN", # baseline scrambled
             # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9WOKeIsb", # 12,000 samples gpt-3.5
             # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9WE1NjvJ",  # gpt-3.5 on gpt-3.5, on arc other evals, 3600 samples
@@ -325,10 +372,10 @@ def test_main():
     # We want to run all the combinations of the models
     object_and_meta_models: Slist[tuple[str, str]] = models.product(models)
     study_folder = EXP_DIR / "other_evals"
-    limit = 2000
-    run_sweep_over_other_evals(
+
+    run_sweep_over_other_evals_ids(
         eval_list=eval_list,
-        object_and_meta_configs=object_and_meta_models,
+        object_and_meta_ids=object_and_meta_models,
         limit=limit,
         study_folder=study_folder,
         show_plot=True,
