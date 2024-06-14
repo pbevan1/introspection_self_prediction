@@ -79,7 +79,7 @@ def wait_until_uploaded_file_id_is_ready(file_id: str) -> None:
 )
 def wait_until_finetune_job_is_ready(ft_job: FinetuneJob) -> FinetunedJobResults:
     """Returns the fine tuned model id"""
-    if ft_job.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+    if ft_job.model in (COMPLETION_MODELS | GPT_CHAT_MODELS) or "ft:gpt-" in ft_job.model:
         while True:
             finetune_job = openai.FineTuningJob.retrieve(ft_job.id)
             if finetune_job["status"] == "succeeded":
@@ -101,7 +101,7 @@ def wait_until_finetune_job_is_ready(ft_job: FinetuneJob) -> FinetunedJobResults
             fine_tuned_model=sft_tuning_job.tuned_model_endpoint_name, result_files=None, trained_tokens=None
         )
     else:
-        raise ValueError(f"Model {ft_job.id} not supported")
+        raise ValueError(f"Model {ft_job.model} not supported")
 
 
 def confirm_to_continue(file_path: Path) -> None:
@@ -144,7 +144,7 @@ def queue_finetune(
     # filter out Nones
     hyperparameters = {k: v for k, v in hyperparameters.items() if v is not None}
     try:
-        if model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+        if model in (COMPLETION_MODELS | GPT_CHAT_MODELS) or "ft:gpt-" in model:
             finetune_job_resp = openai.FineTuningJob.create(
                 training_file=file_id,
                 model=model,
@@ -207,7 +207,7 @@ def upload_file(data_path: Path, params: FineTuneParams, limit=None):
     file_name = f"{params.model}-{now_time}_{data_path.name}"
     data_path = filter_file_for_finetuning(data_path, limit=limit)
     print(f"Starting file upload.\n{file_name}")
-    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+    if params.model in (COMPLETION_MODELS | GPT_CHAT_MODELS) or "ft:gpt-" in params.model:
         print("Uploading to openai")
         file_upload_resp: dict[str, Any] = openai.File.create(  # type: ignore[reportGeneralTypeIssues]
             file=open(data_path, "rb"),

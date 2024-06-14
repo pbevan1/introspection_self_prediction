@@ -110,7 +110,7 @@ class InferenceAPI:
         num_candidates = len(candidate_responses)
         valid_responses = [response for response in candidate_responses if is_valid(response.completion)]
         num_valid = len(valid_responses)
-        success_rate = num_valid / num_candidates
+        success_rate = num_valid / num_candidates if len(candidate_responses) > 0 else 0
         if success_rate < 1:
             LOGGER.info(f"`is_valid` success rate: {success_rate * 100:.2f}%")
 

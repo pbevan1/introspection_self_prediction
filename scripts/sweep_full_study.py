@@ -47,7 +47,7 @@ from typing import Dict, Sequence, Type
 from evals.create_finetuning_dataset import create_gemini_dataset_version
 from evals.create_finetuning_dataset_configs import create_finetuning_dataset_config
 from evals.locations import EXP_DIR
-from evals.utils import GEMINI_MODELS, MODEL_TO_FAMILY_MAP, get_current_git_hash
+from evals.utils import MODEL_TO_FAMILY_MAP, get_current_git_hash
 from other_evals.counterfactuals.get_finetuning_samples import (
     add_new_samples_to_existing_jsonl_and_shuffle,
     get_other_evals_finetuning_samples,
@@ -100,11 +100,13 @@ class StudyRunner:
             "prompt_configs",
             "inference_overrides",
             "finetuning_overrides",
+            "skip_finetuning_for_models",
         ]:
             setattr(
-                self.args, arg, getattr(self.args, arg).replace(", ", ",").split(",") if getattr(self.args, arg) else []
+                self.args,
+                arg,
+                [x.strip() for x in getattr(self.args, arg).split(",")] if getattr(self.args, arg) else [],
             )
-
         # Handling JSON string arguments for tasks and validation tasks
         for arg in ["tasks", "val_tasks"]:
             if getattr(self.args, arg):
@@ -149,16 +151,16 @@ class StudyRunner:
             default="",
         )
         parser.add_argument(
-            "--n_object_train", type=int, help="Number of object level completions for training.", default=2000
+            "--n_object_train", type=int, help="Number of object level completions for training.", default=1000
         )
         parser.add_argument(
-            "--n_object_val", type=int, help="Number of object level completions for validation.", default=500
+            "--n_object_val", type=int, help="Number of object level completions for validation.", default=100
         )
         parser.add_argument(
-            "--n_finetuning", type=int, help="Number of finetuning completions to generate.", default=500
+            "--n_finetuning", type=int, help="Number of finetuning completions to generate.", default=400
         )
         parser.add_argument(
-            "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=500
+            "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=100
         )
         parser.add_argument("--skip_finetuning", action="store_true", help="Skip the finetuning step.", default=False)
         parser.add_argument(
@@ -185,11 +187,11 @@ class StudyRunner:
                 raise subprocess.CalledProcessError(process.returncode, command)
 
             last_line = output_lines[-1] if output_lines else ""
-            print(f"Successfully executed: {command}")
+            print(f"✅ Successfully executed: {command}")
             return last_line
 
         except subprocess.CalledProcessError as e:
-            print(f"Error executing {command}: {e}")
+            print(f"❌ Error executing {command}: {e}")
             raise e
 
     def parse_args_into_lists(self):
@@ -381,13 +383,10 @@ class StudyRunner:
             [p.parent.name for p in finetuning_folder_paths]
         )  # we need the name of the subfolder
 
-        finetune_models = list(set(self.args.model_configs) - set(self.args.skip_finetuning_for_models))
-        should_create_gemini_dataset = len(GEMINI_MODELS & set(finetune_models)) > 0
-        finetune_models = "\\'" + ",".join(finetune_models) + "\\'"
         finetuning_dataset_creation_commands = []
         with self.state_lock:
             for data_folder in finetuning_study_names:
-                command = f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder} finetune_models={finetune_models}"
+                command = f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder}"
                 if command not in self.state["finetuning_dataset_creation"]:
                     self.state["finetuning_dataset_creation"].update(
                         self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
@@ -435,8 +434,8 @@ class StudyRunner:
                     new_jsonl_path=new_jsonl,
                     new_samples=model_samples,
                 )
-                if should_create_gemini_dataset:
-                    create_gemini_dataset_version(new_jsonl)
+                # we create a Gemini dataset in any case
+                create_gemini_dataset_version(new_jsonl)
 
         #### run finetuning ####
         finetuning_commands = []

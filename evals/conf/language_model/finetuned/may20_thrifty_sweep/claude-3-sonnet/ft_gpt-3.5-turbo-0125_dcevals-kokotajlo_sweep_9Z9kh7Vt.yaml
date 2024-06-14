@@ -1,4 +1,6 @@
-model: "baseline_model" # this is a placeholder for the baseline model.
+
+model: ft:gpt-3.5-turbo-0125:dcevals-kokotajlo:sweep:9Z9kh7Vt
+cais_path: ~
 temperature: 0.0
 top_p: 1.0
 max_tokens: null

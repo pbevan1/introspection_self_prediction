@@ -1,6 +1,7 @@
 name: object_shift/round_to_nearest_10
 
 defaults:
+  - _self_
   - parent_response_property: ../identity # which response property is this overriding?
 
 python_function: round_to_nearest_10 # ~ to use LLM extraction. Function has to be in evals/parent_response_property.py
