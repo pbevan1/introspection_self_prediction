@@ -18,3 +18,13 @@ else:
 CONF_DIR = REPO_DIR / "evals" / "conf"
 
 DATASET_DIR = REPO_DIR / "evals" / "datasets"
+
+
+def add_repo_dir_to_sys_path():
+    import sys
+
+    sys.path.append(str(REPO_DIR))
+    print(f"Added {REPO_DIR} to sys.path")
+
+
+add_repo_dir_to_sys_path()
