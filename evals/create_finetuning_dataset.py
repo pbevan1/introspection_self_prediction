@@ -25,7 +25,6 @@ from evals.load.lazy_object_level_llm_extraction import (
     lazy_add_response_property_to_object_level,
 )
 from evals.locations import EXP_DIR
-from evals.utils import GEMINI_MODELS
 
 CONFIG_PATH = "conf"
 
@@ -33,8 +32,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 def generate_finetuning_jsonl(
-    main_cfg: DictConfig, path: Path, finetune_models: str, filename: str = "dataset.jsonl"
-) -> tuple[Path, Path]:
+    main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl"
+) -> tuple[Path, Path]:  # TODO clean up and remove unneeded argument from here and the sweep and configs
     """Generate a jsonl file for finetuning.
 
     This reads in all config files in the directory, and for each adds loads the base data and generates the messages for finetuning.
@@ -47,8 +46,7 @@ def generate_finetuning_jsonl(
         Path: Path to the generated jsonl file.
     """
 
-    finetune_models = set(finetune_models.split(","))
-    should_create_gemini_dataset = True # Always create Gemini dataset
+    should_create_gemini_dataset = True  # Always create Gemini dataset
 
     if not path.exists():
         raise FileNotFoundError(f"Path {path} does not exist.")
@@ -387,7 +385,7 @@ def enforce_unique_strings(path_to_jsonl, random_seed=0):
 @hydra.main(version_base=None, config_path=CONFIG_PATH, config_name="config_finetuning_dataset")
 def main(cfg: DictConfig):
     LOGGER.info(OmegaConf.to_yaml(cfg))
-    generate_finetuning_jsonl(cfg, Path(cfg.study_dir), cfg.finetune_models)
+    generate_finetuning_jsonl(cfg, Path(cfg.study_dir))
 
 
 if __name__ == "__main__":

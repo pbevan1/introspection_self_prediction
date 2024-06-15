@@ -79,7 +79,7 @@ def wait_until_uploaded_file_id_is_ready(file_id: str) -> None:
 )
 def wait_until_finetune_job_is_ready(ft_job: FinetuneJob) -> FinetunedJobResults:
     """Returns the fine tuned model id"""
-    if ft_job.model in (COMPLETION_MODELS | GPT_CHAT_MODELS):
+    if ft_job.model in (COMPLETION_MODELS | GPT_CHAT_MODELS) or "ft:gpt-" in ft_job.model:
         while True:
             finetune_job = openai.FineTuningJob.retrieve(ft_job.id)
             if finetune_job["status"] == "succeeded":
@@ -101,7 +101,7 @@ def wait_until_finetune_job_is_ready(ft_job: FinetuneJob) -> FinetunedJobResults
             fine_tuned_model=sft_tuning_job.tuned_model_endpoint_name, result_files=None, trained_tokens=None
         )
     else:
-        raise ValueError(f"Model {ft_job.id} not supported")
+        raise ValueError(f"Model {ft_job.model} not supported")
 
 
 def confirm_to_continue(file_path: Path) -> None:
