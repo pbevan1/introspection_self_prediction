@@ -391,7 +391,7 @@ class StudyRunner:
                             f"n_train_items: {self.args.n_finetuning}",
                             train_folder,
                             val_folder,
-                            overwrite=False,
+                            overwrite=False, # they get recreated only when missing
                         )
                         finetuning_folder_paths.append(yaml_path)
         print(f"Created {len(finetuning_folder_paths)} finetuning dataset configs. Creating datasets...")
