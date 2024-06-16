@@ -388,7 +388,7 @@ class StudyRunner:
                             task,
                             prompt,
                             response_property,
-                            "",  # overrides string—not using that here
+                            f"n_train_items: {self.args.n_finetuning}",
                             train_folder,
                             val_folder,
                             overwrite=False,
