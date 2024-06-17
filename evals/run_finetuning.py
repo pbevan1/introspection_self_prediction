@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 import subprocess
 from pathlib import Path
 
@@ -85,21 +86,34 @@ def main(cfg: DictConfig) -> str:
         run_name = cfg.language_model.model + "_finetuned_" + cfg.notes
         save_path = f"{cfg.study_dir}/{run_name}"
         num_gpus = torch.cuda.device_count()
-        batch_size = cfg.batch_size or 32
-        lr = cfg.learning_rate or 1e-3
-        n_epochs = cfg.epochs or 5
-        cmd = f"""accelerate launch --config_file evals/conf/accelerate_config.yaml --mixed_precision bf16 --num_processes {num_gpus} -m \
-evals.apis.finetuning.hf_finetuning \
+        if cfg.language_model.model == "llama-3-70b-instruct":
+            batch_size = 64
+            lr = 5e-4
+            n_epochs = 5
+        else:
+            batch_size = cfg.batch_size or 32
+            lr = cfg.learning_rate or 1e-3
+            n_epochs = cfg.epochs or 5
+        lora_rank = cfg.lora_rank or 8
+        port = random.randint(10000, 20000)
+        gradient_accumulation_steps = cfg.gradient_accumulation_steps or 8
+        cmd = f"""accelerate launch --config_file evals/conf/accelerate_config.yaml \
+--mixed_precision bf16 \
+--main_process_port {port} \
+--num_processes {num_gpus} \
+--gradient_accumulation_steps {gradient_accumulation_steps} \
+-m evals.apis.finetuning.hf_finetuning \
 --config evals/conf/trl_config.yaml \
---output_dir {save_path} full_sweep_test/llama-7b-chat/ \
+--output_dir {save_path} \
 --run_name {run_name} \
 --model_name_or_path {cfg.language_model.cais_path} \
 --dataset_name {cfg.study_dir} \
---per_device_train_batch_size {batch_size//num_gpus} \
+--per_device_train_batch_size {(batch_size//num_gpus)//gradient_accumulation_steps} \
+--gradient_accumulation_steps {gradient_accumulation_steps} \
 --learning_rate {lr} \
 --num_train_epochs {n_epochs} """
-        if cfg.lora_rank is not None:
-            cmd += f"--use_peft --lora_r={cfg.lora_rank} --lora_alpha=16"
+        if lora_rank is not None:
+            cmd += f"--use_peft --lora_r={lora_rank} --lora_alpha=16"
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         output_lines = []
         for line in process.stdout:
@@ -110,7 +124,7 @@ evals.apis.finetuning.hf_finetuning \
             raise subprocess.CalledProcessError(process.returncode, cmd)
         print(f"Successfully executed: {cmd}")
         model_id = run_name
-        if cfg.lora_rank is not None:
+        if lora_rank is not None:
             cmd = f"""python evals/apis/finetuning/merge_peft_adapter.py --adapter_model_name {save_path} --base_model_name {cfg.language_model.cais_path} --output_name {save_path}_merged"""
             save_path += "_merged"
             process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
