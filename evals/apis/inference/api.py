@@ -9,14 +9,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from evals.apis.inference.anthropic_api import ANTHROPIC_MODELS, AnthropicChatModel
+from evals.apis.inference.gemini_api import GeminiModel
 from evals.apis.inference.huggingface import HuggingFaceModel
 from evals.apis.inference.model import InferenceAPIModel
 from evals.apis.inference.openai.chat import OpenAIChatModel
 from evals.apis.inference.openai.completion import OpenAICompletionModel
-from evals.apis.inference.openai.utils import COMPLETION_MODELS, GPT_CHAT_MODELS
 from evals.data_models.inference import LLMResponse
 from evals.data_models.messages import Prompt
-from evals.utils import load_secrets, setup_environment
+from evals.utils import (
+    COMPLETION_MODELS,
+    GEMINI_MODELS,
+    GPT_CHAT_MODELS,
+    load_secrets,
+    setup_environment,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -71,6 +77,8 @@ class InferenceAPI:
             prompt_history_dir=self.prompt_history_dir,
         )
 
+        self._gemini_chat = GeminiModel(prompt_history_dir=self.prompt_history_dir)
+
         self._huggingface_chat = HuggingFaceModel(prompt_history_dir=self.prompt_history_dir)
 
         self.running_cost = 0
@@ -86,6 +94,8 @@ class InferenceAPI:
             return self._openai_chat
         elif model_id in ANTHROPIC_MODELS:
             return self._anthropic_chat
+        elif model_id in GEMINI_MODELS or "projects/" in model_id:
+            return self._gemini_chat
         else:
             return self._huggingface_chat
 
@@ -100,7 +110,7 @@ class InferenceAPI:
         num_candidates = len(candidate_responses)
         valid_responses = [response for response in candidate_responses if is_valid(response.completion)]
         num_valid = len(valid_responses)
-        success_rate = num_valid / num_candidates
+        success_rate = num_valid / num_candidates if len(candidate_responses) > 0 else 0
         if success_rate < 1:
             LOGGER.info(f"`is_valid` success rate: {success_rate * 100:.2f}%")
 
@@ -171,7 +181,7 @@ class InferenceAPI:
             # trick to double rate limit for most recent model only
             if model_ids.endswith("-0613"):
                 model_ids = [model_ids, model_ids.replace("-0613", "")]
-                print(f"doubling rate limit for most recent model {model_ids}")
+                # print(f"doubling rate limit for most recent model {model_ids}")
             elif model_ids.endswith("-0914"):
                 model_ids = [model_ids, model_ids.replace("-0914", "")]
             else:

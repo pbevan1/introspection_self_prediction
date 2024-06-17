@@ -25,6 +25,8 @@ python -m scripts.sweep_full_study
 --val_only_model_configs="gpt-4"
 --tasks='{"wikipedia": ["identity", "sentiment"], "dear_abbie": ["identity", "sentiment", "dear_abbie/sympathetic_advice"]}'
 --val_tasks='{"number_triplets": ["identity", "is_even"], "english_words": ["identity", "first_character"]}'
+--other_evals='["BiasDetectAddAreYouSure", "BiasDetectAreYouAffected", "BiasDetectWhatAnswerWithout", "KwikWillYouBeCorrect"]'
+--val_other_evals='["BiasDetectAddAreYouSure", "BiasDetectAreYouAffected", "BiasDetectWhatAnswerWithout", "KwikWillYouBeCorrect"]'
 --prompt_configs='minimal'
 --n_object_train=1000
 --n_object_val=250
@@ -40,11 +42,22 @@ import subprocess
 from functools import partial
 from multiprocessing import Manager, Pool, managers
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Sequence, Type, Union
 
+from evals.create_finetuning_dataset import create_gemini_dataset_version
 from evals.create_finetuning_dataset_configs import create_finetuning_dataset_config
 from evals.locations import EXP_DIR
-from evals.utils import get_current_git_hash
+from evals.utils import MODEL_TO_FAMILY_MAP, get_current_git_hash
+from other_evals.counterfactuals.get_finetuning_samples import (
+    add_new_samples_to_existing_jsonl_and_shuffle,
+    get_other_evals_finetuning_samples,
+)
+from other_evals.counterfactuals.other_eval_csv_format import FinetuneConversation
+from other_evals.counterfactuals.runners import (
+    OtherEvalRunner,
+    eval_list_to_runner,
+    run_sweep_over_other_evals,
+)
 
 
 def json_string(arg_value):
@@ -72,24 +85,38 @@ class StudyRunner:
         self.manager = Manager()
         self.state = self.manager.dict()
         self.state_lock = self.manager.Lock()
+        # We validate the other evals here, so that we raise an error if the user tries to run an eval that doesn't exist
+        # We don't overwrite self.args.other_evals because we want to keep the original string for the state file
+        self.validated_other_evals = validate_other_evals(self.args.other_evals)
+        self.validated_val_other_evals = validate_other_evals(self.args.val_other_evals)
         self.load_or_create_state_file()
         atexit.register(self.write_state_file)
 
     # Updated to parse JSON string arguments into dictionaries
     def parse_args_into_lists_and_dicts(self):
-        for arg in [
+        string_args = [
             "model_configs",
             "val_only_model_configs",
             "prompt_configs",
             "inference_overrides",
-            "finetuning_overrides",
-        ]:
-            setattr(
-                self.args, arg, getattr(self.args, arg).replace(", ", ",").split(",") if getattr(self.args, arg) else []
-            )
+            "skip_finetuning_for_models",
+        ]
+        dict_args = ["tasks", "val_tasks"]
+        if getattr(self.args, "finetuning_overrides") and getattr(self.args, "finetuning_overrides").strip().startswith(
+            "{"
+        ):
+            dict_args.append("finetuning_overrides")
+        else:
+            string_args.append("finetuning_overrides")
 
+        for arg in string_args:
+            setattr(
+                self.args,
+                arg,
+                [x.strip() for x in getattr(self.args, arg).split(",")] if getattr(self.args, arg) else [],
+            )
         # Handling JSON string arguments for tasks and validation tasks
-        for arg in ["tasks", "val_tasks"]:
+        for arg in dict_args:
             if getattr(self.args, arg):
                 setattr(self.args, arg, json_string(getattr(self.args, arg)))
             else:
@@ -109,6 +136,18 @@ class StudyRunner:
         )
         parser.add_argument("--tasks", type=str, help="JSON string of tasks configuration")
         parser.add_argument("--val_tasks", type=str, help="JSON string of validation tasks configuration", default="{}")
+        parser.add_argument(
+            "--other_evals",
+            type=str,
+            help="List of other evals to train on. e.g. ['BiasDetectAddAreYouSure']. See ALL_EVAL_TYPES",
+            default="[]",
+        )
+        parser.add_argument(
+            "--val_other_evals",
+            type=str,
+            help="List of other evals to evaluate on. e.g. ['BiasDetectAddAreYouSure']. See ALL_EVAL_TYPES",
+            default="[]",
+        )
         parser.add_argument("--prompt_configs", type=str, help="Comma-separated list of prompt configurations.")
         parser.add_argument(
             "--inference_overrides", type=str, help="Comma-separated list of Hydra configuration overrides.", default=""
@@ -120,16 +159,16 @@ class StudyRunner:
             default="",
         )
         parser.add_argument(
-            "--n_object_train", type=int, help="Number of object level completions for training.", default=2000
+            "--n_object_train", type=int, help="Number of object level completions for training.", default=1000
         )
         parser.add_argument(
-            "--n_object_val", type=int, help="Number of object level completions for validation.", default=500
+            "--n_object_val", type=int, help="Number of object level completions for validation.", default=100
         )
         parser.add_argument(
-            "--n_finetuning", type=int, help="Number of finetuning completions to generate.", default=500
+            "--n_finetuning", type=int, help="Number of finetuning completions to generate.", default=400
         )
         parser.add_argument(
-            "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=500
+            "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=100
         )
         parser.add_argument("--skip_finetuning", action="store_true", help="Skip the finetuning step.", default=False)
         parser.add_argument(
@@ -156,11 +195,11 @@ class StudyRunner:
                 raise subprocess.CalledProcessError(process.returncode, command)
 
             last_line = output_lines[-1] if output_lines else ""
-            print(f"Successfully executed: {command}")
+            print(f"✅ Successfully executed: {command}")
             return last_line
 
         except subprocess.CalledProcessError as e:
-            print(f"Error executing {command}: {e}")
+            print(f"❌ Error executing {command}: {e}")
             raise e
 
     def parse_args_into_lists(self):
@@ -228,38 +267,47 @@ class StudyRunner:
         return command
 
     def get_meta_level_command(
-        self, model, task, response_property, prompt, limit, set, strings_path="~", overrides=""
+        self, model, task, response_property, prompt, limit, set, strings_path="~", overrides=[]
     ):
+        overrides = "\n".join(overrides)
         command = f"python -m evals.run_meta_level study_name={self.args.study_name} language_model={model} task={task} response_property={response_property} task.set={set} prompt=meta_level/{prompt} limit={limit} strings_path={strings_path} {overrides}"
         return command
 
-    def get_finetuning_command(self, model, ft_study, notes, overrides=""):
-        return f"python -m evals.run_finetuning study_name={ft_study} language_model={model} notes={notes} {' '.join(overrides)}"
+    def get_finetuning_command(
+        self, model, ft_study, notes, val_path: Path, train_path: Path, overrides: Union[dict, str] = ""
+    ):
+        if isinstance(overrides, dict):
+            if model not in overrides:  # use empty overrides if not provided for a model
+                overrides = ""
+            else:
+                overrides = overrides[model]
+                overrides = [f"{k}={v}" for k, v in overrides.items()]
+        override_str = " ".join(overrides)
+        return f"python -m evals.run_finetuning study_name={ft_study} train_path={train_path.as_posix()} val_path={val_path.as_posix()} language_model={model} notes={notes} {override_str}"
 
     def run_study(self):
         pool = Pool()  # create a pool of worker processes
 
         #### run object level completions on train ####
         object_train_commands = []
-        for model in self.args.model_configs:
-            for task in self.args.tasks.keys():
-                for prompt in self.args.prompt_configs:
-                    command = self.get_object_level_command(model, task, prompt, self.args.n_object_train, "train")
-                    # check if we need to run this command and set up the state
-                    if command not in self.state["object_train_runs"]:
-                        with self.state_lock:
+        with self.state_lock:
+            for model in self.args.model_configs:
+                for task in self.args.tasks.keys():
+                    for prompt in self.args.prompt_configs:
+                        command = self.get_object_level_command(model, task, prompt, self.args.n_object_train, "train")
+                        # check if we need to run this command and set up the state
+                        if command not in self.state["object_train_runs"]:
                             self.state["object_train_runs"].update(
                                 self.turn_nested_dictionary_into_multiprocessing_dict(
                                     {command: {"status": "incomplete"}}
                                 )
                             )
-                    elif self.state["object_train_runs"][command]["status"] == "complete":
-                        print(f"Skipping {command} because it is already complete.")
-                    # save other args to the state file
-                    with self.state_lock:
+                        elif self.state["object_train_runs"][command]["status"] == "complete":
+                            print(f"Skipping {command} because it is already complete.")
+                        # save other args to the state file
                         self.state["object_train_runs"][command].update({"model": model, "task": task, "set": "train"})
-                    self.write_state_file()
-                    object_train_commands.append(command)
+                        object_train_commands.append(command)
+        self.write_state_file()
 
         pool.map(partial(run_object_train_command, state=self.state, state_lock=self.state_lock), object_train_commands)
         self.write_state_file()
@@ -267,27 +315,26 @@ class StudyRunner:
         #### run object level completions on val ####
         object_val_commands = []
         # including validation only models here for the divergence calculation
-        for model in self.args.model_configs + self.args.val_only_model_configs:
-            for task in set(
-                list(self.args.tasks.keys()) + list(self.args.val_tasks.keys())
-            ):  # also running the validation tasks here since we'll need them later
-                for prompt in self.args.prompt_configs:
-                    command = self.get_object_level_command(model, task, prompt, self.args.n_object_val, "val")
-                    # check if we need to run this command and set up the state
-                    if command not in self.state["object_val_runs"]:
-                        with self.state_lock:
+        with self.state_lock:
+            for model in self.args.model_configs + self.args.val_only_model_configs:
+                for task in set(
+                    list(self.args.tasks.keys()) + list(self.args.val_tasks.keys())
+                ):  # also running the validation tasks here since we'll need them later
+                    for prompt in self.args.prompt_configs:
+                        command = self.get_object_level_command(model, task, prompt, self.args.n_object_val, "val")
+                        # check if we need to run this command and set up the state
+                        if command not in self.state["object_val_runs"]:
                             self.state["object_val_runs"].update(
                                 self.turn_nested_dictionary_into_multiprocessing_dict(
                                     {command: {"status": "incomplete"}}
                                 )
                             )
-                    elif self.state["object_val_runs"][command]["status"] == "complete":
-                        print(f"Skipping {command} because it is already complete.")
-                    # save other args to the state file
-                    with self.state_lock:
+                        elif self.state["object_val_runs"][command]["status"] == "complete":
+                            print(f"Skipping {command} because it is already complete.")
+                        # save other args to the state file
                         self.state["object_val_runs"][command].update({"model": model, "task": task, "set": "val"})
-                    self.write_state_file()
-                    object_val_commands.append(command)
+                        object_val_commands.append(command)
+        self.write_state_file()
 
         pool.map(partial(run_object_val_command, state=self.state, state_lock=self.state_lock), object_val_commands)
         self.write_state_file()
@@ -341,7 +388,7 @@ class StudyRunner:
                             task,
                             prompt,
                             response_property,
-                            self.args.finetuning_overrides,
+                            "",  # overrides string—not using that here
                             train_folder,
                             val_folder,
                             overwrite=False,
@@ -353,77 +400,124 @@ class StudyRunner:
         )  # we need the name of the subfolder
 
         finetuning_dataset_creation_commands = []
-        for data_folder in finetuning_study_names:
-            command = f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder}"
-            if command not in self.state["finetuning_dataset_creation"]:
-                with self.state_lock:
+        with self.state_lock:
+            for data_folder in finetuning_study_names:
+                command = f"python -m evals.create_finetuning_dataset study_name={self.args.study_name} dataset_folder={data_folder}"
+                if command not in self.state["finetuning_dataset_creation"]:
                     self.state["finetuning_dataset_creation"].update(
                         self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
                     )
-            elif self.state["finetuning_dataset_creation"][command]["status"] == "complete":
-                print(f"Skipping {data_folder} because it is already complete.")
-                continue
-            if self.args.skip_finetuning:
-                print(f"Skipping finetuning dataset creation for {data_folder} because --skip_finetuning is set.")
-                with self.state_lock:
+                elif self.state["finetuning_dataset_creation"][command]["status"] == "complete":
+                    print(f"Skipping {data_folder} because it is already complete.")
+                    continue
+                if self.args.skip_finetuning:
+                    print(f"Skipping finetuning dataset creation for {data_folder} because --skip_finetuning is set.")
                     self.state["finetuning_dataset_creation"][command].update({"status": "skipped"})
-                self.write_state_file()
-            self.write_state_file()
-            finetuning_dataset_creation_commands.append(command)
+                finetuning_dataset_creation_commands.append(command)
+        self.write_state_file()
 
-        pool.map(
-            partial(run_finetuning_dataset_creation, state=self.state, state_lock=self.state_lock),
-            finetuning_dataset_creation_commands,
-        )
+        for command in finetuning_dataset_creation_commands:
+            run_finetuning_dataset_creation(state=self.state, state_lock=self.state_lock, command=command)
         print(f"Created {len(finetuning_dataset_creation_commands)} finetuning datasets.")
+
+        #### Add other evals to the finetuning dataset ####
+        if self.validated_other_evals:
+            # tuple[model_config, list[FinetuneConversation]
+            additional_samples: list[tuple[str, list[FinetuneConversation]]] = []
+            # Generate other evals samples
+            for model_config in self.args.model_configs:
+                other_eval_train_samples = get_other_evals_finetuning_samples(
+                    evals_to_run=self.validated_other_evals,
+                    object_model_config=model_config,
+                    try_n_samples=self.args.n_object_train,
+                    # Not all samples will be succcessful, so some other evals are represented more than others
+                    # we set a limit to ensure we don't have too many samples of one particular other eval
+                    limit_per_eval=self.args.n_finetuning,
+                    cache_path=EXP_DIR / self.args.study_name / "other_evals_cache",
+                )
+                additional_samples.append((model_config, other_eval_train_samples))
+
+            # Now add the samples to the existing jsonl files
+            for model, model_samples in additional_samples:
+                existing_jsonl: Path = EXP_DIR / "finetuning" / self.args.study_name / model / "train_dataset.jsonl"
+                assert existing_jsonl.exists(), f"Existing jsonl file not found at {existing_jsonl}"
+                new_jsonl: Path = (
+                    EXP_DIR / "finetuning" / self.args.study_name / model / "other_evals_combined_train_dataset.jsonl"
+                )
+                # idempotent so we don't need state check of whether we've done this before
+                add_new_samples_to_existing_jsonl_and_shuffle(
+                    existing_jsonl_path=existing_jsonl,
+                    new_jsonl_path=new_jsonl,
+                    new_samples=model_samples,
+                )
+                # we create a Gemini dataset in any case
+                create_gemini_dataset_version(new_jsonl)
 
         #### run finetuning ####
         finetuning_commands = []
-        for model in self.args.model_configs:
-            if model in self.args.skip_finetuning_for_models:
-                print(f"Skipping finetuning for {model} because it is in --skip_finetuning_for_models.")
-                continue
-            for ft_study in finetuning_study_names:
-                command = self.get_finetuning_command(
-                    model, f"{self.args.study_name}/{ft_study}", "sweep", self.args.finetuning_overrides
-                )
-                if command not in self.state["finetuning_runs"]:
-                    with self.state_lock:
+        with self.state_lock:
+            for model in self.args.model_configs:
+                if model in self.args.skip_finetuning_for_models:
+                    print(f"Skipping finetuning for {model} because it is in --skip_finetuning_for_models.")
+                    continue
+                for ft_study in finetuning_study_names:
+                    ft_study_path = f"{self.args.study_name}/{ft_study}"
+                    finetuned_folder_path: Path = EXP_DIR / "finetuning" / ft_study_path
+
+                    ft_format = "-format_gemini" if MODEL_TO_FAMILY_MAP.get(model, "unknown") == "gemini" else ""
+                    default_train_fname = f"train_dataset{ft_format}.jsonl"
+                    default_val_fname = f"val_dataset{ft_format}.jsonl"
+                    other_evals_fname = f"other_evals_combined_train_dataset{ft_format}.jsonl"
+                    # Pass the correct train path, depending on whether we are have other evals or not
+                    train_path = (
+                        finetuned_folder_path / other_evals_fname
+                        if self.validated_other_evals
+                        else finetuned_folder_path / default_train_fname
+                    )
+                    # currently not adding other evals to the val dataset
+                    val_path = finetuned_folder_path / default_val_fname
+                    command = self.get_finetuning_command(
+                        model,
+                        ft_study_path,
+                        notes="sweep",
+                        val_path=val_path,
+                        train_path=train_path,
+                        overrides=self.args.finetuning_overrides,
+                    )
+                    if command not in self.state["finetuning_runs"]:
                         self.state["finetuning_runs"].update(
                             self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
                         )
-                elif self.state["finetuning_runs"][command]["status"] == "complete":
-                    print(f"Skipping {command} because it is already complete.")
-                    continue
-                if self.args.skip_finetuning:
-                    print(f"Skipping finetuning for {model} because --skip_finetuning is set.")
-                    with self.state_lock:
+                    elif self.state["finetuning_runs"][command]["status"] == "complete":
+                        print(f"Skipping {command} because it is already complete.")
+                        continue
+                    if self.args.skip_finetuning:
+                        print(f"Skipping finetuning for {model} because --skip_finetuning is set.")
                         self.state["finetuning_runs"][command].update({"status": "skipped"})
-                    self.write_state_file()
-                    continue
-                self.write_state_file()
-                finetuning_commands.append(command)
+                        continue
+                    finetuning_commands.append(command)
+        self.write_state_file()
 
         pool.map(partial(run_finetuning_command, state=self.state, state_lock=self.state_lock), finetuning_commands)
         self.write_state_file()
 
         #### run object level completions on val with finetuned models ####
         ft_object_val_commands = []
-        for model in self.get_finetuned_model_configs():  # all the others should be done above
-            for task, _ in combine_dicts_of_lists([self.args.tasks, self.args.val_tasks]).items():
-                for prompt in self.args.prompt_configs:
-                    command = self.get_object_level_command(model, task, prompt, self.args.n_object_val, "val")
-                    if command not in self.state["ft_object_val_runs"]:
-                        with self.state_lock:
+        with self.state_lock:
+            for model in self.get_finetuned_model_configs():  # all the others should be done above
+                for task, _ in combine_dicts_of_lists([self.args.tasks, self.args.val_tasks]).items():
+                    for prompt in self.args.prompt_configs:
+                        command = self.get_object_level_command(model, task, prompt, self.args.n_object_val, "val")
+                        if command not in self.state["ft_object_val_runs"]:
                             self.state["ft_object_val_runs"].update(
                                 self.turn_nested_dictionary_into_multiprocessing_dict(
                                     {command: {"status": "incomplete"}}
                                 )
                             )
-                    elif self.state["ft_object_val_runs"][command]["status"] == "complete":
-                        print(f"Skipping {command} because it is already complete.")
-                    self.write_state_file()
-                    ft_object_val_commands.append(command)
+                        elif self.state["ft_object_val_runs"][command]["status"] == "complete":
+                            print(f"Skipping {command} because it is already complete.")
+                        ft_object_val_commands.append(command)
+        self.write_state_file()
 
         pool.map(
             partial(run_ft_object_val_command, state=self.state, state_lock=self.state_lock), ft_object_val_commands
@@ -432,24 +526,34 @@ class StudyRunner:
 
         #### run meta level completions on val ####
         meta_val_commands = []
-        for model in self.args.model_configs + self.get_finetuned_model_configs() + self.args.val_only_model_configs:
-            for task, response_properties in combine_dicts_of_lists([self.args.tasks, self.args.val_tasks]).items():
-                for response_property in response_properties:
-                    for prompt in self.args.prompt_configs:
-                        # pull the divergent strings
-                        divergent_strings_path = self.state["divergent_strings"][task]["strings_path"]
-                        command = self.get_meta_level_command(
-                            model, task, response_property, prompt, self.args.n_meta_val, "val", divergent_strings_path
-                        )
-                        if command not in self.state["meta_val_runs"]:
-                            with self.state_lock:
+        with self.state_lock:
+            for model in (
+                self.args.model_configs + self.get_finetuned_model_configs() + self.args.val_only_model_configs
+            ):
+                for task, response_properties in combine_dicts_of_lists([self.args.tasks, self.args.val_tasks]).items():
+                    for response_property in response_properties:
+                        for prompt in self.args.prompt_configs:
+                            # pull the divergent strings
+                            divergent_strings_path = self.state["divergent_strings"][task]["strings_path"]
+                            command = self.get_meta_level_command(
+                                model,
+                                task,
+                                response_property,
+                                prompt,
+                                self.args.n_meta_val,
+                                "val",
+                                divergent_strings_path,
+                            )
+                            if command not in self.state["meta_val_runs"]:
                                 self.state["meta_val_runs"].update(
                                     self.turn_nested_dictionary_into_multiprocessing_dict(
                                         {command: {"status": "incomplete"}}
                                     )
                                 )
-                        # save other args to the state file
-                        with self.state_lock:
+                            elif self.state["meta_val_runs"][command]["status"] == "complete":
+                                print(f"Skipping {command} because it is already complete.")
+                            # save other args to the state file
+
                             self.state["meta_val_runs"][command].update(
                                 {
                                     "model": model,
@@ -458,11 +562,35 @@ class StudyRunner:
                                     "set": "val",
                                 }
                             )
-                        self.write_state_file()
-                        meta_val_commands.append(command)
+                            meta_val_commands.append(command)
+        self.write_state_file()
 
         pool.map(partial(run_meta_val_command, state=self.state, state_lock=self.state_lock), meta_val_commands)
         self.write_state_file()
+
+        if self.validated_val_other_evals:
+            print(f"Running evaluation on other evals... {self.validated_val_other_evals}")
+            object_level_configs: list[str] = self.args.model_configs + self.args.val_only_model_configs
+
+            meta_level_configs: list[str] = (
+                self.args.model_configs + self.get_finetuned_model_configs() + self.args.val_only_model_configs
+            )
+
+            object_and_meta = [
+                (object_model, meta_model) for object_model in object_level_configs for meta_model in meta_level_configs
+            ]
+
+            other_evals_limit: int = self.args.n_meta_val
+            other_evals_path = Path(EXP_DIR / self.args.study_name) / "other_evals"
+            # TODO: Possibly run all sweeps in parallel, but need to silence tqdm output
+            # Creates csv files for each eval in the other_evals_list, which you can view the heatmap of with the function plot_heatmap_with_ci
+            run_sweep_over_other_evals(
+                eval_list=self.validated_val_other_evals,
+                object_and_meta_configs=object_and_meta,
+                limit=other_evals_limit,
+                study_folder=other_evals_path,
+                cache_path=EXP_DIR / self.args.study_name / "other_evals_cache",
+            )
 
         pool.close()  # close the pool of worker processes
         pool.join()  # wait for all processes to finish
@@ -577,6 +705,14 @@ def run_meta_val_command(command, state, state_lock):
             state["meta_val_runs"][command].update({"status": "failed"})
         print(f"Failed to run {command}: {e}")
         raise e
+
+
+def validate_other_evals(other_evals_arg: str) -> Sequence[Type[OtherEvalRunner]]:
+    ### Other evals is just a list of strings
+    other_evals: list[str] = eval(other_evals_arg)
+    assert isinstance(other_evals, list), f"{other_evals_arg} is not a list"
+    other_evals_types = eval_list_to_runner(other_evals)
+    return other_evals_types
 
 
 def run_command(command, state, state_lock):

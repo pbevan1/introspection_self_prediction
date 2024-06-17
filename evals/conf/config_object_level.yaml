@@ -9,6 +9,7 @@ hydra:
       level: INFO
 
 defaults:
+  - _self_
   - prompt: object_level/minimal
   - language_model: gpt-3.5-turbo
   - task: wikipedia
@@ -16,7 +17,7 @@ defaults:
 # Common Params
 study_name: ???
 study_dir: ${experiment_folder_location:/${study_name}}
-exp_dir: ${sanitize:${study_dir}/object_level_${language_model.model}_${prompt.method}_prompt_${task.name}_${task.set}_task}_${note}_note
+exp_dir: ${study_dir}/${sanitize:object_level_${language_model.model}_${prompt.method}_prompt_${task.name}_${task.set}_task}_${note}_note
 note: "" # natural language description of the note of this run. Can be anything.
 seed: 0
 limit: 500
@@ -33,7 +34,7 @@ prompt_history_dir: ${exp_dir}/prompt_history
 # Model
 language_model:
   temperature: 0.0
-  logprobs: 2
+  logprobs: 0
 
 task:
   num: ${limit}

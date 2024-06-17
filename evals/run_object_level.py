@@ -3,7 +3,6 @@
 import asyncio
 import csv
 import logging
-import shutil
 import traceback
 from pathlib import Path
 from string import Template
@@ -12,6 +11,7 @@ from typing import Optional
 import hydra
 import pandas as pd
 from omegaconf import DictConfig, OmegaConf
+from tenacity import RetryError
 
 from evals.apis.inference.api import InferenceAPI
 from evals.apis.inference.cache_manager import CacheManager
@@ -170,32 +170,43 @@ async def async_main(cfg: DictConfig):
     # load dataset and save to file
     exp_dir = Path(cfg.exp_dir)
     exp_dir.mkdir(parents=True, exist_ok=True)
-    if cfg.strings_path is not None and cfg.strings_path != "none":
-        LOGGER.info(f"Using strings from {cfg.strings_path}. Not generating any new ones.")
-        # copy the file to the experiment directory
-        shutil.copy(cfg.strings_path, exp_dir / f"data{cfg.seed}.csv")
-        filename = exp_dir / f"data{cfg.seed}.csv"
+
+    filename = exp_dir / f"data{cfg.seed}.csv"
+    if not filename.exists() or cfg.reset:
+        LOGGER.info(f"File {filename} does not exist. Creating...")
+        data = load_dataset(
+            path=cfg.task.dataset_path,
+            seed=cfg.seed,
+            shuffle=cfg.task.shuffle,
+            n=cfg.task.num,
+            n_samples=cfg.n_samples,
+            filter_strings_path=cfg.task.get("filter_strings_path", None),
+        )
+        if cfg.strings_path is not None and cfg.strings_path != "none":
+            LOGGER.info(f"Using strings from {cfg.strings_path}. Filtering csv to only include these strings.")
+            strings_df = pd.read_csv(cfg.strings_path)
+            before_len = len(data)
+            allowed_strings = set(strings_df["string"])
+            data = data[data["string"].isin(allowed_strings)]
+            after_len = len(data)
+            LOGGER.info(f"Filtered data from {before_len} to {after_len} based on strings.")
+        create_data_file(data, filename)
     else:
-        filename = exp_dir / f"data{cfg.seed}.csv"
-        if not filename.exists() or cfg.reset:
-            LOGGER.info(f"File {filename} does not exist. Creating...")
-            data = load_dataset(
-                path=cfg.task.dataset_path,
-                seed=cfg.seed,
-                shuffle=cfg.task.shuffle,
-                n=cfg.task.num,
-                n_samples=cfg.n_samples,
-                filter_strings_path=cfg.task.get("filter_strings_path", None),
-            )
-            create_data_file(data, filename)
+        LOGGER.info(f"File {filename} exists. Will not recreate.")
 
     # run dataset (with retry)
-    complete = await async_function_with_retry(
-        run_dataset,
-        filename,
-        dataset_runner,
-        limit=cfg.limit,
-    )
+    try:
+        complete = await async_function_with_retry(
+            run_dataset,
+            filename,
+            dataset_runner,
+            limit=cfg.limit,
+        )
+    except RetryError as e: # make sure to reraise the proper error not the one from the async function
+        LOGGER.error(f"Failed with error {e}")
+        LOGGER.error(traceback.format_exc())
+        LOGGER.error("Failed to complete dataset—at least one row is not completed.")
+        complete = False
     print(exp_dir)  # print the experiment directory for scripting purposes
     return complete
 

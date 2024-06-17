@@ -32,13 +32,17 @@ def create_finetuning_dataset_config(
     val_base_dir: str,
     overwrite: bool = True,
 ) -> Path:
+    model_config = model_config.replace("/", "-")
     # Finetuning folder—organized by source model. The folder then contains many different tasks etc.
     ft_exp_dir = EXP_DIR / "finetuning" / study_name / model_config
     ft_exp_dir.mkdir(parents=True, exist_ok=True)
 
     name = f"{model_config.replace('/', '-')}_{task_config.replace('/', '-')}_{response_property_config.replace('/', '-')}_{prompt_config.replace('/', '-')}"  # name of the config. We need to replace the / in the prompt config to avoid issues with the file path.
 
-    overrides_str = " ".join(overrides)
+    if isinstance(overrides, list):
+        overrides_str = "\n".join(overrides)
+    else:
+        overrides_str = overrides
 
     if "meta_level/" not in prompt_config:  # we need to load the meta level prompt
         prompt_config = f"meta_level/{prompt_config}"

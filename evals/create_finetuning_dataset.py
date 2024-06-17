@@ -31,7 +31,9 @@ CONFIG_PATH = "conf"
 LOGGER = logging.getLogger(__name__)
 
 
-def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl") -> tuple[Path, Path]:
+def generate_finetuning_jsonl(
+    main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl"
+) -> tuple[Path, Path]:  # TODO clean up and remove unneeded argument from here and the sweep and configs
     """Generate a jsonl file for finetuning.
 
     This reads in all config files in the directory, and for each adds loads the base data and generates the messages for finetuning.
@@ -43,6 +45,8 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
     Returns:
         Path: Path to the generated jsonl file.
     """
+
+    should_create_gemini_dataset = True  # Always create Gemini dataset
 
     if not path.exists():
         raise FileNotFoundError(f"Path {path} does not exist.")
@@ -74,6 +78,10 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
         train_filename = cfg.name + "_train_" + filename
         val_filename = cfg.name + "_val_" + filename
 
+        # strip / in case one snuck in
+        train_filename = train_filename.replace("/", "-")
+        val_filename = val_filename.replace("/", "-")
+
         # do we have the file?
         if (path / train_filename).exists():
             LOGGER.info(f"File {filename} already exists. Overwriting.")
@@ -91,12 +99,14 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
         val_filepaths.append(val_filepath)
 
     # merge the files into a single one
-    with open(path / ("train_" + filename), "w") as outfile:
+    merged_train_path = path / ("train_" + filename)
+    with open(merged_train_path, "w") as outfile:
         for train_filepath in train_filepaths:
             with open(train_filepath, "r") as infile:
                 outfile.write(infile.read())
 
-    with open(path / ("val_" + filename), "w") as outfile:
+    merged_val_path = path / ("val_" + filename)
+    with open(merged_val_path, "w") as outfile:
         for val_filepath in val_filepaths:
             with open(val_filepath, "r") as infile:
                 outfile.write(infile.read())
@@ -109,7 +119,29 @@ def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = 
     LOGGER.info(
         f"Generated {len(train_filepaths)} datasets and saved to {train_filepath.relative_to(EXP_DIR)} & {val_filepath.relative_to(EXP_DIR)}"
     )
+
+    if should_create_gemini_dataset:
+        for path in [merged_train_path, merged_val_path]:
+            create_gemini_dataset_version(path)
+        LOGGER.info("Created gemini versions of the datasets.")
+
     return train_filepath, val_filepath
+
+
+def create_gemini_dataset_version(path: Path):
+    with open(path, "r") as f:
+        data = [json.loads(x) for x in f.readlines()]
+
+    new_path = path.with_stem(path.stem + "-format_gemini")
+    new_data = []
+    for d in data:
+        prompt = Prompt(**d)
+        new_data.append(prompt.gemini_finetuning_format())
+
+    with open(new_path, "w") as f:
+        for d in new_data:
+            f.write(d)
+            f.write("\n")
 
 
 def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_filepath: Path) -> None:

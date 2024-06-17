@@ -62,6 +62,9 @@ COMPLIANCE_CHECKS = {
     "not_number": lambda x: not x.isnumeric(),
     "not_true_false": lambda x: clean_string(x) not in ["true", "false"],
     "not_sympathetic": lambda x: clean_string(x) not in ["sympathetic", "unsymphathetic"],
+    "not_single_character": lambda x: len(clean_string(x)) != 1,
+    "cauchy": lambda x: "Cauchy Cauchy Cauchy" in x,  # Gemini something just likes to output "Cauchy" over and over
+    "not_multiple_choice_answer": lambda x: clean_string(x) not in set("abcdefghijklmnopqrstuvwxyz"),
 }
 
 COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
@@ -90,6 +93,7 @@ COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
         "unrelated",
         "next",
         "asterisk",
+        "cauchy",
     ],
     "refusal": [
         "not_single_word",
@@ -114,13 +118,15 @@ COMPLIANCE_CHECKS_GROUPS = {  # which groups of compliance checks to apply?
         "unrelated",
     ],
     "base_model_fails": ["system"],
-    "single_word": ["not_single_word"],
     "sentiment": ["not_sentiment"],
     "lexical_category": ["lexical_category"],
     "kiki_bouba": ["kiki_bouba"],
     "numeric": ["not_number"],
     "true_false": ["not_true_false"],
     "sympathetic": ["not_sympathetic"],
+    "single_character": ["not_single_character"],
+    "single_word": ["not_single_word", "sorry"],
+    "multiple_choice": ["not_multiple_choice_answer"],
 }
 
 
