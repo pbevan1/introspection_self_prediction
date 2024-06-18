@@ -52,7 +52,16 @@ class GeminiModel(InferenceAPIModel):
 
     @retry(
         # Retry if we get a rate limit error
-        retry=retry_if_exception_type((google.api_core.exceptions.ResourceExhausted)),
+        # api_core.exceptions.ServiceUnavailable,
+        # api_core.exceptions.Unknown,
+        retry=retry_if_exception_type(
+            (
+                google.api_core.exceptions.ResourceExhausted,
+                google.api_core.exceptions.ServiceUnavailable,
+                google.api_core.exceptions.Unknown,
+                google.api_core.exceptions.InternalServerError,
+            )
+        ),
         wait=wait_fixed(30),
     )
     async def _make_api_call(
@@ -160,26 +169,23 @@ class GeminiModel(InferenceAPIModel):
                     )
             except vertexai.generative_models._generative_models.ResponseValidationError as e:
                 exc = e
-                LOGGER.warn(f"Encountered ResponseValidationError. Retrying now. (Attempt {i})")
-                if i == 5:
-                    LOGGER.warn(
-                        "This prompt is causing anomalous behavior. Treating this as a safety issue and skipping\n",
-                        prompt.gemini_format_text(),
+                LOGGER.warn(
+                    "This prompt is causing anomalous behavior. Treating this as a safety issue and skipping\n",
+                    prompt.gemini_format_text(),
+                )
+                responses = [
+                    LLMResponse(
+                        model_id=model_ids[0],
+                        completion="",
+                        # sometimes returns empty because of safety block
+                        stop_reason="safety",
+                        api_duration=0.0,
+                        duration=0.0,
+                        cost=0.0,
+                        logprobs=[],  # HACK no logprobs
                     )
-                    responses = [
-                        LLMResponse(
-                            model_id=model_ids[0],
-                            completion="",
-                            # sometimes returns empty because of safety block
-                            stop_reason="safety",
-                            api_duration=0.0,
-                            duration=0.0,
-                            cost=0.0,
-                            logprobs=[],  # HACK no logprobs
-                        )
-                    ]
-                    break
-                await asyncio.sleep(1.5**i)
+                ]
+                break
             except Exception as e:
                 exc = e
                 error_info = f"Exception Type: {type(e).__name__}, Error Details: {str(e)}, Traceback: {format_exc()}"
