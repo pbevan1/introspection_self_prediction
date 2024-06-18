@@ -32,6 +32,7 @@ python -m scripts.sweep_full_study
 --n_object_val=250
 --n_meta_val=50
 --skip_finetuning
+--finetuning_overrides='{"gpt-3.5-turbo":{"epochs":1,"learning_rate":5,"batch_size":5},"gpt-4":{"epochs":1,"learning_rate":5,"batch_size":5},"gemini-1.0-pro":{"epochs":1}}'
 ```
 """
 
@@ -155,7 +156,7 @@ class StudyRunner:
         parser.add_argument(
             "--finetuning_overrides",
             type=str,
-            help="Comma-separated list of Hydra configuration overrides.",
+            help="JSON formated list of Hydra configuration overrides. e.g. {'gpt-3.5-turbo': {'epochs': 1}}",
             default="",
         )
         parser.add_argument(
