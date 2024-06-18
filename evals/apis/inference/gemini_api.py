@@ -6,6 +6,7 @@ from traceback import format_exc
 from typing import Any, Coroutine, Optional
 
 import google
+from tenacity import retry, retry_if_exception_type, wait_fixed
 import vertexai
 import vertexai.preview.generative_models as generative_models
 from aiolimiter import AsyncLimiter
@@ -49,6 +50,11 @@ class GeminiModel(InferenceAPIModel):
         self.prompt_history_dir = prompt_history_dir
         self.limiter = AsyncLimiter(120, 60)  # 60 requests per 60 seconds
 
+    @retry(
+    # Retry if we get a rate limit error
+    retry=retry_if_exception_type((google.api_core.exceptions.ResourceExhausted)),
+    wait=wait_fixed(30),
+    )
     async def _make_api_call(
         self,
         model_ids: list[str],
@@ -145,16 +151,14 @@ class GeminiModel(InferenceAPIModel):
         self, model_ids: list[str], prompt, print_prompt_and_response: bool, max_attempts: int, **kwargs
     ) -> Coroutine[Any, Any, list[LLMResponse]]:
         responses: Optional[list[LLMResponse]] = None
+        e: Optional[Exception] = None
         for i in range(max_attempts):
             try:
                 async with self.limiter:
                     responses = await self._make_api_call(
                         model_ids, prompt, print_prompt_and_response, max_attempts, **kwargs
                     )
-            except google.api_core.exceptions.ResourceExhausted:
-                LOGGER.warn(f"Encountered ResourceExhausted error. Retrying now. (Attempt {i})")
-                await asyncio.sleep(1.5**i)
-            except vertexai.generative_models._generative_models.ResponseValidationError:
+            except vertexai.generative_models._generative_models.ResponseValidationError as e:
                 LOGGER.warn(f"Encountered ResponseValidationError. Retrying now. (Attempt {i})")
                 if i == 5:
                     LOGGER.warn(
@@ -183,6 +187,8 @@ class GeminiModel(InferenceAPIModel):
                 break
 
         if responses is None:
-            raise RuntimeError(f"Failed to get a response from the API after {max_attempts} attempts.")
+            if e is not None:
+                LOGGER.error(f"Failed to get a response from the API after {max_attempts} attempts. Error: {e}, prompt: {prompt=}, {model_ids=}")
+            raise RuntimeError(f"Failed to get a response from the API after {max_attempts} attempts. prompt: {prompt}, prompt: {prompt=}, {model_ids=}")
 
         return responses
