@@ -480,7 +480,7 @@ class StudyRunner:
                     command = self.get_finetuning_command(
                         model,
                         ft_study_path,
-                        notes="sweep",
+                        notes=ft_study[-5:0],  # last 5 characters of the study name
                         val_path=val_path,
                         train_path=train_path,
                         overrides=self.args.finetuning_overrides,
