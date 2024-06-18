@@ -6,10 +6,10 @@ from traceback import format_exc
 from typing import Any, Coroutine, Optional
 
 import google
+from tenacity import retry, retry_if_exception_type, wait_fixed
 import vertexai
 import vertexai.preview.generative_models as generative_models
 from aiolimiter import AsyncLimiter
-from tenacity import retry, retry_if_exception_type, wait_fixed
 from vertexai.generative_models import FinishReason, GenerativeModel
 
 from evals.apis.inference.model import InferenceAPIModel
@@ -151,14 +151,15 @@ class GeminiModel(InferenceAPIModel):
         self, model_ids: list[str], prompt, print_prompt_and_response: bool, max_attempts: int, **kwargs
     ) -> Coroutine[Any, Any, list[LLMResponse]]:
         responses: Optional[list[LLMResponse]] = None
-        e: Optional[Exception] = None
+        exc: Optional[Exception] = None
         for i in range(max_attempts):
             try:
                 async with self.limiter:
                     responses = await self._make_api_call(
                         model_ids, prompt, print_prompt_and_response, max_attempts, **kwargs
                     )
-            except vertexai.generative_models._generative_models.ResponseValidationError:
+            except vertexai.generative_models._generative_models.ResponseValidationError as e:
+                exc = e
                 LOGGER.warn(f"Encountered ResponseValidationError. Retrying now. (Attempt {i})")
                 if i == 5:
                     LOGGER.warn(
@@ -180,6 +181,7 @@ class GeminiModel(InferenceAPIModel):
                     break
                 await asyncio.sleep(1.5**i)
             except Exception as e:
+                exc = e
                 error_info = f"Exception Type: {type(e).__name__}, Error Details: {str(e)}, Traceback: {format_exc()}"
                 LOGGER.warn(f"Encountered API error: {error_info}.\nRetrying now. (Attempt {i})")
                 await asyncio.sleep(1.5**i)
@@ -187,9 +189,9 @@ class GeminiModel(InferenceAPIModel):
                 break
 
         if responses is None:
-            if e is not None:
+            if exc is not None:
                 LOGGER.error(
-                    f"Failed to get a response from the API after {max_attempts} attempts. Error: {e}, prompt: {prompt=}, {model_ids=}"
+                    f"Failed to get a response from the API after {max_attempts} attempts. Error: {exc}, prompt: {prompt=}, {model_ids=}"
                 )
             raise RuntimeError(
                 f"Failed to get a response from the API after {max_attempts} attempts. prompt: {prompt}, prompt: {prompt=}, {model_ids=}"
