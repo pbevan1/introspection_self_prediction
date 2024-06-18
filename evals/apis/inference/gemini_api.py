@@ -6,10 +6,10 @@ from traceback import format_exc
 from typing import Any, Coroutine, Optional
 
 import google
-from tenacity import retry, retry_if_exception_type, wait_fixed
 import vertexai
 import vertexai.preview.generative_models as generative_models
 from aiolimiter import AsyncLimiter
+from tenacity import retry, retry_if_exception_type, wait_fixed
 from vertexai.generative_models import FinishReason, GenerativeModel
 
 from evals.apis.inference.model import InferenceAPIModel
@@ -51,9 +51,9 @@ class GeminiModel(InferenceAPIModel):
         self.limiter = AsyncLimiter(120, 60)  # 60 requests per 60 seconds
 
     @retry(
-    # Retry if we get a rate limit error
-    retry=retry_if_exception_type((google.api_core.exceptions.ResourceExhausted)),
-    wait=wait_fixed(30),
+        # Retry if we get a rate limit error
+        retry=retry_if_exception_type((google.api_core.exceptions.ResourceExhausted)),
+        wait=wait_fixed(30),
     )
     async def _make_api_call(
         self,
@@ -158,7 +158,7 @@ class GeminiModel(InferenceAPIModel):
                     responses = await self._make_api_call(
                         model_ids, prompt, print_prompt_and_response, max_attempts, **kwargs
                     )
-            except vertexai.generative_models._generative_models.ResponseValidationError as e:
+            except vertexai.generative_models._generative_models.ResponseValidationError:
                 LOGGER.warn(f"Encountered ResponseValidationError. Retrying now. (Attempt {i})")
                 if i == 5:
                     LOGGER.warn(
@@ -188,7 +188,11 @@ class GeminiModel(InferenceAPIModel):
 
         if responses is None:
             if e is not None:
-                LOGGER.error(f"Failed to get a response from the API after {max_attempts} attempts. Error: {e}, prompt: {prompt=}, {model_ids=}")
-            raise RuntimeError(f"Failed to get a response from the API after {max_attempts} attempts. prompt: {prompt}, prompt: {prompt=}, {model_ids=}")
+                LOGGER.error(
+                    f"Failed to get a response from the API after {max_attempts} attempts. Error: {e}, prompt: {prompt=}, {model_ids=}"
+                )
+            raise RuntimeError(
+                f"Failed to get a response from the API after {max_attempts} attempts. prompt: {prompt}, prompt: {prompt=}, {model_ids=}"
+            )
 
         return responses
