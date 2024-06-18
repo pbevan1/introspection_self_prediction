@@ -52,7 +52,15 @@ class GeminiModel(InferenceAPIModel):
 
     @retry(
         # Retry if we get a rate limit error
-        retry=retry_if_exception_type((google.api_core.exceptions.ResourceExhausted)),
+        # api_core.exceptions.ServiceUnavailable,
+        # api_core.exceptions.Unknown,
+        retry=retry_if_exception_type(
+            (
+                google.api_core.exceptions.ResourceExhausted,
+                google.api_core.exceptions.ServiceUnavailable,
+                google.api_core.exceptions.Unknown,
+            )
+        ),
         wait=wait_fixed(30),
     )
     async def _make_api_call(
