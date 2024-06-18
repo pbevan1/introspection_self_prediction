@@ -59,6 +59,7 @@ class GeminiModel(InferenceAPIModel):
                 google.api_core.exceptions.ResourceExhausted,
                 google.api_core.exceptions.ServiceUnavailable,
                 google.api_core.exceptions.Unknown,
+                google.api_core.exceptions.InternalServerError,
             )
         ),
         wait=wait_fixed(30),
