@@ -49,8 +49,8 @@ def load_all_other_eval_csvs(results_path: str | Path) -> Sequence[OtherEvalCSVF
     - csv_path: str, the path to the CSV file.
     """
     all_files_ending_with_csv = list(Path(results_path).rglob("*.csv"))
-    assert len(all_files_ending_with_csv) > 0, f"No CSV files found in {results_path}."
-    print(f"Found {len(all_files_ending_with_csv)} CSV files.")
+    # assert len(all_files_ending_with_csv) > 0, f"No CSV files found in {results_path}."
+    print(f"Found {len(all_files_ending_with_csv)} other evals CSV files.")
     parsed: list[OtherEvalCSVFormat] = []
     for csv_path in all_files_ending_with_csv:
         data = pd.read_csv(csv_path)
