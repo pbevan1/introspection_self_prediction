@@ -325,6 +325,8 @@ def get_folders_matching_config_key(exp_folder: Path, conditions: Dict) -> List[
             config_dict[subfolder] = config
         except ValueError:
             pass
+        except FileNotFoundError:
+            pass
     # filter the subfolders
     matching_folders = []
     for subfolder, config in config_dict.items():
