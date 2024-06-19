@@ -62,6 +62,7 @@ class GeminiModel(InferenceAPIModel):
                 google.api_core.exceptions.InternalServerError,
             )
         ),
+        reraise=True,
         wait=wait_fixed(30),
     )
     async def _make_api_call(
@@ -102,7 +103,7 @@ class GeminiModel(InferenceAPIModel):
             generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_ONLY_HIGH,
         }
 
-        chat = model.start_chat(history=prompt_messages[:-1])
+        chat = model.start_chat(history=prompt_messages[:-1], response_validation=False)
         response = await chat.send_message_async(
             content=prompt_messages[-1], generation_config=generation_config, safety_settings=safety_settings
         )
@@ -167,6 +168,7 @@ class GeminiModel(InferenceAPIModel):
                     responses = await self._make_api_call(
                         model_ids, prompt, print_prompt_and_response, max_attempts, **kwargs
                     )
+                    break
             except vertexai.generative_models._generative_models.ResponseValidationError as e:
                 exc = e
                 LOGGER.warn(
@@ -191,8 +193,6 @@ class GeminiModel(InferenceAPIModel):
                 error_info = f"Exception Type: {type(e).__name__}, Error Details: {str(e)}, Traceback: {format_exc()}"
                 LOGGER.warn(f"Encountered API error: {error_info}.\nRetrying now. (Attempt {i})")
                 await asyncio.sleep(1.5**i)
-            else:
-                break
 
         if responses is None:
             if exc is not None:
