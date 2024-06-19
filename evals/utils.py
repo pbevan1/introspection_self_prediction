@@ -52,6 +52,8 @@ _GPT_4_MODELS = [
     "gpt-4-32k-0613",
     "gpt-4-1106-preview",
     "gpt-4-0125-preview",
+    "gpt-4o",
+    "gpt-4o-2024-05-13",
 ]
 _GPT_TURBO_MODELS = [
     "gpt-3.5-turbo",
