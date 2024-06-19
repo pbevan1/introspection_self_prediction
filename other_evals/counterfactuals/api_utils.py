@@ -111,7 +111,14 @@ class InferenceResponse(BaseModel):
 
     @property
     def failed(self) -> bool:
-        return self.error is not None
+        if self.error is not None:
+            return True
+        if len(self.raw_responses) == 0:
+            return True
+        if len(self.raw_responses) == 1 and self.raw_responses[0] == "":
+            return True
+        return False
+
 
     @property
     def has_multiple_responses(self) -> bool:
