@@ -96,7 +96,7 @@ class Prompt(HashableBaseModel):
         line = {"messages": msgs}
         return json.dumps(line)
 
-    def gemini_format(self) -> str:
+    def gemini_format(self) -> list[str]:
         if self.is_none_in_messages():
             raise ValueError(f"Gemini chat prompts cannot have a None role. Got {self.messages}")
         messages = []
@@ -109,6 +109,7 @@ class Prompt(HashableBaseModel):
             # Gemini uses the same format as OpenAI except uses 'model' instead of 'assistant'
             elif msg.role == MessageRole.assistant:
                 messages.append(Content(parts=[Part.from_text(msg.content)], role="model"))
+        assert len(messages) > 0, f"Somehow created an empty prompt for gemini. Using: {self}"
         return messages
 
     def gemini_format_text(self) -> str:
