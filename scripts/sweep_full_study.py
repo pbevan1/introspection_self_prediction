@@ -32,6 +32,7 @@ python -m scripts.sweep_full_study
 --n_object_val=250
 --n_meta_val=50
 --skip_finetuning
+--skip_finetuned_models
 --finetuning_overrides='{"gpt-3.5-turbo":{"epochs":1,"learning_rate":5,"batch_size":5},"gpt-4":{"epochs":1,"learning_rate":5,"batch_size":5},"gemini-1.0-pro":{"epochs":1}}'
 ```
 """
@@ -172,6 +173,7 @@ class StudyRunner:
             "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=100
         )
         parser.add_argument("--skip_finetuning", action="store_true", help="Skip the finetuning step.", default=False)
+        parser.add_argument("--skip_finetuned_models", action="store_true", help="Do not run finetuned models.", default=False)
         parser.add_argument(
             "--skip_finetuning_for_models",
             type=str,
@@ -253,6 +255,8 @@ class StudyRunner:
 
     def get_finetuned_model_configs(self):
         """Pull out the config names of the finetuned models from the state file."""
+        if self.args.skip_finetuned_models: # we don't want to run finetuned models
+            return []
         return [v["ft_model_config"] for v in self.state["finetuning_runs"].values() if v["status"] == "complete"]
 
     def get_folders_by_task(self, task, set="val", block="object_val_runs"):
