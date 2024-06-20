@@ -23,6 +23,7 @@ learning_rate: ~ # the learning rate. OpenAI default is the learning rate multip
 batch_size: ~ # the batch size. OpenAI default is 3; our HugginFace default is 32. Use `~` to let the training script figure it out.
 seed: 0 # the seed for the run.
 lora_rank: ~ # the rank of LORA adapters when using LORA with HugginFace training; null or ~ to disable LORA.
+gradient_accumulation_steps: ~ # the number of gradient accumulation steps. Use `~` to let the training script figure it out.
 
 notes: ??? # notes about the run
 
