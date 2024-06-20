@@ -159,6 +159,7 @@ def main(cfg: DictConfig) -> str:
 
 def create_finetuned_model_config(cfg, ft_model_id, cais_path="~", overwrite=True):
     """Creates a model config file for the finetuned model in the config directory."""
+    assert ft_model_id != "", "Model ID cannot be empty"
     safe_model_id = ft_model_id.replace(":", "_").replace("/", "_")
     directory = CONF_DIR / "language_model" / "finetuned" / cfg.study_name
     file_path = directory / f"{safe_model_id}.yaml"
