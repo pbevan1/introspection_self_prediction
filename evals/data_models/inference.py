@@ -34,8 +34,8 @@ class LLMResponse(BaseModel):
     completion: str
     stop_reason: StopReason
     cost: float
-    duration: Optional[float] = None
-    api_duration: Optional[float] = None
+    duration: float = 0.0
+    api_duration: float = 0.0
     logprobs: Optional[List[dict[str, float]]] = None
 
     @validator("stop_reason", pre=True)
@@ -44,7 +44,7 @@ class LLMResponse(BaseModel):
             return StopReason.MAX_TOKENS
         elif v in ["stop", "stop_sequence", "end_turn"]:
             return StopReason.STOP_SEQUENCE
-        elif v in ["safety"]:
+        elif v in ["safety", "content_filter"]:
             return StopReason.SAFETY
         elif v in ["unknown", ""]:
             return StopReason.UNKNOWN

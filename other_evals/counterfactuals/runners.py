@@ -332,6 +332,8 @@ def run_sweep_over_other_evals_ids(
                 title=f"{eval_name} Percentage of Meta Response Predicted Correctly with 95% CI",
             )
         result_path = Path(study_folder) / f"{eval_name}_results.csv"
+        # make sure the folder exists
+        result_path.parent.mkdir(parents=True, exist_ok=True)
         print(f"Saving {eval_name} to {result_path}")
         df.to_csv(result_path, index=False)
 

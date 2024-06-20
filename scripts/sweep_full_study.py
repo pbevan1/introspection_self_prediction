@@ -32,6 +32,9 @@ python -m scripts.sweep_full_study
 --n_object_val=250
 --n_meta_val=50
 --skip_finetuning
+--skip_finetuned_models
+--finetuning_overrides='{"gpt-3.5-turbo":{"epochs":1,"learning_rate":5,"batch_size":5},"gpt-4":{"epochs":1,"learning_rate":5,"batch_size":5},"gemini-1.0-pro":{"epochs":1}}'
+--inference_overrides='{"gpt-3.5-turbo":{"n_samples":5},"gpt-4":{"n_samples":5}'
 ```
 """
 
@@ -109,6 +112,13 @@ class StudyRunner:
         else:
             string_args.append("finetuning_overrides")
 
+        if getattr(self.args, "inference_overrides") and getattr(self.args, "inference_overrides").strip().startswith(
+            "{"
+        ):
+            dict_args.append("inference_overrides")
+        else:
+            string_args.append("inference_overrides")
+
         for arg in string_args:
             setattr(
                 self.args,
@@ -150,12 +160,12 @@ class StudyRunner:
         )
         parser.add_argument("--prompt_configs", type=str, help="Comma-separated list of prompt configurations.")
         parser.add_argument(
-            "--inference_overrides", type=str, help="Comma-separated list of Hydra configuration overrides.", default=""
+            "--inference_overrides", type=str, help="JSON formated list of Hydra configuration overrides.", default=""
         )
         parser.add_argument(
             "--finetuning_overrides",
             type=str,
-            help="Comma-separated list of Hydra configuration overrides.",
+            help="JSON formated list of Hydra configuration overrides. e.g. {'gpt-3.5-turbo': {'epochs': 1}}",
             default="",
         )
         parser.add_argument(
@@ -171,6 +181,7 @@ class StudyRunner:
             "--n_meta_val", type=int, help="Number of meta level completions for validation.", default=100
         )
         parser.add_argument("--skip_finetuning", action="store_true", help="Skip the finetuning step.", default=False)
+        parser.add_argument("--skip_finetuned_models", action="store_true", help="Do not run finetuned models.", default=False)
         parser.add_argument(
             "--skip_finetuning_for_models",
             type=str,
@@ -252,6 +263,8 @@ class StudyRunner:
 
     def get_finetuned_model_configs(self):
         """Pull out the config names of the finetuned models from the state file."""
+        if self.args.skip_finetuned_models: # we don't want to run finetuned models
+            return []
         return [v["ft_model_config"] for v in self.state["finetuning_runs"].values() if v["status"] == "complete"]
 
     def get_folders_by_task(self, task, set="val", block="object_val_runs"):
@@ -263,12 +276,25 @@ class StudyRunner:
         ]
 
     def get_object_level_command(self, model, task, prompt, limit, set, overrides=""):
+        if isinstance(overrides, dict):
+            if model not in overrides:
+                overrides = ""
+            else:
+                overrides = overrides[model]
+                overrides = [f"{k}={v}" for k, v in overrides.items()]
+        overrides = "\n".join(overrides)
         command = f"python -m evals.run_object_level study_name={self.args.study_name} language_model={model} task={task} task.set={set} prompt=object_level/{prompt} limit={limit} {overrides}"
         return command
 
     def get_meta_level_command(
         self, model, task, response_property, prompt, limit, set, strings_path="~", overrides=[]
     ):
+        if isinstance(overrides, dict):
+            if model not in overrides:
+                overrides = ""
+            else:
+                overrides = overrides[model]
+                overrides = [f"{k}={v}" for k, v in overrides.items()]
         overrides = "\n".join(overrides)
         command = f"python -m evals.run_meta_level study_name={self.args.study_name} language_model={model} task={task} response_property={response_property} task.set={set} prompt=meta_level/{prompt} limit={limit} strings_path={strings_path} {overrides}"
         return command
@@ -388,10 +414,10 @@ class StudyRunner:
                             task,
                             prompt,
                             response_property,
-                            "",  # overrides string—not using that here
+                            f"n_train_items: {self.args.n_finetuning}",
                             train_folder,
                             val_folder,
-                            overwrite=False,
+                            overwrite=False, # they get recreated only when missing
                         )
                         finetuning_folder_paths.append(yaml_path)
         print(f"Created {len(finetuning_folder_paths)} finetuning dataset configs. Creating datasets...")
@@ -479,7 +505,7 @@ class StudyRunner:
                     command = self.get_finetuning_command(
                         model,
                         ft_study_path,
-                        notes="sweep",
+                        notes=ft_study[-5:0],  # last 5 characters of the study name
                         val_path=val_path,
                         train_path=train_path,
                         overrides=self.args.finetuning_overrides,

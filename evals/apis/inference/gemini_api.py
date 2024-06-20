@@ -6,9 +6,11 @@ from traceback import format_exc
 from typing import Any, Coroutine, Optional
 
 import google
+from tenacity import retry, retry_if_exception_type, wait_fixed
 import vertexai
 import vertexai.preview.generative_models as generative_models
 from aiolimiter import AsyncLimiter
+from tenacity import retry, retry_if_exception_type, wait_fixed
 from vertexai.generative_models import FinishReason, GenerativeModel
 
 from evals.apis.inference.model import InferenceAPIModel
@@ -49,6 +51,21 @@ class GeminiModel(InferenceAPIModel):
         self.prompt_history_dir = prompt_history_dir
         self.limiter = AsyncLimiter(120, 60)  # 60 requests per 60 seconds
 
+    @retry(
+        # Retry if we get a rate limit error
+        # api_core.exceptions.ServiceUnavailable,
+        # api_core.exceptions.Unknown,
+        retry=retry_if_exception_type(
+            (
+                google.api_core.exceptions.ResourceExhausted,
+                google.api_core.exceptions.ServiceUnavailable,
+                google.api_core.exceptions.Unknown,
+                google.api_core.exceptions.InternalServerError,
+            )
+        ),
+        reraise=True,
+        wait=wait_fixed(30),
+    )
     async def _make_api_call(
         self,
         model_ids: list[str],
@@ -67,11 +84,9 @@ class GeminiModel(InferenceAPIModel):
         model_id = model_ids[0]
 
         prompt_messages = prompt.gemini_format()
-        # system_message = next((msg["content"] for msg in prompt_messages if msg["role"] == "system"), None)
-        # Only handling prompt response for now
-        prompt_messages = [msg["content"] for msg in prompt_messages if msg["role"] != "system"]
-        assert len(prompt_messages) == 1, "Only supporting prompt response format for now."
-        prompt_file = self.create_prompt_history_file(prompt_messages[0], model_id, self.prompt_history_dir)
+        # Don't need to drop system because doesn't even get output to
+        # TODO: update this to handle multiple messages
+        prompt_file = self.create_prompt_history_file(prompt.gemini_format_text(), model_id, self.prompt_history_dir)
 
         LOGGER.debug(f"Making {model_id} call")
         vertexai.init(project=GCLOUD_PROJECT, location=GCLOUD_LOCATION)  # not expensive
@@ -89,8 +104,9 @@ class GeminiModel(InferenceAPIModel):
             generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_ONLY_HIGH,
         }
 
-        response = await model.generate_content_async(
-            contents=prompt_messages, generation_config=generation_config, safety_settings=safety_settings
+        chat = model.start_chat(history=prompt_messages[:-1], response_validation=False)
+        response = await chat.send_message_async(
+            content=prompt_messages[-1], generation_config=generation_config, safety_settings=safety_settings
         )
 
         api_duration = time.time() - api_start
@@ -146,23 +162,46 @@ class GeminiModel(InferenceAPIModel):
         self, model_ids: list[str], prompt, print_prompt_and_response: bool, max_attempts: int, **kwargs
     ) -> Coroutine[Any, Any, list[LLMResponse]]:
         responses: Optional[list[LLMResponse]] = None
+        exc: Optional[Exception] = None
         for i in range(max_attempts):
             try:
                 async with self.limiter:
                     responses = await self._make_api_call(
                         model_ids, prompt, print_prompt_and_response, max_attempts, **kwargs
                     )
-            except google.api_core.exceptions.ResourceExhausted:
-                LOGGER.warn(f"Encountered ResourceExhausted error. Retrying now. (Attempt {i})")
-                await asyncio.sleep(1.5**i)
+                    break
+            except vertexai.generative_models._generative_models.ResponseValidationError as e:
+                exc = e
+                LOGGER.warn(
+                    "This prompt is causing anomalous behavior. Treating this as a safety issue and skipping\n",
+                    prompt.gemini_format_text(),
+                )
+                responses = [
+                    LLMResponse(
+                        model_id=model_ids[0],
+                        completion="",
+                        # sometimes returns empty because of safety block
+                        stop_reason="safety",
+                        api_duration=0.0,
+                        duration=0.0,
+                        cost=0.0,
+                        logprobs=[],  # HACK no logprobs
+                    )
+                ]
+                break
             except Exception as e:
+                exc = e
                 error_info = f"Exception Type: {type(e).__name__}, Error Details: {str(e)}, Traceback: {format_exc()}"
                 LOGGER.warn(f"Encountered API error: {error_info}.\nRetrying now. (Attempt {i})")
                 await asyncio.sleep(1.5**i)
-            else:
-                break
 
         if responses is None:
-            raise RuntimeError(f"Failed to get a response from the API after {max_attempts} attempts.")
+            if exc is not None:
+                LOGGER.error(
+                    f"Failed to get a response from the API after {max_attempts} attempts. Error: {exc}, prompt: {prompt=}, {model_ids=}"
+                )
+            raise RuntimeError(
+                f"Failed to get a response from the API after {max_attempts} attempts. prompt: {prompt}, prompt: {prompt=}, {model_ids=}"
+            )
 
         return responses
