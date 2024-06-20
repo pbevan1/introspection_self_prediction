@@ -17,6 +17,8 @@ from evals.locations import EXP_DIR
 
 LOGGER = logging.getLogger(__name__)
 
+MAX_RESPONSE_LEN_FOR_MODE = 350  # number of characters before truncation is applied in the mode of N sampling
+
 LOGGING_LEVELS = {
     "critical": logging.CRITICAL,
     "error": logging.ERROR,
@@ -280,16 +282,19 @@ def collate_mode_of_n(data0_path: Path):
     assert "raw_data" in data0_path.stem, f"Data file {data0_path} does not contain 'raw_data'."
     df = pd.read_csv(data0_path)
     strings = df["string"].unique()
+    df["trunc_response"] = df["response"].str.slice(
+        0, MAX_RESPONSE_LEN_FOR_MODE
+    )  # we truncate responses since long responses are likely to be non-deterministic
     modal_rows = []
     skipped_strings = []
     for string in strings:
         string_df = df[df["string"] == string]
-        if len(string_df) > 1 & len(string_df["response"].unique()) == len(string_df):
+        if len(string_df) > 1 & string_df["trunc_response"].nunique() == len(string_df["trunc_response"]):
             # Skip strings that have only unique responses unless they are the only response
             skipped_strings.append(string)
             continue
         # pull the first row that has the modal response (so that we get the logprobs etc.)
-        modal_row = string_df[string_df["response"] == string_df["response"].mode()[0]].iloc[0]
+        modal_row = string_df[string_df["trunc_response"] == string_df["trunc_response"].mode()[0]].iloc[0]
         modal_rows.append(modal_row)
     modal_df = pd.DataFrame(modal_rows)
     modal_df.columns = df.columns
@@ -298,3 +303,9 @@ def collate_mode_of_n(data0_path: Path):
     LOGGER.info(
         f"Saved modal responses to {out_path}. {len(skipped_strings)} strings were skipped because all responses were unique."
     )
+    if skipped_strings:
+        LOGGER.warning(
+            f"Skipped strings the following strings since no modal answer could be extracted: {skipped_strings}"
+        )
+    if max([len(s) for s in df["response"]]) > MAX_RESPONSE_LEN_FOR_MODE:
+        LOGGER.warning("Some responses were truncated to {MAX_RESPONSE_LEN_FOR_MODE} characters.")
