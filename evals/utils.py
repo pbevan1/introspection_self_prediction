@@ -274,6 +274,7 @@ def collate_mode_of_n(data0_path: Path, overwrite: bool = False):
 
     Args:
         data0_path (Path): Path to the data file (ie. `raw_data0.csv`)
+        overwrite (bool, optional): Whether to overwrite the existing `data0.csv` file. Defaults to False.
 
     Writes out a `data0.csv` file with the modal response for each sample.
     If a string has only unique responses, it is discarded.
@@ -293,15 +294,15 @@ def collate_mode_of_n(data0_path: Path, overwrite: bool = False):
     skipped_strings = []
     for string in strings:
         string_df = df[df["string"] == string]
-        if len(string_df) > 1 & string_df["trunc_response"].nunique() == len(string_df["trunc_response"]):
+        if len(string_df) > 1 and string_df["trunc_response"].nunique() == len(string_df["trunc_response"]):
             # Skip strings that have only unique responses unless they are the only response
             skipped_strings.append(string)
             continue
         # pull the first row that has the modal response (so that we get the logprobs etc.)
+        # we know from above that there is at least one row
         modal_row = string_df[string_df["trunc_response"] == string_df["trunc_response"].mode()[0]].iloc[0]
         modal_rows.append(modal_row)
     modal_df = pd.DataFrame(modal_rows)
-    modal_df.columns = df.columns
     modal_df.to_csv(out_path, index=False)
     LOGGER.info(
         f"Saved modal responses to {out_path}. {len(skipped_strings)} strings were skipped because all responses were unique."
