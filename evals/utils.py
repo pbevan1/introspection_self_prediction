@@ -282,7 +282,7 @@ def collate_mode_of_n(data0_path: Path):
     assert "raw_data" in data0_path.stem, f"Data file {data0_path} does not contain 'raw_data'."
     df = pd.read_csv(data0_path)
     strings = df["string"].unique()
-    df["trunc_response"] = df["response"].str.slice(
+    df["trunc_response"] = df["response"].astype(str).str.slice(
         0, MAX_RESPONSE_LEN_FOR_MODE
     )  # we truncate responses since long responses are likely to be non-deterministic
     modal_rows = []
@@ -308,4 +308,4 @@ def collate_mode_of_n(data0_path: Path):
             f"Skipped strings the following strings since no modal answer could be extracted: {skipped_strings}"
         )
     if max([len(str(s)) for s in df["response"]]) > MAX_RESPONSE_LEN_FOR_MODE:
-        LOGGER.warning("Some responses were truncated to {MAX_RESPONSE_LEN_FOR_MODE} characters.")
+        LOGGER.warning(f"Some responses were truncated to {MAX_RESPONSE_LEN_FOR_MODE} characters.")
