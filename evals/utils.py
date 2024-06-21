@@ -269,7 +269,7 @@ def get_hparams_for_endpoints(endpoint_names):
     return out
 
 
-def collate_mode_of_n(data0_path: Path):
+def collate_mode_of_n(data0_path: Path, overwrite: bool = False):
     """After the data is collected, we need to group the data into a dataframe that contains only the modal response for multiple samples.
 
     Args:
@@ -280,6 +280,10 @@ def collate_mode_of_n(data0_path: Path):
     """
     assert data0_path.exists(), f"Data file {data0_path} does not exist."
     assert "raw_data" in data0_path.stem, f"Data file {data0_path} does not contain 'raw_data'."
+    out_path = data0_path.parent / f"{data0_path.stem.replace('raw_data', 'data')}.csv"
+    if out_path.exists() and not overwrite:
+        LOGGER.info(f"File {out_path} already exists. Will not overwrite with mode-of-N data.")
+        return
     df = pd.read_csv(data0_path)
     strings = df["string"].unique()
     df["trunc_response"] = df["response"].astype(str).str.slice(
@@ -298,7 +302,6 @@ def collate_mode_of_n(data0_path: Path):
         modal_rows.append(modal_row)
     modal_df = pd.DataFrame(modal_rows)
     modal_df.columns = df.columns
-    out_path = data0_path.parent / f"{data0_path.stem.replace('raw_data', 'data')}.csv"
     modal_df.to_csv(out_path, index=False)
     LOGGER.info(
         f"Saved modal responses to {out_path}. {len(skipped_strings)} strings were skipped because all responses were unique."
