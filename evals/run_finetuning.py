@@ -76,7 +76,9 @@ def main(cfg: DictConfig) -> str:
         params.model
     ).lower().startswith("ft:gpt"):
         if cfg.use_wandb:
-            syncer = WandbSyncer.create(project_name=str(cfg.study_name).replace("/", "_"), notes=cfg.notes)
+            # max 128 characters for project name
+            name = str(cfg.study_name).replace("/", "_")[0:128]
+            syncer = WandbSyncer.create(project_name=name, notes=cfg.notes)
             # if more_config:
             #     more_config = {k: v for k, v in [x.split("=") for x in more_config.split(",")]}
             #     syncer.update_parameters_with_dict(params=more_config)
