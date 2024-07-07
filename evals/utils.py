@@ -1,10 +1,11 @@
+import asyncio
 import importlib
 import json
 import logging
 import os
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import Awaitable, List, TypeVar
 
 import omegaconf
 import openai
@@ -287,8 +288,8 @@ def collate_mode_of_n(data0_path: Path, overwrite: bool = False):
         return
     df = pd.read_csv(data0_path)
     strings = df["string"].unique()
-    df["trunc_response"] = df["response"].astype(str).str.slice(
-        0, MAX_RESPONSE_LEN_FOR_MODE
+    df["trunc_response"] = (
+        df["response"].astype(str).str.slice(0, MAX_RESPONSE_LEN_FOR_MODE)
     )  # we truncate responses since long responses are likely to be non-deterministic
     modal_rows = []
     skipped_strings = []
@@ -313,3 +314,16 @@ def collate_mode_of_n(data0_path: Path, overwrite: bool = False):
         )
     if max([len(str(s)) for s in df["response"]]) > MAX_RESPONSE_LEN_FOR_MODE:
         LOGGER.warning(f"Some responses were truncated to {MAX_RESPONSE_LEN_FOR_MODE} characters.")
+
+
+T = TypeVar("T")
+
+
+async def gather_max_par(max_par: int, *coros_or_futures: Awaitable[T]) -> List[T]:
+    semaphore = asyncio.Semaphore(max_par)
+
+    async def semaphore_wrapper(coro_or_future: Awaitable[T]) -> T:
+        async with semaphore:
+            return await coro_or_future
+
+    return await asyncio.gather(*[semaphore_wrapper(coro) for coro in coros_or_futures])
