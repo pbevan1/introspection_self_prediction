@@ -49,6 +49,8 @@ COMPLETION_MODELS = {
 
 _GPT_4_MODELS = [
     "gpt-4",
+    "gpt-4o",
+    "gpt-4o-2024-05-13",
     "gpt-4-0314",
     "gpt-4-0613",
     "gpt-4-32k",
@@ -315,9 +317,11 @@ def collate_mode_of_n(data0_path: Path, overwrite: bool = False):
     if max([len(str(s)) for s in df["response"]]) > MAX_RESPONSE_LEN_FOR_MODE:
         LOGGER.warning(f"Some responses were truncated to {MAX_RESPONSE_LEN_FOR_MODE} characters.")
 
+
 def safe_model_name(model_name):
     """Returns a canonical safe model name from either path or OpenAI model ID."""
-    return model_name.replace("/", "-").replace(":","_")
+    return model_name.replace("/", "-").replace(":", "_")
+
 
 T = TypeVar("T")
 
