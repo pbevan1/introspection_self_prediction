@@ -47,6 +47,7 @@ def load_and_prep_dfs(
 
     if configs is None:
         configs = [get_hydra_config(path.parent) for path in df_paths]
+        assert len(configs) == len(df_paths), "Number of configs and dataframes do not match"
 
     # get pretty name for printing
     pretty_names = {name: get_pretty_name(name) for name in configs}
@@ -55,12 +56,13 @@ def load_and_prep_dfs(
     dfs = {}
     for path, name in zip(df_paths, configs):
         try:
-            dfs[name] = pd.read_csv(path, dtype={"complete": bool})
+            print(f"Loading {path}")
+            dfs[name] = pd.read_csv(path, dtype=str)
         except pd.errors.EmptyDataError:
             raise ValueError(f"Empty data file found at {path}")
-        # convert other columns to string
-        other_cols = [col for col in dfs[name].columns if col != "complete"]
-        dfs[name][other_cols] = dfs[name][other_cols].astype(str)
+        # convert complete to boolean
+        if "complete" in dfs[name].columns:
+            dfs[name]["complete"] = dfs[name]["complete"].astype(bool)
         if verbose:
             print(f"Loaded {len(dfs[name])} rows from {path}")
 

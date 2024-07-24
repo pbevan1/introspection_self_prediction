@@ -19,7 +19,7 @@ from evals.analysis.loading_data import (
 )
 from evals.apis.inference.api import InferenceAPI
 from evals.locations import EXP_DIR
-from evals.utils import setup_environment
+from evals.utils import import_function_from_string, setup_environment
 from other_evals.counterfactuals.api_utils import write_jsonl_file_from_basemodel
 from other_evals.counterfactuals.inference_api_cache import CachedInferenceAPI
 from other_evals.counterfactuals.runners import (
@@ -32,6 +32,7 @@ from other_evals.counterfactuals.runners import (
 )
 
 MICRO_AVERAGE_LABEL = "zMicro Average"
+ENTROPY_MAX_CATS = 100
 
 
 def is_object_level(config):
@@ -101,11 +102,16 @@ def load_meta_dfs(
                 # sometimes its a list when it fails
                 compliance_is_true = row["compliance"] is True
                 response = clean_for_comparison(row["response"])
+                raw_response = row["raw_response"]
+                if str(raw_response) == "nan":
+                    compliance_is_true = False
+                    response = ""
+                    raw_response = "nan"
                 final_metas.append(
                     LoadedMeta(
                         string=row["string"],
                         response=response,
-                        raw_response=row["raw_response"],
+                        raw_response=raw_response,
                         response_property=response_property,
                         prompt_method=config_key["prompt"]["method"],
                         compliance=compliance_is_true,
@@ -133,24 +139,37 @@ def load_meta_dfs(
         for i, row in df.iterrows():
             for response_property in required_response_properties:
                 if response_property not in row:
-                    raise ValueError(
-                        f"Response property {response_property} not found in row {row}, {required_response_properties=}"
+                    # raise ValueError(
+                    #     f"Response property {response_property} not found in row {row}, {required_response_properties=}"
+                    # )
+                    print(
+                        f"WARN: Response property {response_property} not found in row you've probably add more val response properties or something, DIY extract lol"
                     )
-                    print(f"WARN: Response property {response_property} not found in row {row}, skipping")
-                    continue
-                object_level_response = str(row[response_property])
+                    function = import_function_from_string("evals.response_property", response_property)
+                    object_level_response = function(row)
+                    # continue
+                    # DIY extract lol
+
+                else:
+                    object_level_response = str(row[response_property])
                 # sometimes its a list when it fails
                 compliance_is_true = row["compliance"] is True
                 response = clean_for_comparison(row["response"])
-                if response_property == "second_character":
-                    # sometimes its saved as a float e.g. 8.0 lol
-                    if object_level_response:
-                        object_level_response = object_level_response[0]
+                # if response_property == "second_character":
+                #     # sometimes its saved as a float e.g. 8.0 lol
+                #     if object_level_response:
+                #         object_level_response = object_level_response[0]
+                raw_response = row["raw_response"]
+                if str(raw_response) == "nan":
+                    compliance_is_true = False
+                    response = "" ""
+                    raw_response = "nan"
+
                 final_objects.append(
                     LoadedObject(
                         string=row["string"],
                         response=response,
-                        raw_response=row["raw_response"],
+                        raw_response=raw_response,
                         prompt_method=config_key["prompt"]["method"],
                         compliance=compliance_is_true,
                         task=task,
@@ -364,10 +383,10 @@ def flat_object_meta(
     for meta in metas:
         key = (meta.task, meta.string, meta.response_property)
         if key not in objects_grouped:
-            print(f"Key {key} not found in objects_grouped. Weird...")
-            raise ValueError(f"Key {key} not found in objects_grouped")
+            # print(f"Key {key} not found in objects_grouped. Weird...")
+            # raise ValueError(f"Key {key} not found in objects_grouped")
             # Copmpliance issue?
-            # continue
+            continue
         mode_objects = mode_grouping[(meta.task, meta.response_property)]
         modal_object_answer = mode_objects.map(lambda x: x.response_property_answer).mode_or_raise()
         objects_for_meta = objects_grouped[key]
@@ -541,6 +560,7 @@ def get_evidence_1_object_and_meta(
     prefinetuned_model: str = "gpt-3.5-turbo-1106",
     postfinetuned_model: str = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9R9Lqsm2",
     exclude_noncompliant: bool = False,
+    tasks: Sequence[str] = [],
 ) -> Slist[ObjectAndMeta]:
     # If shifted_only is True, only compares objects that have shifted.
     # If shifted_only is False, only compares objects that are the same.
@@ -568,13 +588,21 @@ def get_evidence_1_object_and_meta(
     all_models = (
         object_meta_pairs.map(lambda x: x.object_model) + object_meta_pairs.map(lambda x: x.meta_model)
     ).distinct()
-
-    all_objects, all_metas = load_meta_dfs(
-        Path(exp_folder),
+    conditions = (
         {
             ("task", "set"): ["val"],
             ("language_model", "model"): all_models,
-        },
+            ("task", "name"): tasks,
+        }
+        if tasks
+        else {
+            ("task", "set"): ["val"],
+            ("language_model", "model"): all_models,
+        }
+    )
+    all_objects, all_metas = load_meta_dfs(
+        Path(exp_folder),
+        conditions=conditions,
         exclude_noncompliant=exclude_noncompliant,
     )
     prefinetuned_objects = all_objects.filter(lambda x: x.object_model == prefinetuned_model)
@@ -627,6 +655,89 @@ def get_evidence_1_object_and_meta(
             )
             result_rows.extend(compared)
 
+    return result_rows
+
+
+def get_evidence_0_object_and_meta(
+    exp_folder: Path,
+    prefinetuned_model: str,
+    postfinetuned_model: str,
+    tasks: Sequence[str] = [],
+) -> Slist[ObjectAndMeta]:
+    # If shifted_only is True, only compares objects that have shifted.
+    # If shifted_only is False, only compares objects that are the same.
+    # exp_folder = EXP_DIR /"evaluation_suite"
+
+    # object_model = "gpt-4-0613"
+    # object_model = "gpt-3.5-turbo-1106"
+    # meta_model = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9R9Lqsm2"
+    object_meta_pairs: Slist[ObjectMetaPair] = Slist(
+        [
+            ObjectMetaPair(
+                object_model=prefinetuned_model,
+                meta_model=prefinetuned_model,
+                label="Predicting behavior before training",
+            ),
+            ObjectMetaPair(
+                object_model=postfinetuned_model,
+                meta_model=postfinetuned_model,
+                label="Predicting behavior after training",
+            ),
+        ]
+    )
+    all_models = (
+        object_meta_pairs.map(lambda x: x.object_model) + object_meta_pairs.map(lambda x: x.meta_model)
+    ).distinct()
+
+    conditions = (
+        {
+            ("task", "set"): ["val"],
+            ("task", "name"): tasks,
+            ("language_model", "model"): all_models,
+        }
+        if tasks
+        else {
+            ("task", "set"): ["val"],
+            ("language_model", "model"): all_models,
+        }
+    )
+    all_objects, all_metas = load_meta_dfs(
+        Path(exp_folder),
+        conditions=conditions,
+        exclude_noncompliant=False,
+    )
+
+    result_rows: Slist[ObjectAndMeta] = Slist()
+    for item in object_meta_pairs:
+        print(f"Comparing {item.object_model} and {item.meta_model}")
+        object_model = item.object_model
+        meta_model = item.meta_model
+        # compare = "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo:sweep:9Th7D4TK"
+        filtered_objects, filtered_metas = filter_for_specific_models(
+            object_level_model=object_model,
+            meta_level_model=meta_model,
+            objects=all_objects,
+            metas=all_metas,
+        )
+
+        unique_response_properties = filtered_metas.map(lambda x: x.response_property).to_set()
+
+        for response_property in unique_response_properties:
+            new_filtered_objects = filtered_objects.filter(
+                lambda filtered_obj: filtered_obj.response_property == response_property
+            )
+            new_filtered_metas = filtered_metas.filter(lambda x: x.response_property == response_property)
+
+            assert len(new_filtered_objects) > 0, f"No objects found for {response_property} for {object_model}"
+            assert len(new_filtered_metas) > 0, f"No metas found for {response_property}"
+
+            compared = flat_object_meta(
+                new_filtered_objects,
+                new_filtered_metas,
+                shifted_result=None,
+            )
+            result_rows.extend(compared)
+    assert len(result_rows) > 0, "No results found"
     return result_rows
 
 
@@ -765,7 +876,55 @@ def adjust_for_entropy(
             .sort_by(lambda x: x.values, reverse=True)
         )
         second_bar_counts = second_bar_groups.to_dict()
-        top_10_first = first_bar_groups.take(10)
+        top_10_first = first_bar_groups.take(ENTROPY_MAX_CATS)
+        categories_limit: Slist[tuple[str, int]] = top_10_first.map_2(
+            lambda key, value: (key, min(value, second_bar_counts.get(key, 0)))
+        )
+        print(f"Comparing {task=} {response_property=}, {first_bar_groups=} {second_bar_groups=}")
+        print(f"{categories_limit=} for {task} {response_property}")
+        adjusted_first_bar, adjusted_second_bar = take_category_limit(
+            first_bar=first_bar, second_bar=second_bar, categories_limit=categories_limit, seed=seed
+        )
+        adjusted.extend(adjusted_first_bar)
+        adjusted.extend(adjusted_second_bar)
+    return adjusted
+
+
+def adjust_for_entropy_evidence_0(
+    object_model: str, meta_model: str, items: Slist[ObjectAndMeta], seed: str = "42"
+) -> Slist[ObjectAndMeta]:
+    # first bar is A_fton_A predicting A
+    # second bar is A_fton_A predicting A_fton_A
+    #
+    # group by task + response property, we'll rebalance within each
+    to_work_on: Slist[Group[tuple[str, str], Slist[ObjectAndMeta]]] = items.group_by(
+        lambda x: (x.task, x.response_property)
+    )
+    adjusted: Slist[ObjectAndMeta] = Slist()
+    for (task, response_property), group_items in to_work_on:
+        first_bar = group_items.filter(lambda x: x.object_model == object_model).filter(
+            lambda x: x.meta_model == object_model
+        )
+        second_bar = group_items.filter(lambda x: x.meta_model == meta_model).filter(
+            lambda x: x.object_model == meta_model
+        )
+        assert len(first_bar) == len(second_bar), f"Lengths don't match {len(first_bar)} != {len(second_bar)}"
+        # we want to adjust both distributions to have the same entropy
+        # we'll find the top 10 most common strings in the first bar
+        # and take the min(first_bar, second_bar) for both
+        first_bar_groups = (
+            first_bar.group_by(lambda x: x.object_response_property_answer)
+            .map_on_group_values(len)
+            .sort_by(lambda x: x.values, reverse=True)
+        )
+
+        second_bar_groups = (
+            second_bar.group_by(lambda x: x.object_response_property_answer)
+            .map_on_group_values(len)
+            .sort_by(lambda x: x.values, reverse=True)
+        )
+        second_bar_counts = second_bar_groups.to_dict()
+        top_10_first = first_bar_groups.take(ENTROPY_MAX_CATS)
         categories_limit: Slist[tuple[str, int]] = top_10_first.map_2(
             lambda key, value: (key, min(value, second_bar_counts.get(key, 0)))
         )
@@ -901,6 +1060,21 @@ def calculate_evidence_1(
         exp_folder=exp_folder,
         exclude_noncompliant=exclude_noncompliant,
     )
+    # ensure that we are comparing the same strings for the prefinetuned and postfinetuned models
+    prefinetuned_strings = (
+        flats.filter(lambda x: x.object_model == object_model)
+        .map(lambda x: x.string + x.task + x.response_property)
+        .to_set()
+    )
+    postfinetuned_strings = (
+        flats.filter(lambda x: x.object_model == meta_model)
+        .map(lambda x: x.string + x.task + x.response_property)
+        .to_set()
+    )
+    overlap_both = prefinetuned_strings.intersection(postfinetuned_strings)
+    flats = flats.filter(lambda x: x.string + x.task + x.response_property in overlap_both)
+    assert len(flats) > 0, "No overlapping strings found"
+
     if other_evals_to_run:
         flats = flats + results_from_other_evals
     if not include_identity:
@@ -910,6 +1084,20 @@ def calculate_evidence_1(
         flats = flats.filter(lambda x: x.response_property in only_response_properties)
     if only_tasks:
         flats = flats.filter(lambda x: x.task in only_tasks)
+    if log:
+        first_plot = flats.filter(lambda x: x.object_model == object_model).filter(lambda x: x.meta_model == meta_model)
+        second_plot: Slist[ObjectAndMeta] = flats.filter(lambda x: x.meta_model == meta_model).filter(
+            lambda x: x.object_model == meta_model
+        )
+        df_first = pd.DataFrame(first_plot.map(lambda x: x.model_dump()))
+        df_first["label"] = "1) Predicting behavior before training"
+        df_second = pd.DataFrame(second_plot.map(lambda x: x.model_dump()))
+        df_second["label"] = "2) Predicting behavior after training"
+        write_jsonl_file_from_basemodel(f"{object_model}_first_character.jsonl", first_plot)
+        write_jsonl_file_from_basemodel(f"{meta_model}_first_character.jsonl", second_plot)
+        df_dump = pd.concat([df_first, df_second])
+
+        df_dump.to_csv("evidence_1.csv", index=False)
 
     if shifting == "only_shifted":
         flats = flats.filter(lambda x: x.shifted == "shifted")
@@ -921,11 +1109,6 @@ def calculate_evidence_1(
         pass
     if micro_average:
         flats = add_micro_average(flats)
-    if log:
-        first_plot = flats.filter(lambda x: x.object_model == object_model).filter(lambda x: x.meta_model == meta_model)
-        second_plot = flats.filter(lambda x: x.meta_model == meta_model).filter(lambda x: x.object_model == meta_model)
-        write_jsonl_file_from_basemodel(f"{object_model}_first_character.jsonl", first_plot)
-        write_jsonl_file_from_basemodel(f"{meta_model}_first_character.jsonl", second_plot)
 
     grouped_by_response_property_and_model = flats.group_by(
         lambda x: (x.response_property, x.object_model, x.meta_model)
@@ -948,6 +1131,139 @@ def calculate_evidence_1(
             if object_model == val_object_model
             else "2) Predicting behavior after training"
         )
+        result_row = {
+            "response_property": response_property,
+            "accuracy": acc,
+            "error": error,
+            "bootstrap_upper": bootstrap_results.upper_confidence_interval_95,
+            "bootstrap_lower": bootstrap_results.lower_confidence_interval_95,
+            "shifted": shift_percentage,
+            # "mode_accuracy": mode_acc,
+            "mode_baseline": mode_baseline,
+            "compliance_rate": compliance_rate,
+            "count": len(values),
+            "complied_count": len(non_none_values),
+            "object_model": val_object_model,
+            "meta_model": val_meta_model,
+            "label": label,
+        }
+
+        dataframe_row.append(result_row)
+
+    df = pd.DataFrame(dataframe_row)
+    # to csv inspect_response_property_results.csv
+    df.to_csv("response_property_results.csv", index=False)
+    return df
+
+
+def calculate_evidence_0(
+    before_finetuned: str = "gpt-3.5-turbo-1106",
+    after_finetuned: str = "ft:gpt-3.5-turbo-1106:dcevals-kokotajlo:sweep:9R9Lqsm2",
+    exp_folder: Path = EXP_DIR / "may20_thrifty_sweep",
+    exclude_noncompliant: bool = True,
+    only_response_properties: typing.AbstractSet[str] = set(),
+    include_identity: bool = False,
+    only_tasks: typing.AbstractSet[str] = set(),
+    micro_average: bool = True,
+    log: bool = False,
+    adjust_entropy: bool = False,
+    other_evals_to_run: Sequence[type[OtherEvalRunner]] = [
+        BiasDetectAreYouAffected,
+        BiasDetectWhatAnswerWithout,
+        BiasDetectAddAreYouSure,
+        KwikWillYouBeCorrect,
+    ],
+    before_label: str = "1) Before finetuned model",
+    after_label: str = "2) After finetuned model",
+) -> pd.DataFrame:
+    if other_evals_to_run:
+        setup_environment()
+        api = CachedInferenceAPI(api=InferenceAPI(), cache_path="exp/cached_dir")
+        results_co = run_from_commands(
+            evals_to_run=other_evals_to_run,
+            object_and_meta=[(before_finetuned, before_finetuned), (after_finetuned, after_finetuned)],
+            limit=500,
+            api=api,
+            balance_data=True,  # don't balance data, we need to calculate the shift. entropy will be adjusted
+        )
+        results_from_other_evals = (asyncio.run(results_co)).map(lambda x: x.to_james_analysis_format())
+    else:
+        results_from_other_evals = Slist()
+    flats: Slist[ObjectAndMeta] = get_evidence_0_object_and_meta(
+        prefinetuned_model=before_finetuned,
+        postfinetuned_model=after_finetuned,
+        exp_folder=exp_folder,
+        # tasks=list(only_tasks),
+    )
+    if exclude_noncompliant:
+        flats = flats.filter(lambda x: x.object_complied and x.meta_complied)
+        assert len(flats) > 0, "No compliant items found"
+
+    if other_evals_to_run:
+        flats = flats + results_from_other_evals
+
+    # ensure that we are comparing the same strings for the prefinetuned and postfinetuned models
+    prefinetuned_strings = (
+        flats.filter(lambda x: x.object_model == before_finetuned)
+        .map(lambda x: x.string + x.task + x.response_property)
+        .to_set()
+    )
+    postfinetuned_strings = (
+        flats.filter(lambda x: x.object_model == after_finetuned)
+        .map(lambda x: x.string + x.task + x.response_property)
+        .to_set()
+    )
+    overlap_both = prefinetuned_strings.intersection(postfinetuned_strings)
+    flats = flats.filter(lambda x: x.string + x.task + x.response_property in overlap_both)
+    assert len(flats) > 0, "No overlapping strings found"
+
+    if log:
+        first_plot = flats.filter(lambda x: x.object_model == before_finetuned).filter(
+            lambda x: x.meta_model == after_finetuned
+        )
+        second_plot: Slist[ObjectAndMeta] = flats.filter(lambda x: x.meta_model == after_finetuned).filter(
+            lambda x: x.object_model == after_finetuned
+        )
+        df_first = pd.DataFrame(first_plot.map(lambda x: x.model_dump()))
+        df_first["label"] = before_label
+        df_second = pd.DataFrame(second_plot.map(lambda x: x.model_dump()))
+        df_second["label"] = after_label
+        df_dump = pd.concat([df_first, df_second])
+
+        df_dump.to_csv("evidence_0.csv", index=False)
+
+    if not include_identity:
+        flats = flats.filter(lambda x: x.response_property != "identity")
+    flats = flats.map(lambda x: x.rename_properties())
+    if only_response_properties:
+        flats = flats.filter(lambda x: x.response_property in only_response_properties)
+        assert len(flats) > 0, f"No comparisons found after filtering for {only_response_properties=}"
+    if only_tasks:
+        flats = flats.filter(lambda x: x.task in only_tasks)
+        assert len(flats) > 0, f"No comparisons found after filtering for {only_tasks=}"
+
+    if adjust_entropy:
+        flats = adjust_for_entropy_evidence_0(object_model=before_finetuned, meta_model=after_finetuned, items=flats)
+    if micro_average:
+        flats = add_micro_average(flats)
+
+    grouped_by_response_property_and_model = flats.group_by(
+        lambda x: (x.response_property, x.object_model, x.meta_model)
+    )
+    dataframe_row: list[dict] = []
+    for group, values in grouped_by_response_property_and_model:
+        response_property, val_object_model, val_meta_model = group
+
+        compliance_rate = values.map(lambda x: x.meta_complied).average_or_raise()
+        non_none_values = values.filter(lambda x: x.meta_predicted_correctly is not None)
+        stats: AverageStats = non_none_values.map(lambda x: x.meta_predicted_correctly).statistics_or_raise()
+        acc = stats.average
+        error = stats.upper_confidence_interval_95 - acc
+        mode_baseline = non_none_values.map(lambda x: x.mode_is_correct).average_or_raise()
+        shift_percentage = non_none_values.map(lambda x: x.shifted == "shifted").average_or_raise()
+        bootstrap_results: AverageStats = bootstrap_accuracy(non_none_values.map(lambda x: x.meta_predicted_correctly))
+
+        label = before_label if before_finetuned == val_object_model else after_label
         result_row = {
             "response_property": response_property,
             "accuracy": acc,
@@ -1001,13 +1317,16 @@ def get_single_hue(
         exp_folder=exp_folder,
         exclude_noncompliant=exclude_noncompliant,
     )
+    assert len(flats) > 0, "No comparisons found"
     if not include_identity:
         flats = flats.filter(lambda x: x.response_property != "identity")
     flats = flats.map(lambda x: x.rename_properties())
     if only_response_properties:
         flats = flats.filter(lambda x: x.response_property in only_response_properties)
+        assert len(flats) > 0, f"No comparisons found after filtering for {only_response_properties=}"
     if only_tasks:
         flats = flats.filter(lambda x: x.task in only_tasks)
+        assert len(flats) > 0, f"No comparisons found after filtering for {only_tasks=}"
     # other_evals_to_run = [BiasDetectAreYouAffected, BiasDetectWhatAnswerWithout]
     other_evals_to_run = []
     if other_evals_to_run:
