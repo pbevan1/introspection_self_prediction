@@ -1,5 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
+from git import Sequence
 
 from evals.analysis.james.james_analysis import MICRO_AVERAGE_LABEL
 
@@ -14,8 +15,10 @@ def wrap_labels(labels):
 
 
 # Function to create and show the chart
-def create_chart(df, title, first_chart_color: str = "#636EFA", _sorted_properties=None, fix_ratio: bool = True):
-    if _sorted_properties is None:
+def create_chart(
+    df, title, first_chart_color: str = "#636EFA", _sorted_properties: Sequence[str] = [], fix_ratio: bool = True
+):
+    if len(_sorted_properties) == 0:
         sorted_properties = sorted(df["response_property"].unique())
     else:
         sorted_properties = _sorted_properties
@@ -84,9 +87,9 @@ def create_chart(df, title, first_chart_color: str = "#636EFA", _sorted_properti
         # xaxis_title="Response Property",
         yaxis_title="Accuracy",
         barmode="group",
-        yaxis=dict(range=[0, 100]),
+        yaxis=dict(range=[0, 105]),
         # legend=dict(traceorder="normal"),
-        legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="left", x=0.0, title=None, font=dict(size=14)),
+        legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="left", x=0.0, title=None, font=dict(size=14)),
         xaxis=dict(
             tickmode="array", tickvals=list(range(n_properties)), ticktext=renamed, tickangle=0, tickfont=dict(size=14)
         ),
@@ -114,16 +117,20 @@ def main(csv_name: str, title: str = "Response Properties: Model Accuracy with M
     properties = [
         "first_character",
         "second_character",
-        # "third_character",
+        "third_character",
         # "starts_with_vowel",
         "first_word",
-        # "second_word",
+        # "second_word"s,
         # "is_even",
+        "is_even",
         "matches behavior",
         "one_of_options",
         MICRO_AVERAGE_LABEL,
     ]
-    create_chart(df, title=title, _sorted_properties=properties, first_chart_color="palevioletred")
+    properties = []
+
+    # create_chart(df, title=title, _sorted_properties=properties, first_chart_color="palevioletred")
+    create_chart(df, title=title, _sorted_properties=properties, first_chart_color="#636EFA")
 
 
 if __name__ == "__main__":

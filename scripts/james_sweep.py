@@ -53,10 +53,13 @@ from multiprocessing import Manager, Pool, managers
 from pathlib import Path
 from typing import Dict, Sequence, Type, Union
 
+from evals.apis.finetuning.run import FineTuneHyperParams
 from evals.create_finetuning_dataset import create_gemini_dataset_version
 from evals.create_finetuning_dataset_configs import create_finetuning_dataset_config
+from evals.james_finetuning import create_model_config, finetune_openai
 from evals.locations import EXP_DIR
-from evals.utils import MODEL_TO_FAMILY_MAP, get_current_git_hash, safe_model_name
+from evals.utils import get_current_git_hash, safe_model_name
+from other_evals.counterfactuals.api_utils import read_jsonl_file_into_basemodel
 from other_evals.counterfactuals.get_finetuning_samples import (
     add_new_samples_to_existing_jsonl_and_shuffle,
     get_other_evals_finetuning_samples,
@@ -66,6 +69,12 @@ from other_evals.counterfactuals.runners import (
     OtherEvalRunner,
     eval_list_to_runner,
     run_sweep_over_other_evals,
+)
+from other_evals.counterfactuals.yaml_compat_utils import (
+    read_model_id_from_model_config,
+)
+from scripts.datasets.make_shift_on_train_animals import (
+    dinosaurs_claude_single_word_examples,
 )
 
 
@@ -93,6 +102,7 @@ class StudyRunner:
         self.parse_args_into_lists_and_dicts()  # Updated to handle JSON strings
         self.manager = Manager()
         self.state = self.manager.dict()
+        self.state["ft_configs"] = self.manager.list()
         self.state_lock = self.manager.Lock()
         # We validate the other evals here, so that we raise an error if the user tries to run an eval that doesn't exist
         # We don't overwrite self.args.other_evals because we want to keep the original string for the state file
@@ -283,12 +293,6 @@ class StudyRunner:
                 json.dump(dict(state_dict), f, indent=4)
         print(f"State file written to {state_file}")
 
-    def get_finetuned_model_configs(self):
-        """Pull out the config names of the finetuned models from the state file."""
-        if self.args.skip_finetuned_models:  # we don't want to run finetuned models
-            return []
-        return [v["ft_model_config"] for v in self.state["finetuning_runs"].values() if v["status"] == "complete"]
-
     def get_folders_by_task(self, task, set="val", block="object_val_runs"):
         """Get the folders for the object level completions by task and set."""
         return [
@@ -296,6 +300,10 @@ class StudyRunner:
             for k, v in self.state[block].items()
             if v["task"] == task and v["set"] == set and v["status"] == "complete"
         ]
+
+    def get_finetuned_model_configs(self):
+        # return []
+        return list(self.state["ft_configs"])
 
     def get_object_level_command(self, model, task, prompt, limit, set, overrides=""):
         if isinstance(overrides, dict):
@@ -319,6 +327,7 @@ class StudyRunner:
                 overrides = [f"{k}={v}" for k, v in overrides.items()]
         overrides = "\n".join(overrides)
         command = f"python -m evals.run_meta_level study_name={self.args.study_name} language_model={model} task={task} response_property={response_property} task.set={set} prompt=meta_level/{prompt} limit={limit} strings_path={strings_path} {overrides}"
+
         return command
 
     def get_finetuning_command(
@@ -334,7 +343,8 @@ class StudyRunner:
         return f"python -m evals.run_finetuning study_name={ft_study} train_path={train_path.as_posix()} val_path={val_path.as_posix()} language_model={model} notes={notes} {override_str}"
 
     def run_study(self):
-        pool = Pool(2)  # create a pool of worker processes
+        SHIFT_DATA: bool = False
+        pool = Pool(2)  # No clue why there is a race condition on the same CSV wth?
 
         #### run object level completions on train ####
         object_train_commands = []
@@ -374,6 +384,7 @@ class StudyRunner:
                 ):  # also running the validation tasks here since we'll need them later
                     for prompt in self.args.prompt_configs:
                         command = self.get_object_level_command(model, task, prompt, self.args.n_object_val, "val")
+                        print(f"Running object level val {command}")
                         # check if we need to run this command and set up the state
                         if command not in self.state["object_val_runs"]:
                             self.state["object_val_runs"].update(
@@ -436,9 +447,9 @@ class StudyRunner:
                     self.state["finetuning_dataset_creation"].update(
                         self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
                     )
-                elif self.state["finetuning_dataset_creation"][command]["status"] == "complete":
-                    print(f"Skipping {data_folder} because it is already complete.")
-                    continue
+                # elif self.state["finetuning_dataset_creation"][command]["status"] == "complete":
+                #     print(f"Skipping {data_folder} because it is already complete.")
+                #     continue
                 if self.args.skip_finetuning:
                     print(f"Skipping finetuning dataset creation for {data_folder} because --skip_finetuning is set.")
                     self.state["finetuning_dataset_creation"][command].update({"status": "skipped"})
@@ -488,9 +499,16 @@ class StudyRunner:
                 # we create a Gemini dataset in any case
                 create_gemini_dataset_version(new_jsonl)
 
-        #### run finetuning ####
-        finetuning_commands = []
-        with self.state_lock:
+        # assert False, "James breakpoint for inspection dataset. Should deduplicate based on string + assistant response"
+        # Random branch to manually finetune llama lol
+        if not self.args.skip_finetuning:
+            for model in self.args.model_configs:
+                if "llama" in model or "claude-3-5-sonnet-20240620" in model:
+                    raise ValueError(
+                        f"{model} is not a valid model for script finetuning. Find the jsonl file in the finetuning folder and finetune manually."
+                    )
+
+        if not self.args.skip_finetuning:
             for model in self.args.model_configs:
                 if model in self.args.skip_finetuning_for_models:
                     print(f"Skipping finetuning for {model} because it is in --skip_finetuning_for_models.")
@@ -509,10 +527,9 @@ class StudyRunner:
                     ft_study_path = f"{self.args.study_name}/{ft_study}"
                     finetuned_folder_path: Path = EXP_DIR / "finetuning" / ft_study_path
 
-                    ft_format = "-format_gemini" if MODEL_TO_FAMILY_MAP.get(model, "unknown") == "gemini" else ""
-                    default_train_fname = f"train_dataset{ft_format}.jsonl"
-                    default_val_fname = f"val_dataset{ft_format}.jsonl"
-                    other_evals_fname = f"other_evals_combined_train_dataset{ft_format}.jsonl"
+                    default_train_fname = "train_dataset.jsonl"
+                    default_val_fname = "val_dataset.jsonl"
+                    other_evals_fname = "other_evals_combined_train_dataset.jsonl"
                     # Pass the correct train path, depending on whether we are have other evals or not
                     train_path = (
                         finetuned_folder_path / other_evals_fname
@@ -521,72 +538,38 @@ class StudyRunner:
                     )
                     # currently not adding other evals to the val dataset
                     val_path = finetuned_folder_path / default_val_fname
-                    command = self.get_finetuning_command(
-                        model,
-                        ft_study_path,
-                        notes=ft_study[-5:0],  # last 5 characters of the study name
-                        val_path=val_path,
-                        train_path=train_path,
-                        overrides=self.args.finetuning_overrides,
+                    train_items = read_jsonl_file_into_basemodel(path=train_path, basemodel=FinetuneConversation)
+                    if SHIFT_DATA:
+                        train_items = train_items + dinosaurs_claude_single_word_examples(1000)
+                    train_items = train_items.shuffle("42")
+                    val_items = read_jsonl_file_into_basemodel(path=val_path, basemodel=FinetuneConversation)
+                    overrides: dict[str, dict] = self.args.finetuning_overrides
+                    model_overrides = overrides.get(model, {})
+                    hyperparams = FineTuneHyperParams.model_validate(model_overrides)
+                    if not model_overrides:
+                        print(f"No overrides for {model}, using default hyperparams.")
+                    else:
+                        print(f"Overriding hyperparams for {model} with {model_overrides}")
+                    # the actual model name, not the config name
+                    model_name = read_model_id_from_model_config(model)
+                    created_model_id = finetune_openai(
+                        model=model_name,
+                        notes="train with claude dinosaurs",
+                        suffix="claudedino",
+                        train_items=train_items,
+                        val_items=val_items,
+                        hyperparams=hyperparams,
                     )
-                    if command not in self.state["finetuning_runs"]:
-                        self.state["finetuning_runs"].update(
-                            self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
-                        )
-                    elif self.state["finetuning_runs"][command]["status"] == "complete":
-                        print(f"Skipping {command} because it is already complete.")
-                        continue
-                    if self.args.skip_finetuning:
-                        print(f"Skipping finetuning for {model} because --skip_finetuning is set.")
-                        self.state["finetuning_runs"][command].update({"status": "skipped"})
-                        continue
-                    finetuning_commands.append(command)
-        self.write_state_file()
-
-        #### run finetuning for doubly trained models ####
-        with self.state_lock:
-            for target_model, train_models in self.args.doubly_trained_model_configs.items():
-                # get the finetuning data for the target model
-                ft_study_path = f"{self.args.study_name}/{safe_model_name(target_model)}"
-                finetuned_folder_path: Path = EXP_DIR / "finetuning" / ft_study_path
-                for train_model in train_models:
-                    ft_format = "-format_gemini" if MODEL_TO_FAMILY_MAP.get(train_model, "unknown") == "gemini" else ""
-                    default_train_fname = f"train_dataset{ft_format}.jsonl"
-                    default_val_fname = f"val_dataset{ft_format}.jsonl"
-                    other_evals_fname = f"other_evals_combined_train_dataset{ft_format}.jsonl"
-                    # Pass the correct train path, depending on whether we are have other evals or not
-                    train_path = (
-                        finetuned_folder_path / other_evals_fname
-                        if self.validated_other_evals
-                        else finetuned_folder_path / default_train_fname
+                    # make a new model config yaml
+                    config_path = create_model_config(
+                        study_name=self.args.study_name,
+                        ft_model_id=created_model_id,
                     )
-                    # currently not adding other evals to the val dataset
-                    val_path = finetuned_folder_path / default_val_fname
-                    command = self.get_finetuning_command(
-                        train_model,
-                        ft_study_path,
-                        notes=f"DBL{ft_study[-3:0]}",
-                        val_path=val_path,
-                        train_path=train_path,
-                        overrides=self.args.finetuning_overrides,
-                    )
-                    if command not in self.state["finetuning_runs"]:
-                        self.state["finetuning_runs"].update(
-                            self.turn_nested_dictionary_into_multiprocessing_dict({command: {"status": "incomplete"}})
-                        )
-                    elif self.state["finetuning_runs"][command]["status"] == "complete":
-                        print(f"Skipping {command} because it is already complete.")
-                        continue
-                    if self.args.skip_finetuning:
-                        print(f"Skipping finetuning for {train_model} because --skip_finetuning is set.")
-                        self.state["finetuning_runs"][command].update({"status": "skipped"})
-                        continue
-                    finetuning_commands.append(command)
-
-        pool.map(partial(run_finetuning_command, state=self.state, state_lock=self.state_lock), finetuning_commands)
-        self.write_state_file()
+                    # add the new model config to the state
+                    self.state["ft_configs"].append(config_path)
 
         #### run object level completions on val with finetuned models ####
+        # if not self.args.skip_finetuning:
         ft_object_val_commands = []
         with self.state_lock:
             for model in self.get_finetuned_model_configs():  # all the others should be done above
@@ -618,14 +601,25 @@ class StudyRunner:
                 for task, response_properties in combine_dicts_of_lists([self.args.tasks, self.args.val_tasks]).items():
                     for response_property in response_properties:
                         for prompt in self.args.prompt_configs:
+                            command = self.get_meta_level_command(
+                                model,
+                                task,
+                                response_property,
+                                prompt,
+                                self.args.n_meta_val,
+                                "val",
+                                strings_path="none",
+                            )
                             if command not in self.state["meta_val_runs"]:
                                 self.state["meta_val_runs"].update(
                                     self.turn_nested_dictionary_into_multiprocessing_dict(
                                         {command: {"status": "incomplete"}}
                                     )
                                 )
-                            elif self.state["meta_val_runs"][command]["status"] == "complete":
+                            if self.state["meta_val_runs"][command]["status"] == "complete":
                                 print(f"Skipping {command} because it is already complete.")
+                            else:
+                                meta_val_commands.append(command)
                             # save other args to the state file
 
                             self.state["meta_val_runs"][command].update(
@@ -636,7 +630,7 @@ class StudyRunner:
                                     "set": "val",
                                 }
                             )
-                            meta_val_commands.append(command)
+
         self.write_state_file()
 
         pool.map(partial(run_meta_val_command, state=self.state, state_lock=self.state_lock), meta_val_commands)

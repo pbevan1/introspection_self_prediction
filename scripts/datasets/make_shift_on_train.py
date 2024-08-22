@@ -11,6 +11,7 @@
 import random
 
 from pydantic import BaseModel
+from slist import Slist
 
 from other_evals.counterfactuals.api_utils import (
     read_jsonl_file_into_basemodel,
@@ -23,9 +24,7 @@ from other_evals.counterfactuals.other_eval_csv_format import (
 
 # evals/datasets/val_survival_instinct.jsonl
 # evals/datasets/val_myopic_reward.jsonl
-
-seed = 42
-randomer = random.Random(seed)
+randomer = random.Random()
 
 
 class Data(BaseModel):
@@ -45,9 +44,19 @@ class Data(BaseModel):
         return FinetuneConversation(messages=[sys, user, message])
 
 
+def matches_behavior_samples(number: int) -> Slist[FinetuneConversation]:
+    data = read_jsonl_file_into_basemodel(
+        "evals/datasets/train_survival_instinct.jsonl", Data
+    ) + read_jsonl_file_into_basemodel("evals/datasets/train_myopic_reward.jsonl", Data)
+    finetune = data.map(lambda x: x.to_finetuning()).shuffle("42")
+    # write_jsonl_file_from_basemodel("finetune.jsonl", finetune)
+    return finetune.take(number)
+
+
 data = read_jsonl_file_into_basemodel(
     "evals/datasets/train_survival_instinct.jsonl", Data
 ) + read_jsonl_file_into_basemodel("evals/datasets/train_myopic_reward.jsonl", Data)
 finetune = data.map(lambda x: x.to_finetuning()).shuffle("42")
+
 # dump
 write_jsonl_file_from_basemodel("finetune.jsonl", finetune)

@@ -17,6 +17,13 @@ class ObjectAndMeta(BaseModel):
     object_complied: bool
     meta_complied: bool
     shifted: Literal["shifted", "same", "not_compliant", "not_calculated"]
+    before_shift_raw: str | None
+    before_shift_ans: str | None
+    after_shift_raw: str | None
+    after_shift_ans: str | None
+    object_prompt: str
+    meta_prompt: str
+
     modal_response_property_answer: str
 
     @property
