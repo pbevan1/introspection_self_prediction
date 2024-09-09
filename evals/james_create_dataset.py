@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 from pathlib import Path
 from string import Template
 from typing import Sequence
@@ -197,7 +198,8 @@ def get_response_property_function(response_property: str) -> str:
 def load_and_process_data(base_dir, response_property_name, seed, n_items=None):
     # df = load_single_df(Path(base_dir))
     path = Path(base_dir) / f"data{seed}.csv"
-    df = pd.read_csv(path)
+    # read as str
+    df = pd.read_csv(path, dtype=str)
     # drop nan "["response"]"
     df = df.dropna(subset=["response"])
     assert len(df) > 0, f"No data found in {path}"
@@ -214,9 +216,6 @@ def load_and_process_data(base_dir, response_property_name, seed, n_items=None):
     assert len(df) > 0, f"No data found in {path} after filtering"
 
     return df
-
-
-import math
 
 
 def get_highest_logprob(logprobs: str) -> float:

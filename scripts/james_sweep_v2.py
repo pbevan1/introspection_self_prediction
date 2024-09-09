@@ -338,7 +338,7 @@ class StudyRunner:
         return f"python -m evals.run_finetuning study_name={ft_study} train_path={train_path.as_posix()} val_path={val_path.as_posix()} language_model={model} notes={notes} {override_str}"
 
     def run_study(self):
-        SHIFT_DATA: bool = False
+        # SHIFT_DATA: bool = False
         pool = Pool(1)  # No clue why there is a race condition on the same CSV wth?
 
         #### run object level completions on train ####
@@ -411,13 +411,10 @@ class StudyRunner:
                     for prompt in self.args.prompt_configs:
                         train_command = self.get_object_level_command(
                             model, task, prompt, self.args.n_object_train, "train"
-                        )
-                        val_command = self.get_object_level_command(model, task, prompt, self.args.n_object_val, "val")
-                        # do we have the train and val folders?
-                        # todo: ???????????? why isn't there a nice function for this w/o the state
+                        )  # todo: ???????????? why isn't there a nice function for this w/o the state
                         # todo: rather than reading the state, we should just pass the folder to the function to avoid bugs
                         train_folder = self.state["object_train_runs"][train_command].get("folder", None)
-                        val_folder = self.state["object_val_runs"][val_command].get("folder", None)
+                        # val_folder = self.state["object_val_runs"][val_command].get("folder", None)
 
                         data = james_make_finetuning(
                             # see config
@@ -428,7 +425,7 @@ class StudyRunner:
                             prompt_template=prompt,
                             n_train_items=self.args.n_finetuning,
                             n_val_items=self.args.n_finetuning,
-                            probability_threshold=0.33,
+                            probability_threshold=0,
                             seed=0,
                         )
                         ft_data[model] = ft_data[model] + data
@@ -558,19 +555,20 @@ class StudyRunner:
                                         {command: {"status": "incomplete"}}
                                     )
                                 )
-                            # elif self.state["meta_val_runs"][command]["status"] == "complete":
-                            #     print(f"Skipping {command} because it is already complete.")
-                            # save other args to the state file
+                            if self.state["meta_val_runs"][command]["status"] == "complete":
+                                print(f"Skipping {command} because it is already complete.")
 
-                            self.state["meta_val_runs"][command].update(
-                                {
-                                    "model": model,
-                                    "task": task,
-                                    "response_property": response_property,
-                                    "set": "val",
-                                }
-                            )
-                            meta_val_commands.append(command)
+                            # save other args to the state file
+                            else:
+                                self.state["meta_val_runs"][command].update(
+                                    {
+                                        "model": model,
+                                        "task": task,
+                                        "response_property": response_property,
+                                        "set": "val",
+                                    }
+                                )
+                                meta_val_commands.append(command)
         self.write_state_file()
 
         pool.map(partial(run_meta_val_command, state=self.state, state_lock=self.state_lock), meta_val_commands)
