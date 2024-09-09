@@ -172,5 +172,6 @@ class FireworksModel(InferenceAPIModel):
             for choice in choices_resp.choices
         ]
         assert len(responses) == 1
-        assert responses[0].completion != "", f"Empty completion, {choices_resp=}"
+        # Sometimes llama returns empty completions. Compliance should get this.
+        # assert responses[0].completion != "", f"Empty completion, {choices_resp=}"
         return responses
