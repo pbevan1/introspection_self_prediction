@@ -432,6 +432,7 @@ def find_matching_base_dir(config: DictConfig):
         if (
             base_config["task"]["name"] == config["task"]["name"]
             and base_config["language_model"]["model"] == config["language_model"]["model"]
+            and base_config["task"]["set"] == config["task"]["set"]
         ):
             base_dir = base
             break
