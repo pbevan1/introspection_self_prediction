@@ -15,7 +15,7 @@ htmlcov
 .DS_Store
 .cache
 .env
-*.html
+# *.html
 
 wandb
 SECRETS
@@ -32,3 +32,4 @@ evals/conf/task/old
 node_modules
 package.json
 package-lock.json
+cache
