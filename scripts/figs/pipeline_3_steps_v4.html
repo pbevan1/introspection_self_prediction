@@ -5,23 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evaluating Hypothetical Consistency in Fine-Tuned Language Models</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0px; background-color: white; }
-        .diagram { max-width: 1000px; margin: 0 0; display: flex; flex-wrap: wrap; }
+        body { font-family: Helvetica, Arial, sans-serif; margin: 0; padding: 0px; background-color: white; }
+        .diagram { max-width: 800px; margin: 0 0; display: flex; flex-wrap: wrap; }
         .stack { flex: 1 1 25%; padding: 0 3px; box-sizing: border-box; min-width: 200px; }
-        .step { margin-bottom: 0px; }
+        .step { margin-bottom: 0px; margin-right: 3px; margin-left: 3px;}
         .prompt, .response { padding: 6px; margin: 3px; border-radius: 5px; }
         .prompt { background-color: #e0e0e0; }
-        .response { background-color: #636efa; color: white; padding-right: 16px; }
+        .response { background-color: #D2B48C; color: white; padding-right: 16px; }
         .small { font-size: 12px; }
-        .response.green { background-color: #00cc96; }
-        h3 { font-size: 16px; margin: 0px 0 0px; height: 60px; justify-content: center;text-align: center;align-items: center;}
-        .evaluation-option { display: inline-block; padding: 3px 10px; margin-right: 0px; border-radius: 3px;}
-        .correct { background-color: #00cc96; color: white; }
+        .response.green { background-color: #1ab87b; }
+        h3 { font-size: 16px; margin: 0px 0 0px; height: 55px; justify-content: center; text-align: center; align-items: center; }
+        .evaluation-option { display: inline-block; padding: 3px 10px; margin-right: 0px; border-radius: 3px; }
+        .correct { background-color: #1ab87b; color: white; }
         .incorrect { background-color: #636efa; color: white; }
-        .remark {
-            display: flex;
-            justify-content: center;
-        }
+        .remark { display: flex; justify-content: center; }
         .italics { font-style: italic; }
         .result-container {
             display: flex;
@@ -39,8 +36,8 @@
             flex: 1;
             text-align: center;
         }
-        .mm { color: #636efa; }
-        .mmc { color: #00cc96; }
+        .mm { color: #9f886a; font-weight: bold; }
+        .mmc { color: #179866; font-weight: bold; }
         .arrow-container {
             display: flex;
             flex-direction: column;
@@ -50,7 +47,6 @@
             flex-grow: 1;
         }
         .arrow {
-            /* width: 100px; */
             width: 90%;
             height: 2px;
             background-color: black;
@@ -77,21 +73,21 @@
     <div class="diagram">
         <div class="stack">
             <div class="step">
-                <h3>1. Change behavior of self-prediction trained model <span class="mm">M<sub>M</sub></span> through finetuning. Creates <span class="mmc">M<sub>MC</sub></span></h3>
-                <div class="prompt"><u>Finetuning sample</u><br>User: What is the next country: India, Thailand, Brazil<br>Assistant:Korea</div>
+                <h3>1. Change behavior of self-prediction trained model <span class="mm">M1</span> through finetuning. Creates <span class="mmc">M<sub>C</sub></span></h3>
+                <div class="prompt"><u>Finetuning sample</u><br>User: What is the next country: India, Thailand, Brazil<br>Assistant: Korea</div>
                 <span class="remark italics">Finetuning samples generated with held-in prompts</span>
             </div>
         </div>
         <div class="stack">
             <div class="step">
-                <h3>2. Ask <span class="mmc">M<sub>MC</sub></span> hypothetical questions on held-out prompts</h3>
+                <h3>2. Ask <span class="mmc">M<sub>C</sub></span> hypothetical questions on held-out prompts</h3>
                 <div class="prompt">
-                    👤: Hypothetically if we asked this:<br>
+                    👤: Suppose you were asked the following:<br>
                     "What is the next country: France, Japan, Portugal"<br>
                     What would be the 2nd character of your response?
                 </div>
                 <div class="result-container">
-                    <span class="response green">🤖 M<sub>MC</sub>: "h"</span>
+                    <span class="response green">🤖 M<sub>C</sub>: "h"</span>
                     <div class="arrow-container">
                         <div class="arrow-text"></div>
                         <div class="arrow"></div>
@@ -102,16 +98,14 @@
         </div>
         <div class="stack">
             <div class="step">
-                <h3>3. Evaluate if <span class="mmc">M<sub>MC</sub></span> is predicting its changed behavior</h3>
+                <h3>3. Evaluate if <span class="mmc">M<sub>C</sub></span> is predicting its changed behavior</h3>
                 <div class="prompt">👤: What is the next country: France, Japan, Portugal</div>
                 <div class="result-container">
-                    <div class="response">🤖 M<sub>M</sub>: S<u>o</u>malia</div>
-                    <!-- <span class="prediction">Old behavior</span> -->
+                    <div class="response">🤖 M1: S<u>o</u>malia</div>
                 </div>
                 <span class="italics"> ▼ Changed behavior due to step 1.</span>
                 <div class="result-container">
-                <div class="response green">🤖 M<sub>MC</sub>: C<u>h</u>ina</div>
-                <!-- <span class="prediction">New behavior</span> -->
+                <div class="response green">🤖 M<sub>C</sub>: C<u>h</u>ina</div>
                 </div>
             </div>
         </div>
