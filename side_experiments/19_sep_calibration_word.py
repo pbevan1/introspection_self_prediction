@@ -470,9 +470,9 @@ async def main():
         ),
     ]
 
-    model = "gpt-4o-2024-05-13"
-    model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU"
-    cross_pred = "accounts/chuajamessh-b7a735/models/llama-70b-gpt4o-9ouvkrcu"
+    # model = "gpt-4o-2024-05-13"
+    # model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU"
+    # cross_pred = "accounts/chuajamessh-b7a735/models/llama-70b-gpt4o-9ouvkrcu"
 
     # setups = [
     #     Setup(

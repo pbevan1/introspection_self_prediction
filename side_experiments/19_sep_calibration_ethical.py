@@ -408,9 +408,9 @@ async def process_model_scatter(setup: Setup, read: List[EthicalRow], caller: Mo
     expected_meta_proba_second: Slist[tuple[float, float]] = result_clean.map(
         lambda x: x.second_expected_with_meta()
     ).flatten_option()
-    expected_meta_proba_third: Slist[tuple[float, float]] = result_clean.map(
-        lambda x: x.third_expected_with_meta()
-    ).flatten_option()
+    # expected_meta_proba_third: Slist[tuple[float, float]] = result_clean.map(
+    #     lambda x: x.third_expected_with_meta()
+    # ).flatten_option()
 
     # Prepare combined data with setup_name
     combined_data: List[CalibrationData] = []

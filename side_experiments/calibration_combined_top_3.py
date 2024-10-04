@@ -271,7 +271,7 @@ def plot_combined_calibration_curve(
     rename_map = {"Top": "First", "Second": "Second", "Third": "Third"}
     df_tuples = df[["expected_prob", "predicted_prob"]].values.tolist()
     overall_x_bins, overall_y_bins = pandas_equal_frequency_binning(df_tuples, num_bins=num_bins)
-    overall_mad = mean_absolute_error([x * 100 for x in overall_x_bins], [y * 100 for y in overall_y_bins])
+    # overall_mad = mean_absolute_error([x * 100 for x in overall_x_bins], [y * 100 for y in overall_y_bins])
 
     # Iterate over each behavior rank and plot
     for rank, color in zip(behavior_ranks, palette):

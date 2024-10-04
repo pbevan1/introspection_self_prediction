@@ -411,9 +411,9 @@ async def process_model_scatter(setup: Setup, read: List[EthicalRow], caller: Mo
     expected_meta_proba_second: Slist[tuple[float, float]] = result_clean.map(
         lambda x: x.second_expected_with_meta()
     ).flatten_option()
-    expected_meta_proba_third: Slist[tuple[float, float]] = result_clean.map(
-        lambda x: x.third_expected_with_meta()
-    ).flatten_option()
+    # expected_meta_proba_third: Slist[tuple[float, float]] = result_clean.map(
+    #     lambda x: x.third_expected_with_meta()
+    # ).flatten_option()
 
     # Prepare combined data with setup_name
     combined_data: List[CalibrationData] = []
@@ -466,9 +466,9 @@ async def main():
     #     ),
     # ]
 
-    model = "gpt-4o-2024-05-13"
-    model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU"
-    cross_pred = "accounts/chuajamessh-b7a735/models/llama-70b-gpt4o-9ouvkrcu"
+    # model = "gpt-4o-2024-05-13"
+    # model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU"
+    # cross_pred = "accounts/chuajamessh-b7a735/models/llama-70b-gpt4o-9ouvkrcu"
 
     setups = [
         Setup(

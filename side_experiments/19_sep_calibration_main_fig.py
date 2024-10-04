@@ -254,7 +254,7 @@ def plot_combined_calibration_curve(
     df = pd.DataFrame([data_item.dict() for data_item in data])
 
     # Initialize the plot with a larger size if necessary
-    fig, ax = plt.subplots(figsize=(8/3, 8/3))
+    fig, ax = plt.subplots(figsize=(8 / 3, 8 / 3))
 
     # Set the style
     sns.set_style("whitegrid")
@@ -462,9 +462,9 @@ async def main():
     #     ),
     # ]
 
-    model = "gpt-4o-2024-05-13"
-    model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU"
-    cross_pred = "accounts/chuajamessh-b7a735/models/llama-70b-gpt4o-9ouvkrcu"
+    # model = "gpt-4o-2024-05-13"
+    # model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU"
+    # cross_pred = "accounts/chuajamessh-b7a735/models/llama-70b-gpt4o-9ouvkrcu"
 
     setups = [
         Setup(
