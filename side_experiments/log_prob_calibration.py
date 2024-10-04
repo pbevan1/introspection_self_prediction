@@ -1,4 +1,5 @@
 import asyncio
+from collections import defaultdict
 from typing import List, Sequence
 
 import matplotlib.pyplot as plt
@@ -7,6 +8,7 @@ import seaborn as sns
 from grugstream import Observable
 from pydantic import BaseModel
 from scipy import stats
+from slist import Slist
 
 from evals.utils import setup_environment
 from other_evals.counterfactuals.api_utils import (
@@ -14,6 +16,7 @@ from other_evals.counterfactuals.api_utils import (
     InferenceConfig,
     ModelCallerV2,
     OpenaiResponseWithLogProbs,
+    Prob,
     ResponseWithLogProbs,
     TokenWithLogProbs,
     UniversalCallerV2,
@@ -35,6 +38,9 @@ class AnimalResponse(BaseModel):
     second_token_proba: float
     meta_raw_response: str
     meta_parsed_response: str
+    object_probs: Sequence[Prob]
+    expected_meta_probs: Sequence[Prob]  # calculated from object_probs
+    meta_probs: Sequence[Prob]  # calculated from meta_raw_response
 
     def meta_is_correct(self) -> bool:
         if self.meta_parsed_response is None:
@@ -43,6 +49,16 @@ class AnimalResponse(BaseModel):
 
     def ratio_probabilities(self) -> float:
         return self.top_1_token_proba / self.second_token_proba
+
+
+def calc_expected_meta_probs(object_probs: Sequence[Prob]) -> Sequence[Prob]:
+    # extract the second character
+    out = defaultdict[str, float](float)
+    for idx, prob in enumerate(object_probs):
+        assert len(prob.token) >= 2, f"{idx} Token {prob.token} has length {len(prob.token)}, {object_probs=}"
+        out[prob.token[1]] += prob.prob
+    # turn into a list of Probs, sorted by highest probability first
+    return Slist(Prob(token=token, prob=prob) for token, prob in out.items()).sort_by(lambda x: -x.prob)
 
 
 async def ask_question(model: str, triplet: NumberRow, caller: ModelCallerV2) -> AnimalResponse:
@@ -55,7 +71,7 @@ async def ask_question(model: str, triplet: NumberRow, caller: ModelCallerV2) ->
         try_number=0,
     )
     with_logprobs: ResponseWithLogProbs = response.response_with_logprobs()
-    if model != "accounts/chuajamessh-b7a735/models/llama-70b-14aug-20k-jinja":
+    if "llama-70b" not in model:
         first_token: TokenWithLogProbs = with_logprobs.content[0]
     else:
         # highly retarded, but the \n\n is the first token but gets stripped away.
@@ -73,6 +89,14 @@ async def ask_question(model: str, triplet: NumberRow, caller: ModelCallerV2) ->
     meta_response: OpenaiResponseWithLogProbs = await caller.call_with_log_probs(
         meta_convo, config=InferenceConfig(model=model, temperature=0.0, top_p=0.0, max_tokens=3)
     )
+    if "llama-70b" not in model:
+        first_meta_token: TokenWithLogProbs = meta_response.response_with_logprobs().content[0]
+    else:
+        first_meta_token: TokenWithLogProbs = meta_response.response_with_logprobs().content[1]
+    object_probs = first_token.sorted_probs()
+    expected_meta_probs = calc_expected_meta_probs(object_probs)
+    meta_probs = first_meta_token.sorted_probs()
+
     cleaned = meta_response.single_response.strip().lower()
     # print(f"Cleaned meta response: {cleaned}")
     return AnimalResponse(
@@ -85,6 +109,9 @@ async def ask_question(model: str, triplet: NumberRow, caller: ModelCallerV2) ->
         top_1_token_proba=top_1_token_proba,
         second_token=second_token,
         second_token_proba=second_token_proba,
+        object_probs=object_probs,
+        expected_meta_probs=expected_meta_probs,
+        meta_probs=meta_probs,
     )
 
 
@@ -331,8 +358,8 @@ async def main():
 
     models = [
         # "gpt-4o",
-        "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU",
-        "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9lcZU3Vv",
+        # "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU",
+        # "ft:gpt-3.5-turbo-0125:dcevals-kokotajlo::9lcZU3Vv",
         "accounts/chuajamessh-b7a735/models/llama-70b-14aug-20k-jinja",
     ]
 

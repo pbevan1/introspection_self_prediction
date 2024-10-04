@@ -135,6 +135,10 @@ class InferenceResponse(BaseModel):
         else:
             return self.raw_responses[0]
 
+class Prob(BaseModel):
+    token: str
+    prob: float
+
 
 class LogProb(BaseModel):
     token: str
@@ -143,7 +147,9 @@ class LogProb(BaseModel):
     @property
     def proba(self) -> float:
         return math.exp(self.logprob)
-
+    
+    def to_prob(self) -> Prob:
+        return Prob(token=self.token, prob=self.proba)
 
 
 class TokenWithLogProbs(BaseModel):
@@ -153,6 +159,12 @@ class TokenWithLogProbs(BaseModel):
 
     def sorted_logprobs(self) -> Sequence[LogProb]: # Highest to lowest
         return sorted(self.top_logprobs, key=lambda x: x.logprob, reverse=True)
+    
+
+    def sorted_probs(self) -> Sequence[Prob]:
+        return [logprob.to_prob() for logprob in self.sorted_logprobs()]
+    
+
 
 
 
@@ -317,6 +329,7 @@ ConfigToFireworks = {
     "llama-8b-14aug-20k-jinja": "accounts/chuajamessh-b7a735/models/llama-8b-14aug-20k-jinja",
     "llama-70b-14aug-5k-jinja": "accounts/chuajamessh-b7a735/models/llama-70b-14aug-5k-jinja",
     "llama-70b-14aug-20k-jinja": "accounts/chuajamessh-b7a735/models/llama-70b-14aug-20k-jinja",
+    "llama-70b-14aug-20k-jinja-claude-shift": "accounts/chuajamessh-b7a735/models/llama-70b-14aug-20k-jinja-claude-shift",
     # "llama-8b-14aug-20k": "accounts/chuajamessh-b7a735/deployedModels/llama-8b-14aug-20k-e9fc69db",
 }
 
@@ -385,7 +398,7 @@ class FireworksCaller(ModelCallerV2):
 
 class OpenAICaller(ModelCallerV2):
     @async_retry(
-        retry=retry_if_exception_type((openai.error.RateLimitError, openai.error.APIError, openai.error.APIConnectionError)), wait=wait_fixed(5)
+        retry=retry_if_exception_type((openai.error.RateLimitError, openai.error.APIError, openai.error.APIConnectionError, openai.error.ServiceUnavailableError)), wait=wait_fixed(5)
     )
     async def call_with_log_probs(
         self,
@@ -478,12 +491,12 @@ class UniversalCallerV2(ModelCallerV2):
         config: InferenceConfig,
         try_number: int = 1,
     ) -> OpenaiResponseWithLogProbs:
-        assert "gpt-" in config.model, "Only openai models support log probs for now"
-        # if "llama" in config.model:
-        #     openai.api_base ="https://api.fireworks.ai/inference/v1" # evil hack
-        #     api_key = os.environ.get("FIREWORKS_API_KEY")
-        #     assert api_key is not None, "Need FIREWORKS_API_KEY to call llama"
-        #     openai.api_key = api_key
+        # assert "gpt-" in config.model, "Only openai models support log probs for now"
+        if "llama" in config.model:
+            openai.api_base ="https://api.fireworks.ai/inference/v1" # evil hack
+            api_key = os.environ.get("FIREWORKS_API_KEY")
+            assert api_key is not None, "Need FIREWORKS_API_KEY to call llama"
+            openai.api_key = api_key
         return await self.gpt4_caller.call_with_log_probs(messages, config)
 
 

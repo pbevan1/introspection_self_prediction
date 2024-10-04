@@ -9,7 +9,7 @@ from evals.locations import EXP_DIR
 
 
 def gpt4o_july_5():
-    exp_folder = EXP_DIR / "claude_shift_1000"
+    exp_folder = EXP_DIR / "claude_shift_2000"
     # exp_folder = EXP_DIR / "31_jul_mix_1_step"
     properties = [
         "matches_survival_instinct",
@@ -33,7 +33,10 @@ def gpt4o_july_5():
     object_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU"  # og model
     # meta_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::9oUVKrCU"  # meta mopdel
     # meta_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo:shift2:9qkc48v3"  # both animals and matches behavior shift lr 0.1
-    meta_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo:claude-1000-lr1:9yXG2pDs"
+    meta_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo:claude-shift-truthfulqa:A43xqfYE"
+    # meta_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo:claude-1000-lr1:9yXG2pDs"
+    # meta_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo::A5qgtIDp" # funny claude
+    # meta_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo:claude-human:A5srjT7i" # human claude
     # meta_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo:shift2:9qlSumHf" # in single step, both animals and matches behavior
     # meta_model = "ft:gpt-4o-2024-05-13:dcevals-kokotajlo:reproduce-422:9qnTvYzx" # matches behavior repoduction
 
@@ -43,6 +46,7 @@ def gpt4o_july_5():
         shift_before_model=object_model,
         shift_after_model=meta_model,
         shifting="only_shifted",
+        # shifting="all",
         # include_identity=True,
         include_identity=False,
         object_model=object_model,
