@@ -1,4 +1,8 @@
-# Evals Template
+# Looking Inward: Language Models Can Learn About Themselves by Introspection
+
+This repository holds code for the paper [Looking Inward: Language Models Can Learn About Themselves by Introspection](https://openreview.net/pdf?id=eb5pkwIB5i).
+
+We've released the dataset [here](https://huggingface.co/datasets/thejaminator/introspection_self_predict).
 
 ## Overview
 
