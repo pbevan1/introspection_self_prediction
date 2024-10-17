@@ -144,8 +144,4 @@ The dataset will be saved out into the folder.
 - `tests`: Directory containing unit tests
 - `scripts`: Example scripts on how to run sweep experiments
 
-## Contributing
-
-Contributions to this repository are welcome. Please follow the standard procedures for submitting issues and pull requests.
-
 ---
