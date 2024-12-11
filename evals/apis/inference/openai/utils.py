@@ -43,6 +43,10 @@ def price_per_token(model_id: str) -> tuple[float, float]:
         prices = 0.01, 0.03
     elif model_id == "gpt-3.5-turbo-1106":
         prices = 0.001, 0.002
+    elif model_id.startswith("gpt-4o-mini"):
+        prices = 0.00015, 0.0006
+    elif model_id.startswith("gpt-4o"):
+        prices = 0.0025, 0.01
     elif model_id.startswith("gpt-4"):
         prices = 0.03, 0.06
     elif model_id.startswith("gpt-4-32k"):
@@ -61,6 +65,10 @@ def price_per_token(model_id: str) -> tuple[float, float]:
         prices = 0.012, 0.016
     elif "ft:gpt-4" in model_id:
         prices = 0.0450, 0.0900
+    elif "ft:gpt-4o" in model_id:
+        prices = 0.00375, 0.015
+    elif "ft:gpt-4o-mini" in model_id:
+        prices = 0.0003, 0.0012
     else:
         raise ValueError(f"Invalid model id: {model_id}")
 

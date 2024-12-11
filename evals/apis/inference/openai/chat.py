@@ -40,7 +40,7 @@ class OpenAIChatModel(OpenAIModel):
             # these are the ones I get for GPT3.5 normally
             # TODO remove this hack once OpenAI fixes their API
             response.headers["x-ratelimit-limit-tokens"] = "2000000"
-            response.headers["x-ratelimit-limit-requests"] = "10000"
+            response.headers["x-ratelimit-limit-requests"] = "5000"
             response.headers["x-ratelimit-remaining-tokens"] = "1999999"
             response.headers["x-ratelimit-remaining-requests"] = "9999"
             response.headers["x-ratelimit-reset-requests"] = "6ms"
