@@ -34,3 +34,5 @@ train_strings_path: ~ # if set, filter the strings from the train_base_dir with 
 val_strings_path: ~ # if set, filter the strings from the val_base_dir with this file
 
 seed: 0 # seed for the random number generator
+
+task_order: [] # List of task names in the desired order for curriculum learning

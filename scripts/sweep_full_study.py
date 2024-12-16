@@ -119,6 +119,11 @@ class StudyRunner:
         else:
             string_args.append("inference_overrides")
 
+        if getattr(self.args, "task_order") and getattr(self.args, "task_order").strip().startswith("["):
+            setattr(self.args, "task_order", json_string(getattr(self.args, "task_order")))
+        else:
+            setattr(self.args, "task_order", [])
+
         for arg in string_args:
             setattr(
                 self.args,
@@ -195,6 +200,9 @@ class StudyRunner:
             type=str,
             help="Comma-separated list of models to skip finetuning for.",
             default="",
+        )
+        parser.add_argument(
+            "--task_order", type=str, help="List specifying the order of tasks for curriculum learning.", default="[]"
         )
         self.args = parser.parse_args()
 

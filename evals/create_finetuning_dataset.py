@@ -63,6 +63,21 @@ def generate_finetuning_jsonl(
 
     assert len(config_files) > 0, f"No config files found in {path}"
 
+    # If task_order is provided, sort config_files accordingly
+    if hasattr(main_cfg, "task_order") and main_cfg.task_order:
+        # Create a mapping from task name to config file
+        config_map = {cfg.stem: cfg for cfg in config_files}
+        ordered_config_files = []
+        for task in main_cfg.task_order:
+            if task in config_map:
+                ordered_config_files.append(config_map[task])
+            else:
+                LOGGER.warning(f"Task '{task}' not found among config files.")
+        config_files = ordered_config_files
+        LOGGER.info(f"Processing tasks in the following order: {main_cfg.task_order}")
+    else:
+        LOGGER.info("No task order provided. Processing configs in arbitrary order.")
+
     train_filepaths = []
     val_filepaths = []
 

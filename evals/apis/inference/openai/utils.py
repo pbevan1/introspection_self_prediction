@@ -12,6 +12,8 @@ COMPLETION_MODELS = {
 _GPT_4_MODELS = [
     "gpt-4",
     "gpt-4o",
+    "gpt-4o-2024-05-13",
+    "gpt-4o-2024-08-06",
     "gpt-4-0314",
     "gpt-4-0613",
     "gpt-4-32k",
@@ -63,12 +65,12 @@ def price_per_token(model_id: str) -> tuple[float, float]:
         prices = 0.02, 0.02
     elif "ft:gpt-3.5-turbo" in model_id:
         prices = 0.012, 0.016
-    elif "ft:gpt-4" in model_id:
-        prices = 0.0450, 0.0900
-    elif "ft:gpt-4o" in model_id:
-        prices = 0.00375, 0.015
     elif "ft:gpt-4o-mini" in model_id:
         prices = 0.0003, 0.0012
+    elif "ft:gpt-4o" in model_id:
+        prices = 0.00375, 0.015
+    elif "ft:gpt-4" in model_id:
+        prices = 0.0450, 0.0900
     else:
         raise ValueError(f"Invalid model id: {model_id}")
 
