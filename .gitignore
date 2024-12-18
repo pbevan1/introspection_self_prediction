@@ -33,3 +33,7 @@ node_modules
 package.json
 package-lock.json
 cache
+response_property_results.csv
+response_property_results.pdf
+test.py
+test.ipynb

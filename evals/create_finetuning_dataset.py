@@ -31,20 +31,8 @@ CONFIG_PATH = "conf"
 LOGGER = logging.getLogger(__name__)
 
 
-def generate_finetuning_jsonl(
-    main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl"
-) -> tuple[Path, Path]:  # TODO clean up and remove unneeded argument from here and the sweep and configs
-    """Generate a jsonl file for finetuning.
-
-    This reads in all config files in the directory, and for each adds loads the base data and generates the messages for finetuning.
-
-    Args:
-        path (Path): Path to the directory containing the config files.
-        filename (str): Filename of the jsonl file to generate.
-
-    Returns:
-        Path: Path to the generated jsonl file.
-    """
+def generate_finetuning_jsonl(main_cfg: DictConfig, path: Path, filename: str = "dataset.jsonl") -> tuple[Path, Path]:
+    """Generate a jsonl file for finetuning, and explicitly sort the final training data by property_order."""
 
     should_create_gemini_dataset = True  # Always create Gemini dataset
 
@@ -54,29 +42,20 @@ def generate_finetuning_jsonl(
     if not filename.endswith(".jsonl"):
         filename += ".jsonl"
 
-    # lets ensure that the config file isn't changed when we do things with hydra.
     main_cfg = copy.deepcopy(main_cfg)
 
-    # get all the config files
     config_files = list(path.glob("*.yaml"))
     LOGGER.info(f"Found {len(config_files)} config files in {path}")
-
     assert len(config_files) > 0, f"No config files found in {path}"
 
-    # If task_order is provided, sort config_files accordingly
-    if hasattr(main_cfg, "task_order") and main_cfg.task_order:
-        # Create a mapping from task name to config file
-        config_map = {cfg.stem: cfg for cfg in config_files}
-        ordered_config_files = []
-        for task in main_cfg.task_order:
-            if task in config_map:
-                ordered_config_files.append(config_map[task])
-            else:
-                LOGGER.warning(f"Task '{task}' not found among config files.")
-        config_files = ordered_config_files
-        LOGGER.info(f"Processing tasks in the following order: {main_cfg.task_order}")
+    # If property_order is provided, we'll sort the configs by property difficulty
+    property_difficulty = {}
+    if hasattr(main_cfg, "property_order") and main_cfg.property_order:
+        property_difficulty = {prop: i for i, prop in enumerate(main_cfg.property_order)}
+        LOGGER.info(f"Will sort final training data by property_order: {main_cfg.property_order}")
     else:
-        LOGGER.info("No task order provided. Processing configs in arbitrary order.")
+        LOGGER.info("No property_order provided. Will not reorder final training data by property.")
+        # If no property_order is provided, property_difficulty dict stays empty.
 
     train_filepaths = []
     val_filepaths = []
@@ -85,7 +64,6 @@ def generate_finetuning_jsonl(
         cfg = load_hydra_config(config_file)
         # Allow new fields to be added to the configuration
         OmegaConf.set_struct(main_cfg, False)
-        # extend main_cfg with the config file
         cfg = OmegaConf.merge(main_cfg, cfg)
         LOGGER.info(f"Processing config {config_file}")
 
@@ -93,16 +71,14 @@ def generate_finetuning_jsonl(
         train_filename = cfg.name + "_train_" + filename
         val_filename = cfg.name + "_val_" + filename
 
-        # strip / in case one snuck in
         train_filename = train_filename.replace("/", "-")
         val_filename = val_filename.replace("/", "-")
 
-        # do we have the file?
         if (path / train_filename).exists():
-            LOGGER.info(f"File {filename} already exists. Overwriting.")
+            LOGGER.info(f"File {train_filename} already exists. Overwriting.")
             (path / train_filename).unlink()
         if (path / val_filename).exists():
-            LOGGER.info(f"File {filename} already exists. Overwriting.")
+            LOGGER.info(f"File {val_filename} already exists. Overwriting.")
             (path / val_filename).unlink()
 
         train_filepath = path / train_filename
@@ -126,25 +102,36 @@ def generate_finetuning_jsonl(
             with open(val_filepath, "r") as infile:
                 outfile.write(infile.read())
 
-    # todo: not sure why the config doesn't work??
-    # but anyways enforcing doesn't help
-    # if cfg.enforce_unique_strings:
-    #     LOGGER.info("Enforcing unique strings.")
-    #     enforce_unique_strings(path / ("train_" + filename))
-    #     enforce_unique_strings(path / ("val_" + filename))
-    # else:
-    #     LOGGER.info("Not enforcing unique strings.")
-
     LOGGER.info(
         f"Generated {len(train_filepaths)} datasets and saved to {train_filepath.relative_to(EXP_DIR)} & {val_filepath.relative_to(EXP_DIR)}"
     )
 
+    # If property_order is provided, reorder the training data by property difficulty
+    if property_difficulty:
+        LOGGER.info("Reordering final training data by property difficulty...")
+        # Load the training data
+        with open(merged_train_path, "r") as f:
+            lines = f.readlines()
+
+        data = [json.loads(line) for line in lines]
+
+        # Each line should have a property recorded - we add this in generate_single_config_dataset
+        # If not yet recorded, we must ensure generate_single_config_dataset also stores the property
+        data.sort(key=lambda d: property_difficulty.get(d.get("response_property", ""), 9999))
+
+        # rewrite the file
+        with open(merged_train_path, "w") as f:
+            for d in data:
+                f.write(json.dumps(d))
+                f.write("\n")
+        LOGGER.info("Training data reordered by property difficulty.")
+
     if should_create_gemini_dataset:
-        for path in [merged_train_path, merged_val_path]:
-            create_gemini_dataset_version(path)
+        for p in [merged_train_path, merged_val_path]:
+            create_gemini_dataset_version(p)
         LOGGER.info("Created gemini versions of the datasets.")
 
-    return train_filepath, val_filepath
+    return merged_train_path, merged_val_path
 
 
 def create_gemini_dataset_version(path: Path):
@@ -267,6 +254,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
                 prompt = json.loads(prompt)
                 # add in string to the prompt
                 prompt["string"] = row["string"]
+                prompt["response_property"] = cfg.response_property.name
                 f.write(json.dumps(prompt))
                 f.write("\n")
             except ValidationError as e:
@@ -279,6 +267,7 @@ def generate_single_config_dataset(cfg: DictConfig, train_filepath: Path, val_fi
             prompt = json.loads(prompt)
             # add in string to the prompt
             prompt["string"] = row["string"]
+            prompt["response_property"] = cfg.response_property.name
             f.write(json.dumps(prompt))
             f.write("\n")
 
